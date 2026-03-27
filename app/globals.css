@@ -1,0 +1,55 @@
+/* TAILWIND */
+@import "tailwindcss";
+
+/* RESET */
+html, body {
+  margin: 0;
+  padding: 0;
+  background: #000;
+  color: #fff;
+  overflow-x: hidden;
+  font-family: inherit;
+}
+
+/* MENU */
+.menu-item {
+  display: block;
+  padding: 14px;
+  border-bottom: 1px solid #bc9b6a;
+  text-align: center;
+  transition: 0.3s;
+}
+
+.menu-item:hover {
+  background: #bc9b6a;
+  color: black;
+}
+
+/* DROPDOWN */
+.dropdown-item {
+  display: block;
+  padding: 10px;
+  border-bottom: 1px solid #bc9b6a;
+  transition: 0.3s;
+}
+
+.dropdown-item:hover {
+  background: #bc9b6a;
+  color: black;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeUp {
+  animation: fadeUp 1s ease forwards;
+}
+
