@@ -22,13 +22,13 @@ export default function TablesSponsorsPage() {
       title: "Tables & Sponsors",
       table: "VIP Table Booking",
       sponsor: "Corporate Sponsorship",
-      booth: "Catering Booths",
+      booth: "Commercial Booths",
     },
     ar: {
       title: "الطاولات والرعايات",
       table: "حجز الطاولات",
       sponsor: "رعايات الشركات",
-      booth: "بوثات كاترينج",
+      booth: "البوثات التجارية",
     },
   };
 
@@ -38,14 +38,14 @@ export default function TablesSponsorsPage() {
       title: t[lang].table,
       image:
         "/viptable.jpg",
-      link: "/tables/table",
+      link: "/table-booking",
     },
     {
       id: 2,
       title: t[lang].sponsor,
       image:
         "/sponsor.jpg",
-      link: "/tables/sponsor",
+      link: "/csponsor",
     },
     {
       id: 3,

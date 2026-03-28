@@ -481,11 +481,25 @@ className="w-full max-h-[300px] object-contain bg-black"
     <span>Kuwait 🇰🇼</span>
   </div>
 
+
+<div className="flex flex-col items-center mt-6">
+  <img 
+    src="/logo.png" 
+    alt="Kuwait Shows"
+    className="w-14 mb-2 object-contain"
+  />
+
+  <p className="text-xs bg-gradient-to-r from-[#bc9b6a] via-[#f5e6c8] to-[#bc9b6a] bg-clip-text text-transparent">
+    Kuwait Shows
+  </p>
+</div>
+
+
 </div>
 </section>
 
 <footer className="py-6 text-center border-t border-gray-800" style={{ color: gold }}>
-Kuwait Shows All Right Reserved
+© Kuwait Shows All Right Reserved
 </footer>
 
 </div>

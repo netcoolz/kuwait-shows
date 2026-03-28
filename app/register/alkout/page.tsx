@@ -112,7 +112,7 @@ export default function RegisterPage() {
   return (
     <div className="min-h-screen bg-black text-white p-10">
 
-      <h1 className="text-3xl mb-6 text-yellow-500">
+      <h1 className="text-x20 md:text-3xl font-bold mb-6 text-center bg-gradient-to-r from-[#bc9b6a] via-[#f5e6c8] to-[#bc9b6a] bg-clip-text text-transparent ">
         {mounted ? t[lang].title : ""}
       </h1>
 

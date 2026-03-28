@@ -80,7 +80,7 @@ export default function ShowsPage() {
         lang === "ar" ? "text-right" : "text-left"
       }`}
     >
-      <h1 className="text-3xl md:text-5xl font-bold text-yellow-500 mb-12 text-center">
+     <h1 className="text-1.5xl md:text-5xl font-bold mb-2 text-center bg-gradient-to-r from-[#bc9b6a] via-[#f5e6c8] to-[#bc9b6a] bg-clip-text text-transparent">
         {t[lang].title}
       </h1>
 
