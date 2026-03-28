@@ -3,6 +3,11 @@
 import Link from "next/link";
 import { FaInstagram, FaFacebookF, FaWhatsapp } from "react-icons/fa";
 import { useState, useEffect } from "react";
+import { FaGlobe } from "react-icons/fa";
+import { motion } from "framer-motion";
+
+
+<FaGlobe size={28} />
 
 const gold = "#bc9b6a";
 
@@ -32,12 +37,36 @@ export default function Sidebar() {
   return (
     <>
       {/* 🔥 زر المينيو (موبايل فقط) */}
-      <button
-        onClick={() => setOpen(true)}
-        className="md:hidden fixed top-4 left-4 z-50 bg-black border border-[#bc9b6a] px-3 py-2 rounded text-[#bc9b6a]"
-      >
-        ☰
-      </button>
+    <motion.button
+  onClick={() => setOpen(prev => !prev)}
+  whileTap={{ scale: 0.9 }}
+  initial={{ opacity: 0, x: -20 }}
+  animate={{ opacity: 1, x: 0 }}
+  transition={{ duration: 0.6 }}
+  className="md:hidden fixed top-4 left-4 z-50
+             border border-[#bc9b6a] px-4 py-3 rounded-xl
+             bg-black/40 backdrop-blur-sm
+             flex items-center justify-center
+             hover:bg-[#bc9b6a]/20 transition-all duration-300"
+  style={{
+    boxShadow: "0 0 10px #bc9b6a"
+  }}
+>
+
+  <motion.span
+    key={open ? "close" : "menu"}
+    initial={{ rotate: -90, opacity: 0 }}
+    animate={{ rotate: 0, opacity: 1 }}
+    transition={{ duration: 0.3 }}
+    className="text-[#bc9b6a] text-xl"
+    style={{
+      filter: "drop-shadow(0 0 6px #bc9b6a)"
+    }}
+  >
+    {open ? "✕" : "☰"}
+  </motion.span>
+
+</motion.button>
 
       {/* 🔥 الخلفية (موبايل) */}
       {open && (
@@ -49,7 +78,7 @@ export default function Sidebar() {
 
 <aside
   className={`
-    fixed right-0 top-0 h-screen w-[190px]
+    fixed right-0 top-0 h-screen w-[290px]
     bg-black border-l border-[#bc9b6a]
     flex flex-col justify-between z-50
     transition-transform duration-300
@@ -75,12 +104,48 @@ export default function Sidebar() {
         {/* MENU */}
         <div className="flex flex-col text-sm">
 
-          <div
-            onClick={toggleLang}
-            className="py-3 border-b border-[#bc9b6a] text-center cursor-pointer hover:bg-[#bc9b6a] hover:text-black"
-          >
-            🌐
-          </div>
+<motion.div
+  onClick={toggleLang}
+  whileTap={{ scale: 0.92 }}
+  className="py-3 border-b border-[#bc9b6a] text-center cursor-pointer
+             flex justify-center items-center
+             transition-all duration-300
+             hover:bg-[#bc9b6a]/20"
+>
+
+  <motion.div
+    animate={{ scale: [1, 1.08, 1] }}
+    transition={{ repeat: Infinity, duration: 2 }}
+    className="flex items-center gap-2"
+  >
+
+    {/* 🌍 أيقونة مع Glow */}
+    <FaGlobe
+      size={22}
+      className="text-[#bc9b6a]"
+      style={{
+        filter: "drop-shadow(0 0 6px #bc9b6a)"
+      }}
+    />
+
+    {/* 🇰🇼 / 🇬🇧 */}
+    <motion.span
+      key={lang}
+      initial={{ opacity: 0, y: 5 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      className="text-xl"
+      style={{
+        filter: "drop-shadow(0 0 4px #bc9b6a)"
+      }}
+    >
+      {lang === "en" ? "🇰🇼" : "🇬🇧"}
+    </motion.span>
+
+  </motion.div>
+
+</motion.div>
+
 
           <Link href="/" className="menu-item" onClick={() => setOpen(false)}>
             {lang === "ar" ? "الرئيسية" : "Home"}

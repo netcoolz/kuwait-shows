@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FaInstagram, FaFacebookF, FaWhatsapp, FaEnvelope } from "react-icons/fa";
+import { FaGlobe } from "react-icons/fa";
 
 const gold = "#bc9b6a";
 
@@ -223,28 +224,76 @@ From planning to podium, we manage it all`,
   className="bg-black text-white flex"
 >
 
-<div className="fixed top-4 right-4 z-50">
+<motion.div
+  onClick={toggleLang}
+  whileTap={{ scale: 0.92 }}
+  initial={{ opacity: 0, y: -20 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.6 }}
+  className="fixed top-4 right-4 z-50"
+>
 
-
-  <button
-    type="button"
-    onClick={(e) => {
-      e.preventDefault();
-      toggleLang();
+  <div
+    className="border border-[#bc9b6a] rounded-xl px-3 py-2
+               bg-black/40 backdrop-blur-sm cursor-pointer
+               flex items-center gap-2
+               transition-all duration-300
+               hover:bg-[#bc9b6a]/20"
+    style={{
+      boxShadow: "0 0 10px #bc9b6a"
     }}
-    className="border border-[#bc9b6a] px-3 py-1 rounded-lg"
   >
-    🌐
-  </button>
-</div>
+
+    {/* 🌍 الأيقونة مع Glow */}
+    <FaGlobe
+      size={20}
+      className="text-[#bc9b6a]"
+      style={{
+        filter: "drop-shadow(0 0 6px #bc9b6a)"
+      }}
+    />
+
+    {/* 🇰🇼 / 🇬🇧 */}
+    <motion.span
+      key={lang}
+      initial={{ opacity: 0, y: 5 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      className="text-lg"
+      style={{
+        filter: "drop-shadow(0 0 4px #bc9b6a)"
+      }}
+    >
+      {lang === "en" ? "🇰🇼" : "🇬🇧"}
+    </motion.span>
+
+  </div>
+
+</motion.div>
 
 <div className="w-full">
 
-<section className="relative h-screen flex items-center justify-center text-center">
-<img src="/hero.jpg" className="absolute w-full h-full object-cover" />
-<div className="absolute inset-0 bg-black/40"></div>
 
-<div className="relative z-10 flex flex-col items-center">
+<section className="relative h-[90vh] md:h-screen flex items-center justify-center">
+<img src="/hero.png" className="absolute w-full h-full object-cover" />
+<div className="absolute inset-0 bg-black/40">
+
+<img
+  src="hero.jpg"
+  className="absolute w-full h-full object-cover object-[50%_30%] scale-[1.05] will-change-transform"
+/>
+
+<motion.div
+  initial={{ x: 0 }}
+  animate={{ x: "-100%" }}
+  transition={{ duration: 1.4, ease: "easeInOut" }}
+  className="absolute inset-0 bg-black z-20"
+/>
+
+
+</div>
+
+<div className="relative z-10 flex flex-col items-center justify-center text-center w-full px-4">
 
   {/* العنوان */}
   <motion.h1
