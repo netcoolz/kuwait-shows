@@ -15,6 +15,16 @@ const cairo = Cairo({
   weight: ["300", "400", "500", "600", "700"],
 });
 
+
+export const metadata = {
+  title: {
+    default: "Kuwait Shows",
+    template: "%s | Kuwait Shows",
+  },
+  description: "Arabian Horse Championships & VIP Events | بطولات الخيل العربية والفعاليات",
+};
+
+
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
