@@ -311,7 +311,7 @@ From planning to podium, we manage it all`,
     initial={{ width: 0 }}
     animate={{ width: "120px" }}
     transition={{ duration: 0.8, delay: 0.5 }}
-    className="h-[2px] bg-[#bc9b6a] my-4"
+    className="h-[4px] bg-[#bc9b6a] my-4"
   />
 
   {/* النص */}
@@ -320,8 +320,9 @@ From planning to podium, we manage it all`,
     animate={{ opacity: 1, y: 0 }}
     transition={{ duration: 1, delay: 0.6 }}
     className="text-center max-w-xl"
+
   >
-    <p className="text-lg opacity-80">
+    <p className="text-lg font-bold opacity-100">
       {t[lang].subtitle.split("\n")[0]}
     </p>
 
