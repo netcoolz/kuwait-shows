@@ -296,13 +296,19 @@ From planning to podium, we manage it all`,
 <div className="relative z-10 flex flex-col items-center justify-center text-center w-full px-4">
 
   {/* العنوان */}
-  <motion.h1
-    initial={{ opacity: 0, y: -40 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 1 }}
-    className="text-6xl font-bold tracking-wide"
-    style={{ color: gold }}
-  >
+<motion.h1
+  className="text-5xl md:text-6xl font-extrabold tracking-wide"
+  style={{
+    color: "#bc9b6a",
+    textShadow: `
+      0 0 2px rgba(192,161,114,0.8),
+      0 0 10px rgba(192,161,114,0.7),
+      0 0 00px rgba(192,161,114,0.6),
+      0 0 60px rgba(192,161,114,0.4),
+      0 2px 10px rgba(0,0,0,0.9)
+    `
+  }}
+>
     Kuwait Shows
   </motion.h1>
 
@@ -326,7 +332,13 @@ From planning to podium, we manage it all`,
       {t[lang].subtitle.split("\n")[0]}
     </p>
 
-    <p className="mt-2 text-sm tracking-wider text-[#bc9b6a]">
+   <p 
+  className="mt-2 text-lg md:text-xl font-semibold tracking-wide"
+  style={{
+    color: "#ddc9ab",
+    textShadow: "0 2px 15px rgba(0,0,0,0.9)"
+  }}
+>
       {t[lang].subtitle.split("\n")[1]}
     </p>
   </motion.div>

@@ -8,6 +8,7 @@ import { motion } from "framer-motion";
 import { usePathname } from "next/navigation";
 
 const gold = "#D4AF37";
+const brandGold = "#CDAF81"; // ✅ لونك
 
 export default function Sidebar() {
 
@@ -19,7 +20,6 @@ export default function Sidebar() {
   const [open, setOpen] = useState(false);
   const [hovered, setHovered] = useState(false);
 
-  // ✅ فقط لإصلاح الموبايل
   const [policyOpen, setPolicyOpen] = useState(false);
 
   useEffect(() => {
@@ -44,15 +44,19 @@ export default function Sidebar() {
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.6 }}
         className="md:hidden fixed top-4 left-4 z-50
-                   border border-[#D4AF37] px-4 py-3 rounded-xl
+                   border px-4 py-3 rounded-xl
                    bg-black/40 backdrop-blur-sm
                    flex items-center justify-center
-                   hover:bg-[#D4AF37]/20 transition-all duration-300"
-        style={{ boxShadow: "0 0 10px #D4AF37" }}
+                   transition-all duration-300"
+        style={{ 
+          borderColor: brandGold,
+          boxShadow: `0 0 12px ${brandGold}`
+        }}
       >
         <motion.span
           key={open ? "close" : "menu"}
-          className="text-[#D4AF37] text-xl"
+          className="text-xl"
+          style={{ color: brandGold }}
         >
           {open ? "✕" : "☰"}
         </motion.span>
@@ -74,25 +78,29 @@ export default function Sidebar() {
           border-l border-[#D4AF37]/30
           flex flex-col justify-between z-50
           transition-all duration-300
-filter: "brightness(0.9) contrast(1.05)"
 
           ${open ? "translate-x-0" : "translate-x-full"}
           md:translate-x-0 md:flex
           ${!isHome && !hovered ? "md:w-[90px]" : "md:w-[290px]"}
         `}
-       style={{
-  backgroundImage: `
-    linear-gradient(rgba(10,7,5,0.75), rgba(10,7,5,0.85)),
-    url('/gold-texture.png')
-  `,
-  backgroundSize: "cover",
-  backgroundPosition: "center",
-  backgroundBlendMode: "multiply"
-}}
+        style={{
+          backgroundImage: `
+            linear-gradient(rgba(10,7,5,0.75), rgba(10,7,5,0.85)),
+            url('/gold-texture.png')
+          `,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundBlendMode: "multiply"
+        }}
       >
 
         <div className="md:hidden p-3 text-left">
-          <button onClick={() => setOpen(false)}>✕</button>
+          <button 
+            onClick={() => setOpen(false)}
+            style={{ color: brandGold }}
+          >
+            ✕
+          </button>
         </div>
 
         {/* LOGO */}
@@ -104,16 +112,16 @@ filter: "brightness(0.9) contrast(1.05)"
         </div>
 
         {/* MENU */}
-        <div className="flex flex-col text-sm text-[#E8DCCB]">
+        <div className="flex flex-col text-base text-[#ffffff]"> {/* أوضح */}
 
           <motion.div
             onClick={toggleLang}
             className="py-3 border-b border-[#D4AF37]/30 text-center cursor-pointer
                        flex justify-center items-center
-                       hover:bg-[#D4AF37]/10"
+                       hover:bg-[#CDAF81]/10"
           >
             <div className="flex items-center gap-2">
-              <FaGlobe size={22} className="text-[#D4AF37]" />
+              <FaGlobe size={22} style={{ color: brandGold }} />
               <span>{lang === "en" ? "🇰🇼" : "🇬🇧"}</span>
             </div>
           </motion.div>
@@ -143,39 +151,56 @@ filter: "brightness(0.9) contrast(1.05)"
           </Link>
 
           {/* POLICIES */}
-          <div className="relative group">
+          <div>
             <div
-              className="menu-item cursor-pointer"
+              className="menu-item cursor-pointer flex justify-between items-center"
               onClick={() => setPolicyOpen(prev => !prev)}
             >
               {lang === "ar" ? "السياسات" : "Policies"}
+
+              {/* سهم */}
+              <span style={{ color: brandGold }}>
+                {policyOpen ? "▾" : "▸"}
+              </span>
             </div>
 
+            {/* تحت مباشرة */}
             <div
-           className={`
-  absolute right-full top-0
-  bg-[#120c08] border border-[#D4AF37]/30 w-[200px] z-50
-
-  transition-all duration-300
-
-  opacity-0 invisible pointer-events-none
-
-  ${policyOpen ? "opacity-100 visible pointer-events-auto" : ""}
-
-  md:group-hover:opacity-100 
-  md:group-hover:visible 
-  md:group-hover:pointer-events-auto
-`}
+              className={`
+                overflow-hidden transition-all duration-300
+                ${policyOpen ? "max-h-[300px] opacity-100" : "max-h-0 opacity-0"}
+              `}
             >
-              <Link href="/policies/privacy-policy" className="dropdown-item">
+              <Link 
+                href="/policies/privacy-policy" 
+                className="dropdown-item"
+                onClick={() => {
+                  setOpen(false);
+                  setPolicyOpen(false);
+                }}
+              >
                 {lang === "ar" ? "سياسة الخصوصية" : "Privacy Policy"}
               </Link>
 
-              <Link href="/policies/terms-conditions" className="dropdown-item">
+              <Link 
+                href="/policies/terms-conditions" 
+                className="dropdown-item"
+                onClick={() => {
+                  setOpen(false);
+                  setPolicyOpen(false);
+                }}
+              >
                 {lang === "ar" ? "الشروط والأحكام" : "Terms & Conditions"}
               </Link>
 
-              <Link href="/policies/refund-cancelation" className="dropdown-item">
+              <Link 
+                href="/policies/refund-cancelation" 
+                className="dropdown-item"
+                onClick={() => {
+                  setOpen(false);
+                  setPolicyOpen(false);
+                }}
+              >
                 {lang === "ar" ? "الاسترجاع والإلغاء" : "Refund & cancellation"}
               </Link>
             </div>
@@ -188,16 +213,16 @@ filter: "brightness(0.9) contrast(1.05)"
         </div>
 
         {/* SOCIAL */}
-        <div className="flex justify-center gap-2 p-6 border-t border-[#D4AF37]/30 text-xl text-[#D4AF37]">
-          <a href="https://instagram.com/q8shows" target="_blank">
+        <div className="flex justify-center gap-2 p-6 border-t border-[#D4AF37]/30 text-xl">
+          <a href="https://instagram.com/q8shows" target="_blank" style={{ color: brandGold }}>
             <FaInstagram />
           </a>
 
-          <a href="https://facebook.com/kuwaitshows" target="_blank">
+          <a href="https://facebook.com/kuwaitshows" target="_blank" style={{ color: brandGold }}>
             <FaFacebookF />
           </a>
 
-          <a href="https://wa.me/96597944003" target="_blank">
+          <a href="https://wa.me/96597944003" target="_blank" style={{ color: brandGold }}>
             <FaWhatsapp />
           </a>
         </div>
@@ -215,21 +240,22 @@ filter: "brightness(0.9) contrast(1.05)"
         .menu-item:hover {
           background: linear-gradient(
             90deg,
-            rgba(212,175,55,0.15),
+            rgba(205,175,129,0.15),
             transparent
           );
-          color: #D4AF37;
+          color: #CDAF81;
         }
 
         .dropdown-item {
           display: block;
-          padding: 12px;
+          padding: 12px 20px;
           border-bottom: 1px solid rgba(212,175,55,0.2);
+          background: rgba(0,0,0,0.2);
         }
 
         .dropdown-item:hover {
-          background: rgba(212,175,55,0.15);
-          color: #D4AF37;
+          background: rgba(205,175,129,0.15);
+          color: #CDAF81;
         }
       `}</style>
 
