@@ -30,7 +30,7 @@ export const metadata = {
     siteName: "Kuwait Shows",
     images: [
       {
-        url: "https://www.kuwaitshows.com/preview.png",
+        url: "https://www.kuwaitshows.com/preview2.png",
         width: 1200,
         height: 630,
       },

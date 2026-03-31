@@ -106,9 +106,14 @@ export default function Sidebar() {
         {/* LOGO */}
         <div className="p-6 text-center border-b border-[#D4AF37]/30">
           <img src="/logo.png" className="w-12 h-12 mx-auto mb-3" />
-          <h2 style={{ color: gold }} className="font-semibold tracking-wide">
-            Kuwait Shows
-          </h2>
+         <h2
+  className="font-semibold tracking-wide bg-gradient-to-r from-[#bc9b6a] via-[#f5e6c8] to-[#bc9b6a] bg-clip-text text-transparent"
+  style={{
+    textShadow: "0 2px 10px rgba(0,0,0,0.8)",
+  }}
+>
+  Kuwait Shows
+</h2>
         </div>
 
         {/* MENU */}

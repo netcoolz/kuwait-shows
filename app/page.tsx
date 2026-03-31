@@ -6,6 +6,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { FaInstagram, FaFacebookF, FaWhatsapp, FaEnvelope } from "react-icons/fa";
 import { FaGlobe } from "react-icons/fa";
 
+
+
 const gold = "#bc9b6a";
 
 export default function Home() {
@@ -18,9 +20,28 @@ const toggleLang = () => {
 
   window.dispatchEvent(new Event("languageChange"));
 };
+
+const [isInteracting, setIsInteracting] = useState(false);
+useEffect(() => {
+  if (isInteracting) return;
+
+  const interval = setInterval(() => {
+    setSlide((prev) => (prev + 1) % slides.length);
+  }, 4000);
+
+  return () => clearInterval(interval);
+}, [isInteracting]);
   const [activeService, setActiveService] = useState(null);
 
   const slides = ["/slide1.jpg", "/slide2.jpg", "/slide3.jpg"];
+
+useEffect(() => {
+  const interval = setInterval(() => {
+    setSlide((prev) => (prev + 1) % slides.length);
+  }, 4000);
+
+  return () => clearInterval(interval);
+}, []);
 
 useEffect(() => {
   const savedLang = localStorage.getItem("lang");
@@ -221,8 +242,21 @@ From planning to podium, we manage it all`,
   initial={{ opacity: 0, y: 40 }}
   animate={{ opacity: 1, y: 0 }}
   transition={{ duration: 0.7 }}
-  className="bg-black text-white flex"
+  className="text-white flex"
 >
+
+
+<div
+  className="fixed inset-0 -z-10"
+  style={{
+    backgroundImage: "url('/bg.png')",
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+  }}
+/>
+
+{/* overlay */}
+<div className="fixed inset-0 -z-10 bg-black/50" />
 
 <motion.div
   onClick={toggleLang}
@@ -348,6 +382,10 @@ From planning to podium, we manage it all`,
 <a href="#slider" className="absolute bottom-10 text-3xl animate-bounce">↓</a>
 </section>
 
+
+
+
+
 <section id="slider" className="py-16 text-center">
 <div className="flex justify-center px-4 md:pr-[190px]">
 <div className="w-full max-w-[900px] text-center">
@@ -358,19 +396,43 @@ From planning to podium, we manage it all`,
 </div>
 
 <div className="flex justify-center px-4 md:pr-[190px]">
-<div className="w-full max-w-[900px]">
+<div className="w-full max-w-[700px] relative">
 
 <AnimatePresence mode="wait">
-<motion.img
-key={slide}
-src={slides[slide]}
-className="w-full h-full object-cover rounded-2xl"
-initial={{ opacity: 0, scale: 1.05 }}
-animate={{ opacity: 1, scale: 1 }}
-exit={{ opacity: 0, scale: 1.05 }}
-transition={{ duration: 0.8, ease: "easeInOut" }}
-/>
+  <motion.img
+    key={slide}
+    src={slides[slide]}
+    className="w-full h-full object-cover rounded-2xl"
+
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    exit={{ opacity: 0 }}
+
+    transition={{
+      duration: 0.8,
+      ease: "easeInOut",
+    }}
+  />
 </AnimatePresence>
+{/* سهم يسار */}
+<button
+  onClick={() =>
+    setSlide((prev) => (prev === 0 ? slides.length - 1 : prev - 1))
+  }
+  className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 px-3 py-2 rounded-full text-white"
+>
+  ←
+</button>
+
+{/* سهم يمين */}
+<button
+  onClick={() =>
+    setSlide((prev) => (prev + 1) % slides.length)
+  }
+  className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 px-3 py-2 rounded-full text-white"
+>
+  →
+</button>
 
 <div className="flex justify-center mt-4 gap-2">
 {slides.map((_, i) => (
@@ -418,10 +480,11 @@ className="border border-[#bc9b6a] rounded-2xl overflow-hidden cursor-pointer"
 <AnimatePresence>
 {activeService && (
 <motion.div
-className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
-initial={{ opacity: 0 }}
-animate={{ opacity: 1 }}
-exit={{ opacity: 0 }}
+  onClick={() => setActiveService(null)}
+  className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
+  initial={{ opacity: 0 }}
+  animate={{ opacity: 1 }}
+  exit={{ opacity: 0 }}
 >
 
 <motion.div
