@@ -23,7 +23,7 @@ useEffect(() => {
 }, []);
 
   const [slide, setSlide] = useState(0);
-  const [lang, setLang] = useState("en");
+  const [lang, setLang] = useState<"ar" | "en">("en");
 const toggleLang = () => {
   const newLang = lang === "en" ? "ar" : "en";
   localStorage.setItem("lang", newLang);
@@ -42,7 +42,7 @@ useEffect(() => {
 
   return () => clearInterval(interval);
 }, [isInteracting]);
-  const [activeService, setActiveService] = useState(null);
+  const [activeService, setActiveService] = useState<string | null>(null);
 
   const slides = ["/slide1.jpg", "/slide2.jpg", "/slide3.jpg"];
 
@@ -56,11 +56,17 @@ useEffect(() => {
 
 useEffect(() => {
   const savedLang = localStorage.getItem("lang");
-  if (savedLang) setLang(savedLang);
+
+  if (savedLang === "ar" || savedLang === "en") {
+    setLang(savedLang);
+  }
 
   const handleLangChange = () => {
     const newLang = localStorage.getItem("lang");
-    if (newLang) setLang(newLang);
+
+    if (newLang === "ar" || newLang === "en") {
+      setLang(newLang);
+    }
   };
 
   window.addEventListener("languageChange", handleLangChange);
@@ -523,13 +529,14 @@ className="w-full max-h-[300px] object-contain bg-black"
 <div className="p-6">
 
 <h2 className="text-2xl mb-4 text-[#bc9b6a]">
-{servicesDetails[activeService]?.title}
+{activeService && servicesDetails[activeService as keyof typeof servicesDetails]?.title}
 </h2>
 
 <p className="text-gray-300 whitespace-pre-line leading-relaxed">
-{lang === "en"
-? servicesDetails[activeService]?.desc
-: servicesDetails[activeService]?.descAr}
+  {activeService &&
+    (lang === "en"
+      ? servicesDetails[activeService as keyof typeof servicesDetails]?.desc
+      : servicesDetails[activeService as keyof typeof servicesDetails]?.descAr)}
 </p>
 
 </div>

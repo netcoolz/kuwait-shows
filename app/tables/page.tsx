@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react";
 
 export default function TablesSponsorsPage() {
-  const [lang, setLang] = useState("en");
-
+ 
+const [lang, setLang] = useState("en");
   useEffect(() => {
     const savedLang = localStorage.getItem("lang") || "en";
     setLang(savedLang);
@@ -32,30 +32,26 @@ export default function TablesSponsorsPage() {
     },
   };
 
-  const cards = [
-    {
-      id: 1,
-      title: t[lang].table,
-      image:
-        "/viptable.jpg",
-      link: "#",
-    },
-    {
-      id: 2,
-      title: t[lang].sponsor,
-      image:
-        "/sponsor.jpg",
-      link: "/csponsor",
-    },
-    {
-      id: 3,
-      title: t[lang].booth,
-      image:
-        "/boothes.jpg",
-      link: "#",
-    },
-  ];
-
+const cards = [
+  {
+    id: 1,
+    title: t[lang].table,
+    image: "/viptable.jpg",
+    link: "#",
+  },
+  {
+    id: 2,
+    title: t[lang].sponsor,
+    image: "/sponsor.jpg",
+    link: "/csponsor",
+  },
+  {
+    id: 3,
+    title: t[lang].booth,
+    image: "/boothes.jpg",
+    link: "#",
+  },
+];
   return (
 <main className="relative min-h-screen bg-[url('/bg.png')] bg-cover bg-center bg-fixed text-white p-6 md:p-10">
 
