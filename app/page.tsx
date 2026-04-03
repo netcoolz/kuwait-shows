@@ -402,10 +402,28 @@ if (showSplash) return <Splash />;
 </section>
 
 
+<section className="py-20 flex justify-center">
+  <div className="flex justify-center items-center px-4 md:pr-[190px]">
 
 
+    <Link href="/sell" className="block">
 
-<section id="slider" className="py-16 text-center">
+<div className="inline-block mx-auto rounded-2xl border border-[#c9a96e] shadow-lg animate-[pulse_3s_ease-in-out_infinite]">
+
+      <img
+  src="/lux.jpg"
+  className="block mx-auto w-full h-auto object-contain max-h-[300px] sm:max-h-[400px] md:max-h-[460px]"
+/>
+
+      </div>
+
+    </Link>
+
+  </div>
+</section>
+
+
+<section id="slider" className="py-3 text-center">
 <div className="flex justify-center px-4 md:pr-[190px]">
 <div className="w-full max-w-[900px] text-center">
 <h2 className="mb-6 text-2xl" style={{ color: gold }}>
@@ -423,14 +441,14 @@ if (showSplash) return <Splash />;
     src={slides[slide]}
     className="w-full h-full object-cover rounded-2xl"
 
-    initial={{ opacity: 0 }}
-    animate={{ opacity: 1 }}
-    exit={{ opacity: 0 }}
+initial={{ x: 100, opacity: 0 }}
+animate={{ x: 0, opacity: 1 }}
+exit={{ x: -100, opacity: 0 }}
 
-    transition={{
-      duration: 0.8,
-      ease: "easeInOut",
-    }}
+transition={{
+  duration: 0.5,
+  ease: "easeInOut"
+}}
   />
 </AnimatePresence>
 {/* سهم يسار */}
