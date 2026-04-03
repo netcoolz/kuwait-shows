@@ -15,19 +15,23 @@ import {
 export default function CorporateSponsor() {
   const [lang, setLang] = useState<"ar" | "en">("en");
 
-  useEffect(() => {
-  const savedLang = localStorage.getItem("lang");
+useEffect(() => {
+  const updateLang = () => {
+    const savedLang = localStorage.getItem("lang");
 
-if (savedLang === "ar" || savedLang === "en") {
-  setLang(savedLang);
-} else {
-  setLang("en");
-}
+    if (savedLang === "ar" || savedLang === "en") {
+      setLang(savedLang);
+    } else {
+      setLang("en");
+    }
+  };
 
-    updateLang();
-    window.addEventListener("langChange", updateLang);
-    return () => window.removeEventListener("langChange", updateLang);
-  }, []);
+  updateLang();
+
+  window.addEventListener("langChange", updateLang);
+  return () =>
+    window.removeEventListener("langChange", updateLang);
+}, []);
 
   const t = {
     ar: {
@@ -91,10 +95,17 @@ if (savedLang === "ar" || savedLang === "en") {
   const mediaIcons = [FaHashtag, FaUsers, FaGem, FaTv, FaGlobe];
 
   return (
-    <main
-      dir={lang === "ar" ? "rtl" : "ltr"}
-      className="bg-black text-white min-h-screen"
-    >
+   <main
+  dir={lang === "ar" ? "rtl" : "ltr"}
+  className="relative min-h-screen bg-[url('/bg.png')] bg-cover bg-center bg-fixed text-white"
+>
+
+
+
+
+
+
+
       {/* FIX SIDEBAR ISSUE */}
      <div className="w-full lg:ml-[90px] lg:w-[calc(100%-90px)] px-4 md:px-10">
 
@@ -125,7 +136,7 @@ if (savedLang === "ar" || savedLang === "en") {
             {t[lang].benefitsTitle}
           </h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 max-w-4xl mx-auto ml-0 md:ml-[190px]">
             {t[lang].benefits.map((item, i) => {
               const Icon = icons[i];
               return (
@@ -147,7 +158,7 @@ if (savedLang === "ar" || savedLang === "en") {
             {t[lang].mediaTitle}
           </h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 max-w-4xl mx-auto ml-0 md:ml-[190px]">
             {t[lang].media.map((item, i) => {
               const Icon = mediaIcons[i];
               return (
