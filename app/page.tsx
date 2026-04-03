@@ -5,12 +5,23 @@ import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FaInstagram, FaFacebookF, FaWhatsapp, FaEnvelope } from "react-icons/fa";
 import { FaGlobe } from "react-icons/fa";
-
+import Splash from "@/components/Splash.tsx";
 
 
 const gold = "#bc9b6a";
 
-export default function Home() {
+export default function Home() { 
+
+const [showSplash, setShowSplash] = useState(true);
+
+useEffect(() => {
+  const timer = setTimeout(() => {
+    setShowSplash(false);
+  }, 2000);
+
+  return () => clearTimeout(timer);
+}, []);
+
   const [slide, setSlide] = useState(0);
   const [lang, setLang] = useState("en");
 const toggleLang = () => {
@@ -74,7 +85,7 @@ useEffect(() => {
     title: "Registration System",
     desc: `Digital Registration & Scoring Solutions
 
-We provide a complete digital system for managing Arabian Horse Championship registrations with high accuracy and professionalism, including:
+We provide a complete digital system for managing Horse Championship registrations with high accuracy and professionalism, including:
 • Full registration and fee collection system
 • Secure online payment processing
 • Verification and approval of participant and horse data
@@ -83,7 +94,7 @@ We provide a complete digital system for managing Arabian Horse Championship reg
 • Detailed reports for results and classifications`,
     descAr: `حلول التسجيل والتقييم الرقمية
 
-نقدم نظامًا رقميًا متكاملًا لإدارة تسجيل بطولات الخيل العربية بدقة واحترافية عالية، ويشمل
+نقدم نظامًا رقميًا متكاملًا لإدارة تسجيل بطولات الخيل بدقة واحترافية عالية، ويشمل
 • نظام كامل للتسجيل وتحصيل الرسوم
 • معالجة آمنة للدفع الإلكتروني
 • التحقق من بيانات المشاركين والخيل
@@ -216,7 +227,7 @@ We deliver:
       menu: ["Home","Register","Tables & Sponsors","Services","Handlers","Policies","Contact"],
       updates: "Latest Updates",
       services: "Our Services",
-      subtitle: `Arabian Horse Championship Management
+      subtitle: `Horse Championship Management
 From planning to podium, we manage it all`,
       ctaTitle: "Excellence Begins With a Conversation",
       ctaDesc:
@@ -227,7 +238,7 @@ From planning to podium, we manage it all`,
       menu: ["الرئيسية","التسجيل","الطاولات والرعايات","خدماتنا","العارضين","السياسات","تواصل معنا"],
       updates: "آخر التحديثات",
       services: "خدماتنا",
-   subtitle: `إدارة احترافية لبطولات الخيل العربية
+   subtitle: `إدارة احترافية لبطولات الخيل
 من المنصة إلى التتويج نحن نديرها`,
       ctaTitle: "التميز يبدأ بمحادثة",
       ctaDesc:
@@ -236,7 +247,9 @@ From planning to podium, we manage it all`,
     },
   };
 
-  return (
+ 
+if (showSplash) return <Splash />;
+ return (
 <motion.main
  key={lang}
   initial={{ opacity: 0, y: 40 }}

@@ -27,12 +27,19 @@ export default function AboutPage() {
     <main className={`bg-black text-white ${isAr ? "rtl text-right" : ""}`}>
 
       {/* 🎬 HERO */}
-      <section className="relative h-screen flex items-center justify-center text-center">
-        <video autoPlay muted loop className="absolute w-full h-full object-cover">
-          <source src="/horse.mp4" />
-        </video>
-
-        <div className="absolute inset-0 bg-black/70"></div>
+     <section className="relative h-screen flex items-center justify-center text-center">
+  <video
+    autoPlay
+    muted
+    loop
+    playsInline
+    disablePictureInPicture
+    className="absolute w-full h-full object-cover pointer-events-none"
+  >
+    <source src="/horse.mp4" />
+  </video>
+       <div className="relative min-h-screen bg-[url('/bg.png')] bg-cover bg-center bg-fixed text-white py-20 px-4">
+</div>
 
         <div className="relative z-10">
           <h1 className="text-6xl font-bold" style={{ color: gold }}>
@@ -42,7 +49,9 @@ export default function AboutPage() {
       </section>
 
       {/* CONTENT */}
-      <section className="py-24 px-6 md:px-20 space-y-20">
+     <section className="relative py-24 px-6 md:px-20 space-y-20 bg-[url('/bg.png')] bg-cover bg-center bg-fixed">
+
+
 
         {/* ABOUT */}
         <div className="max-w-4xl mx-auto">
@@ -158,16 +167,69 @@ export default function AboutPage() {
           </p>
         </div>
 
-        {/* CONTACT */}
-        <div className="text-center">
-          <h2 className="text-3xl mb-6" style={{ color: gold }}>
-            {isAr ? "تواصل معنا" : "Contact"}
-          </h2>
+       {/* CONTACT */}
+<div className="text-center">
 
-          <p className="text-gray-300">
-            admin@kuwaitshows.com
-          </p>
-        </div>
+  <h2 className="text-3xl mb-1" style={{ color: gold }}>
+    {isAr ? "تواصل معنا" : "Contact us"}
+  </h2>
+
+  {/* LOGO */}
+  <div className="flex justify-center mb-1">
+    <img
+      src="/logo.png"
+      alt="logo"
+      className="w-20 md:w-24 opacity-90 hover:opacity-100 transition duration-300 mb-1"
+    />
+  </div>
+
+</div>
+<div className="text-center mt-4 space-y-4">
+
+  {/* TEXT */}
+  <p className="text-lg  md:text-xl font-medium text-[#bc9b6a] tracking-wide">
+    {isAr
+      ? "التميز يبدأ بمحادثة"
+      : "Excellence Begins With a Conversation"}
+  </p>
+
+  {/* ICONS */}
+  <div className="flex justify-center gap-6 mt-1">
+
+    {/* EMAIL */}
+    <a
+      href="mailto:admin@kuwaitshows.com"
+      className="w-12 h-12 flex items-center justify-center rounded-full border border-[#bc9b6a]
+      text-[#bc9b6a] hover:bg-[#bc9b6a] hover:text-black transition duration-300
+      hover:shadow-[0_0_15px_#bc9b6a]"
+    >
+      ✉️
+    </a>
+
+    {/* WHATSAPP */}
+    <a
+      href="https://wa.me/96597944003"
+      target="_blank"
+      className="w-12 h-12 flex items-center justify-center rounded-full border border-green-500
+      text-green-500 hover:bg-green-500 hover:text-black transition duration-300
+      hover:shadow-[0_0_15px_#25D366]"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 32 32"
+        className="w-5 h-5 fill-current"
+      >
+        <path d="M16.001 2.999c-7.18 0-13 5.82-13 13 0 2.295.602 4.546 1.744 6.522L3 29l6.64-1.736A12.944 12.944 0 0016 29c7.18 0 13-5.82 13-13s-5.82-13-13-13zm0 23.5a10.42 10.42 0 01-5.31-1.452l-.38-.224-3.94 1.03 1.05-3.84-.25-.394A10.416 10.416 0 015.5 16c0-5.79 4.71-10.5 10.5-10.5S26.5 10.21 26.5 16 21.79 26.5 16 26.5zm5.79-7.79c-.316-.158-1.872-.924-2.162-1.03-.29-.106-.5-.158-.71.158-.21.316-.816 1.03-1 1.24-.184.21-.368.237-.684.079-.316-.158-1.334-.491-2.54-1.566-.94-.84-1.575-1.876-1.76-2.192-.184-.316-.02-.486.138-.644.142-.142.316-.368.474-.553.158-.184.21-.316.316-.526.106-.21.053-.395-.026-.553-.079-.158-.71-1.71-.973-2.342-.256-.616-.516-.532-.71-.542l-.605-.01c-.21 0-.553.079-.842.395-.29.316-1.105 1.08-1.105 2.632s1.132 3.05 1.29 3.263c.158.21 2.228 3.4 5.4 4.768.754.326 1.342.52 1.8.666.756.24 1.444.206 1.99.125.608-.09 1.872-.764 2.136-1.504.263-.74.263-1.374.184-1.504-.079-.132-.29-.21-.605-.368z"/>
+      </svg>
+    </a>
+
+  </div>
+
+</div>
+
+
+
+
 
       </section>
 

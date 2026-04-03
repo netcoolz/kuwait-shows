@@ -3,7 +3,7 @@ import Sidebar from "./sidebar";
 import { Inter, Cairo } from "next/font/google";
 import PageTransition from "./components/PageTransition";
 import { AnimatePresence } from "framer-motion";
-import Splash from "./components/Splash";
+
 
 const inter = Inter({
   subsets: ["latin"],
@@ -54,7 +54,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className={`${inter.className} ${cairo.className} bg-black text-white`}>
-         <Splash />
+      
         <Sidebar />
 
         <main className="w-full md:mr-[190px] relative z-0">

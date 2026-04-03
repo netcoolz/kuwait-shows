@@ -1,5 +1,7 @@
 "use client";
 
+
+
 import { handlers } from "../data/handlers";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
@@ -25,7 +27,8 @@ useEffect(() => {
 }, []);
 
   return (
-    <div className="bg-black text-white min-h-screen py-20 px-4">
+   <div className="relative min-h-screen bg-[url('/bg.png')] bg-cover bg-center bg-fixed text-white py-20 px-4">
+
 
       {/* العنوان */}
       <motion.h1

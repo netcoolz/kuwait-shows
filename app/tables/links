@@ -38,7 +38,7 @@ export default function TablesSponsorsPage() {
       title: t[lang].table,
       image:
         "/viptable.jpg",
-      link: "#",
+      link: "/table-booking",
     },
     {
       id: 2,
@@ -52,12 +52,12 @@ export default function TablesSponsorsPage() {
       title: t[lang].booth,
       image:
         "/boothes.jpg",
-      link: "#",
+      link: "/tables/booth",
     },
   ];
 
   return (
-<main className="relative min-h-screen bg-[url('/bg.png')] bg-cover bg-center bg-fixed text-white p-6 md:p-10">
+    <main className="min-h-screen bg-black text-white p-6 md:p-10">
 
       {/* TITLE */}
       <h1 className="text-3xl md:text-5xl font-bold text-[#bc9b6a] mb-10 text-center">

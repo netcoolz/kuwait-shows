@@ -104,12 +104,12 @@ export default function Sidebar() {
         </div>
 
         {/* LOGO */}
-        <div className="p-6 text-center border-b border-[#D4AF37]/30">
-          <img src="/logo.png" className="w-12 h-12 mx-auto mb-3" />
+      <div className="py-0 px-0 md:p-4 text-center border-b border-[#D4AF37]/30">
+          <img src="/logo.png" className="w-12 h-12 mx-auto mb-0" />
          <h2
   className="font-semibold tracking-wide bg-gradient-to-r from-[#bc9b6a] via-[#f5e6c8] to-[#bc9b6a] bg-clip-text text-transparent"
   style={{
-    textShadow: "0 2px 10px rgba(0,0,0,0.8)",
+    textShadow: "0 1px 10px rgba(0,0,0,0.8)",
   }}
 >
   Kuwait Shows
@@ -117,7 +117,9 @@ export default function Sidebar() {
         </div>
 
         {/* MENU */}
-        <div className="flex flex-col text-base text-[#ffffff]"> {/* أوضح */}
+        {/* MENU + SCROLL */}
+<div className="flex-1 overflow-y-auto">
+  <div className="flex flex-col text-base text-[#ffffff]">
 
           <motion.div
             onClick={toggleLang}
@@ -125,8 +127,8 @@ export default function Sidebar() {
                        flex justify-center items-center
                        hover:bg-[#CDAF81]/10"
           >
-            <div className="flex items-center gap-2">
-              <FaGlobe size={22} style={{ color: brandGold }} />
+            <div className="flex items-center gap-6">
+              <FaGlobe size={20} style={{ color: brandGold }} />
               <span>{lang === "en" ? "🇰🇼" : "🇬🇧"}</span>
             </div>
           </motion.div>
@@ -147,8 +149,13 @@ export default function Sidebar() {
             {lang === "ar" ? "الخدمات" : "Services"}
           </Link>
 
+          <Link href="/sell" className="menu-item" onClick={() => setOpen(false)}>
+            {lang === "ar" ? "خيل للبيع" : "Horses for Sale"}
+          </Link>
+
+
           <Link href="/handlers" className="menu-item" onClick={() => setOpen(false)}>
-            {lang === "ar" ? "عراض الخيل" : "Handlers"}
+            {lang === "ar" ? "مدربين الخيل" : "Horse Trainers"}
           </Link>
 
           <Link href="/about" className="menu-item" onClick={() => setOpen(false)}>
@@ -215,10 +222,12 @@ export default function Sidebar() {
             {lang === "ar" ? "تواصل معنا" : "Contact"}
           </Link>
 
+
+</div>
         </div>
 
         {/* SOCIAL */}
-        <div className="flex justify-center gap-2 p-6 border-t border-[#D4AF37]/30 text-xl">
+        <div className="flex justify-center gap-2 p-3 border-t border-[#D4AF37]/30 text-xl">
           <a href="https://instagram.com/q8shows" target="_blank" style={{ color: brandGold }}>
             <FaInstagram />
           </a>
