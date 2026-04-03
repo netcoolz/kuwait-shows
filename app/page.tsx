@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FaInstagram, FaFacebookF, FaWhatsapp, FaEnvelope } from "react-icons/fa";
 import { FaGlobe } from "react-icons/fa";
-import Splash from "@/components/Splash.tsx";
+import Splash from "@/components/Splash";
 
 
 const gold = "#bc9b6a";
