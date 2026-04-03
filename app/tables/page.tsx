@@ -17,7 +17,7 @@ const [lang, setLang] = useState("en");
     return () => window.removeEventListener("languageChange", updateLang);
   }, []);
 
-  const t = {
+  const t : any = {
     en: {
       title: "Tables & Sponsors",
       table: "VIP Table Booking",
