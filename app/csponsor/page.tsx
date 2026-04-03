@@ -13,12 +13,16 @@ import {
 } from "react-icons/fa";
 
 export default function CorporateSponsor() {
-  const [lang, setLang] = useState("en");
+  const [lang, setLang] = useState<"ar" | "en">("en");
 
   useEffect(() => {
-    const updateLang = () => {
-      setLang(localStorage.getItem("lang") || "en");
-    };
+  const savedLang = localStorage.getItem("lang");
+
+if (savedLang === "ar" || savedLang === "en") {
+  setLang(savedLang);
+} else {
+  setLang("en");
+}
 
     updateLang();
     window.addEventListener("langChange", updateLang);
