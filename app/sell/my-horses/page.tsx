@@ -173,7 +173,7 @@ export default function MyHorses() {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      router.push(`/sell/edit/${horse.id}`);
+                      router.push(`/sell/edit?id=${horse.id}`);
                     }}
                     className="px-2 py-1 text-xs rounded border text-yellow-400"
                   >

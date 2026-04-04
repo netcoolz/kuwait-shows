@@ -1,9 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import {  useRouter } from "next/navigation";
 import imageCompression from "browser-image-compression";
 import { db, storage, auth } from "@/lib/firebase";
+import { Suspense } from "react";
+
+import { useSearchParams } from "next/navigation";
+
+
+
+
 import {
   doc,
   getDoc,
@@ -17,8 +24,12 @@ import {
 
 const gold = "#bc9b6a";
 
-export default function EditHorsePage() {
-  const { id } = useParams();
+function EditHorsePageContent() {
+  const params = useSearchParams();
+const id = params.get("id");
+  
+
+
   const router = useRouter();
 
   const [lang, setLang] = useState("en");
@@ -43,6 +54,8 @@ export default function EditHorsePage() {
     const saved = localStorage.getItem("lang");
     if (saved) setLang(saved);
   }, []);
+
+
 
   // 🔥 جلب البيانات
   useEffect(() => {
@@ -226,3 +239,14 @@ export default function EditHorsePage() {
     </div>
   );
 }
+
+export default function Page() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <EditHorsePageContent />
+    </Suspense>
+  );
+}
+
+
+

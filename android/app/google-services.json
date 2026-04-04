@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "587975812328",
+    "project_id": "kuwaitshows-a82e1",
+    "storage_bucket": "kuwaitshows-a82e1.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:587975812328:android:5f170a2eae895bdac0d55d",
+        "android_client_info": {
+          "package_name": "com.kuwaitshows.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "587975812328-3567313oio4ffsa33jm5rf9tkcvafgc1.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.kuwaitshows.app",
+            "certificate_hash": "2c5631e5c73d0937e49c3d72da8392766ba5c9d0"
+          }
+        },
+        {
+          "client_id": "587975812328-15frpvlmcqf7siri86el891g99kip91a.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA90fMXAgBbaip8yBSArYeT1rSplz_IzQE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "587975812328-15frpvlmcqf7siri86el891g99kip91a.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

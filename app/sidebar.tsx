@@ -15,17 +15,36 @@ export default function Sidebar() {
   const pathname = usePathname();
   const isHome = pathname === "/";
 
-  const [lang, setLang] = useState("en");
+  const [lang, setLang] = useState("ar");
   const [mounted, setMounted] = useState(false);
   const [open, setOpen] = useState(false);
   const [hovered, setHovered] = useState(false);
 
   const [policyOpen, setPolicyOpen] = useState(false);
 
-  useEffect(() => {
-    const saved = localStorage.getItem("lang");
-    if (saved) setLang(saved);
-  }, []);
+ useEffect(() => {
+  const saved = localStorage.getItem("lang");
+  if (saved) {
+    setLang(saved);
+  } else {
+    localStorage.setItem("lang", "ar");
+  }
+}, []);
+
+useEffect(() => {
+  const handleLangChange = () => {
+    const newLang = localStorage.getItem("lang");
+    if (newLang) {
+      setLang(newLang);
+    }
+  };
+
+  window.addEventListener("languageChange", handleLangChange);
+
+  return () => {
+    window.removeEventListener("languageChange", handleLangChange);
+  };
+}, []);
 
   const toggleLang = () => {
     const newLang = lang === "en" ? "ar" : "en";

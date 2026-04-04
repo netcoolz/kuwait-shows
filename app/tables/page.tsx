@@ -1,13 +1,19 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function TablesSponsorsPage() {
  
+const router = useRouter();
+
 const [lang, setLang] = useState("en");
   useEffect(() => {
     const savedLang = localStorage.getItem("lang") || "en";
     setLang(savedLang);
+
+
 
     const updateLang = () => {
       setLang(localStorage.getItem("lang") || "en");
@@ -64,10 +70,10 @@ const cards = [
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 max-w-4xl mx-auto">
 
         {cards.map((card) => (
-          <a
-            key={card.id}
-            href={card.link}
-            className="group relative rounded-2xl overflow-hidden border border-[#bc9b6a] bg-black hover:shadow-[0_0_30px_rgba(188,155,106,0.5)] transition duration-300"
+         <Link
+  key={card.id}
+  href={card.link}
+  className="group relative rounded-2xl overflow-hidden border border-[#bc9b6a] bg-black hover:shadow-[0_0_30px_rgba(188,155,106,0.5)] transition duration-300"
           >
             {/* IMAGE */}
             <div className="relative h-52 md:h-64 overflow-hidden">
@@ -87,7 +93,7 @@ const cards = [
               </h2>
             </div>
 
-          </a>
+          </Link>
         ))}
 
       </div>

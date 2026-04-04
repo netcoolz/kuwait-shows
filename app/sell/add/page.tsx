@@ -5,15 +5,7 @@ import { useRouter } from "next/navigation";
 import imageCompression from "browser-image-compression";
 import { FaPlus } from "react-icons/fa";
 import { db, storage, auth } from "@/lib/firebase";
-import { collection, addDoc } from "firebase/firestore";
-import { FcGoogle } from "react-icons/fc";
-import { FaApple } from "react-icons/fa";
-import {
-  GoogleAuthProvider,
-  OAuthProvider,
-  signInWithPopup,
-} from "firebase/auth";
-
+import { collection, addDoc, doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import {
   signInWithEmailAndPassword,
@@ -35,31 +27,42 @@ export default function AddHorsePage() {
     description: "",
   });
 
-  const [images, setImages] = useState<File[]>([]);
-  const [preview, setPreview] = useState<string[]>([]);
-  const [agree, setAgree] = useState(false);
-  const [loading, setLoading] = useState(false);
-
-  const [showLogin, setShowLogin] = useState(false);
-
-  const [authMode, setAuthMode] = useState<"choose" | "login" | "register">("choose");
-
   const [authData, setAuthData] = useState({
     email: "",
     password: "",
+    name: "",
+    phone: "",
+    country: "",
+    agreeRules: false,
   });
+
+  const [images, setImages] = useState<any[]>([]);
+  const [preview, setPreview] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  const [showLogin, setShowLogin] = useState(false);
+  const [authMode, setAuthMode] = useState<"choose" | "login" | "register">("choose");
 
   useEffect(() => {
     const saved = localStorage.getItem("lang");
     if (saved) setLang(saved);
   }, []);
 
-  const handleChange = (e: any) => {
+  // 🔥 FIX memory leak
+  useEffect(() => {
+    return () => {
+      preview.forEach((url) => URL.revokeObjectURL(url));
+    };
+  }, [preview]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleImages = async (e: any) => {
-    const files = Array.from(e.target.files);
+  const handleImages = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []).filter((file: any) =>
+      file.type.startsWith("image/")
+    );
 
     const compressedFiles = await Promise.all(
       files.map(async (file: any) => {
@@ -77,7 +80,7 @@ export default function AddHorsePage() {
       })
     );
 
-    setImages((prev) => [...prev, ...(compressedFiles as File[])]);
+    setImages((prev) => [...prev, ...(compressedFiles as any[])]);
     const previewUrls = compressedFiles.map((file: any) =>
       URL.createObjectURL(file)
     );
@@ -89,67 +92,43 @@ export default function AddHorsePage() {
     setPreview((prev) => prev.filter((_, i) => i !== index));
   };
 
-  // ✅ تسجيل دخول
   const handleAuth = async () => {
     try {
-      const res = await signInWithEmailAndPassword(
-        auth,
-        authData.email,
-        authData.password
-      );
+      if (authMode === "login") {
+        await signInWithEmailAndPassword(auth, authData.email, authData.password);
+      } else {
+        if (!authData.agreeRules) {
+          alert(lang === "ar" ? "يجب الموافقة على الشروط والأحكام" : "You must agree to the terms and conditions");
+          return;
+        }
 
-      await publishAd(res.user);
+        const userCredential = await createUserWithEmailAndPassword(
+          auth,
+          authData.email,
+          authData.password
+        );
 
+        // 🔥 FIX duplicate users
+        await setDoc(doc(db, "users", userCredential.user.uid), {
+          uid: userCredential.user.uid,
+          name: authData.name,
+          phone: authData.phone,
+          country: authData.country,
+          email: authData.email,
+          agreedToRules: authData.agreeRules,
+          createdAt: serverTimestamp(),
+        });
+      }
+
+      alert(lang === "ar" ? "تم تسجيل الدخول" : "Success");
       setShowLogin(false);
+
     } catch (err) {
-      alert("Login error");
+      console.log(err);
+      alert("Error");
     }
   };
 
-  const handleGoogleLogin = async () => {
-    try {
-      const provider = new GoogleAuthProvider();
-      const result = await signInWithPopup(auth, provider);
-
-      await publishAd(result.user);
-
-      setShowLogin(false);
-    } catch (err) {
-      alert("Google login error");
-    }
-  };
-
-  const handleAppleLogin = async () => {
-    try {
-      const provider = new OAuthProvider("apple.com");
-      const result = await signInWithPopup(auth, provider);
-
-      await publishAd(result.user);
-
-      setShowLogin(false);
-    } catch (err) {
-      alert("Apple login error");
-    }
-  };
-
-  // ✅ إنشاء حساب
-  const handleRegister = async () => {
-    try {
-      const res = await createUserWithEmailAndPassword(
-        auth,
-        authData.email,
-        authData.password
-      );
-
-      await publishAd(res.user);
-
-      setShowLogin(false);
-    } catch (err) {
-      alert("Register error");
-    }
-  };
-
-  // ✅ هنا التعديل المهم فقط
   const publishAd = async (user: any) => {
     try {
       if (!user?.uid) {
@@ -162,7 +141,10 @@ export default function AddHorsePage() {
       const imageUrls: string[] = [];
 
       for (let file of images) {
-        const storageRef = ref(storage, `horses/${Date.now()}-${file.name}`);
+        const storageRef = ref(
+          storage,
+          `horses/${user.uid}-${Date.now()}-${file.name}`
+        );
         await uploadBytes(storageRef, file);
         const url = await getDownloadURL(storageRef);
         imageUrls.push(url);
@@ -171,13 +153,14 @@ export default function AddHorsePage() {
       await addDoc(collection(db, "horses"), {
         ...form,
         images: imageUrls,
-        createdAt: new Date(),
-        userId: user.uid, // 🔥 هذا المهم
+        createdAt: serverTimestamp(),
+        userId: user.uid,
       });
 
       alert(lang === "ar" ? "تم نشر الإعلان بنجاح" : "Ad published successfully");
 
       router.push("/sell");
+
     } catch (err) {
       console.error(err);
       alert("ERROR OCCURRED");
@@ -189,8 +172,13 @@ export default function AddHorsePage() {
   const handleSubmit = async () => {
     const user = auth.currentUser;
 
-    if (!agree) {
-      alert("agree first");
+    if (!authData.agreeRules) {
+      alert(lang === "ar" ? "يجب الموافقة على الشروط والأحكام" : "You must agree to the terms and conditions");
+      return;
+    }
+
+    if (!form.name || !form.phone || !form.age) {
+      alert(lang === "ar" ? "يرجى تعبئة البيانات المطلوبة" : "Please fill required fields");
       return;
     }
 
@@ -273,8 +261,8 @@ export default function AddHorsePage() {
           <div className="flex items-center gap-2 mt-3">
             <input
               type="checkbox"
-              checked={agree}
-              onChange={() => setAgree(!agree)}
+              checked={authData.agreeRules}
+              onChange={(e) => setAuthData({ ...authData, agreeRules: e.target.checked })}
             />
             <span className="text-sm">
               {lang === "ar"
@@ -287,7 +275,7 @@ export default function AddHorsePage() {
 
             <button
               type="button"
-              onClick={() => router.back()}
+              onClick={() => router.push("/sell")}
               className="w-full py-3 rounded-lg border text-gray-300 hover:bg-white/10 transition relative z-10"
               style={{ borderColor: "#444" }}
             >
@@ -304,14 +292,14 @@ export default function AddHorsePage() {
                 opacity: loading ? 0.6 : 1,
               }}
             >
-             {loading ? (
-  <div className="flex items-center justify-center gap-2">
-    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-    <span>{lang === "ar" ? "جاري النشر..." : "Publishing..."}</span>
-  </div>
-) : (
-  lang === "ar" ? "نشر الإعلان" : "Publish Ad"
-)}
+              {loading ? (
+                <div className="flex items-center justify-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <span>{lang === "ar" ? "جاري النشر..." : "Publishing..."}</span>
+                </div>
+              ) : (
+                lang === "ar" ? "نشر الإعلان" : "Publish Ad"
+              )}
             </button>
 
           </div>
@@ -319,174 +307,165 @@ export default function AddHorsePage() {
         </div>
       </div>
 
-    {/* LOGIN POPUP */}
-{showLogin && (
-  <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center px-4">
-    <div
-      className="bg-[#111] p-6 rounded-xl w-full max-w-sm text-center"
-      style={{
-        border: `1px solid ${gold}`,
-        boxShadow: "0 0 30px #bc9b6a66",
-      }}
-    >
-
-      {/* CHOOSE */}
-      {authMode === "choose" && (
-        <>
-          <h2 className="text-xl mb-4">
-            {lang === "ar" ? "اختر" : "Choose"}
-          </h2>
-
-          <button
-            onClick={() => setAuthMode("login")}
-            className="w-full py-3 rounded-lg mb-3 font-semibold"
+      {/* LOGIN POPUP */}
+      {showLogin && (
+        <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center px-4">
+          <div
+            className="bg-[#111] p-6 rounded-xl w-full max-w-sm text-center"
             style={{
-              background: "linear-gradient(90deg, #bc9b6a, #8c6a3f)",
+              border: `1px solid ${gold}`,
+              boxShadow: "0 0 30px #bc9b6a66",
             }}
           >
-            {lang === "ar" ? "تسجيل دخول" : "Login"}
-          </button>
 
-          <button
-            onClick={() => setAuthMode("register")}
-            className="w-full py-3 rounded-lg font-semibold border"
-            style={{ borderColor: gold }}
-          >
-            {lang === "ar" ? "إنشاء حساب" : "Register"}
-          </button>
-        </>
-      )}
+            {authMode === "choose" && (
+              <>
+                <h2 className="text-xl mb-4">
+                  {lang === "ar" ? "اختر" : "Choose"}
+                </h2>
 
-      {/* LOGIN */}
-      {authMode === "login" && (
-        <>
-          <h2 className="text-xl mb-4">
-            {lang === "ar" ? "تسجيل الدخول" : "Login"}
-          </h2>
+                <button
+                  onClick={() => setAuthMode("login")}
+                  className="w-full py-3 rounded-lg mb-3 font-semibold"
+                  style={{
+                    background: "linear-gradient(90deg, #bc9b6a, #8c6a3f)",
+                  }}
+                >
+                  {lang === "ar" ? "تسجيل دخول" : "Login"}
+                </button>
 
-          <button
-            onClick={handleGoogleLogin}
-            className="w-full py-3 rounded-lg mb-3 flex items-center justify-center gap-2 font-semibold"
-            style={{ background: "#fff", color: "#000" }}
-          >
-            <FcGoogle size={20} />
-            Google
-          </button>
+                <button
+                  onClick={() => setAuthMode("register")}
+                  className="w-full py-3 rounded-lg font-semibold border"
+                  style={{ borderColor: gold }}
+                >
+                  {lang === "ar" ? "إنشاء حساب" : "Register"}
+                </button>
+              </>
+            )}
 
-          <button
-            onClick={handleAppleLogin}
-            className="w-full py-3 rounded-lg mb-4 flex items-center justify-center gap-2 font-semibold"
-            style={{ background: "#000", color: "#fff" }}
-          >
-            <FaApple size={18} />
-            Apple
-          </button>
+            {authMode === "login" && (
+              <>
+                <h2 className="text-xl mb-4">
+                  {lang === "ar" ? "تسجيل الدخول" : "Login"}
+                </h2>
 
-          <div className="flex items-center my-3">
-            <div className="flex-1 h-px bg-gray-600"></div>
-            <span className="px-2 text-gray-400 text-sm">OR</span>
-            <div className="flex-1 h-px bg-gray-600"></div>
+                <div className="flex items-center my-3">
+                  <div className="flex-1 h-px bg-gray-600"></div>
+                  <span className="px-2 text-gray-400 text-sm">OR</span>
+                  <div className="flex-1 h-px bg-gray-600"></div>
+                </div>
+
+                <input
+                  placeholder="Email"
+                  className="w-full p-3 mb-2 bg-black border rounded"
+                  onChange={(e) =>
+                    setAuthData({ ...authData, email: e.target.value })
+                  }
+                />
+
+                <input
+                  type="password"
+                  placeholder="Password"
+                  className="w-full p-3 mb-3 bg-black border rounded"
+                  onChange={(e) =>
+                    setAuthData({ ...authData, password: e.target.value })
+                  }
+                />
+
+                <button onClick={handleAuth}>
+                  {lang === "ar" ? "دخول" : "Login"}
+                </button>
+              </>
+            )}
+
+            {authMode === "register" && (
+              <>
+                <h2 className="text-xl mb-4">
+                  {lang === "ar" ? "إنشاء حساب" : "Register"}
+                </h2>
+
+                <div className="flex items-center my-3">
+                  <div className="flex-1 h-px bg-gray-600"></div>
+                  <span className="px-2 text-gray-400 text-sm">OR</span>
+                  <div className="flex-1 h-px bg-gray-600"></div>
+                </div>
+
+                <input
+                  placeholder={lang === "ar" ? "الاسم" : "Name"}
+                  className="w-full p-3 mb-2 bg-black border rounded"
+                  onChange={(e) =>
+                    setAuthData({ ...authData, name: e.target.value })
+                  }
+                />
+                <input
+                  placeholder={lang === "ar" ? "رقم الهاتف" : "Phone Number"}
+                  className="w-full p-3 mb-2 bg-black border rounded"
+                  onChange={(e) =>
+                    setAuthData({ ...authData, phone: e.target.value })
+                  }
+                />
+                <input
+                  placeholder={lang === "ar" ? "الدولة" : "Country"}
+                  className="w-full p-3 mb-2 bg-black border rounded"
+                  onChange={(e) =>
+                    setAuthData({ ...authData, country: e.target.value })
+                  }
+                />
+                <input
+                  placeholder="Email"
+                  className="w-full p-3 mb-2 bg-black border rounded"
+                  onChange={(e) =>
+                    setAuthData({ ...authData, email: e.target.value })
+                  }
+                />
+
+                <input
+                  type="password"
+                  placeholder="Password"
+                  className="w-full p-3 mb-3 bg-black border rounded"
+                  onChange={(e) =>
+                    setAuthData({ ...authData, password: e.target.value })
+                  }
+                />
+                <div className="flex items-center gap-2 mt-3">
+                  <input
+                    type="checkbox"
+                    checked={authData.agreeRules}
+                    onChange={(e) => setAuthData({ ...authData, agreeRules: e.target.checked })}
+                  />
+                  <span className="text-sm">
+                    {lang === "ar"
+                      ? "أوافق على شروط وأحكام موقع كويت شوز"
+                      : "I agree to Kuwait Shows terms & conditions"}
+                  </span>
+                </div>
+
+                <button
+                  onClick={handleAuth}
+                  className="w-full py-3 rounded-lg font-semibold"
+                  style={{
+                    background: "linear-gradient(90deg, #bc9b6a, #8c6a3f)",
+                  }}
+                >
+                  {lang === "ar" ? "إنشاء الحساب" : "Register"}
+                </button>
+              </>
+            )}
+
+            <button
+           onClick={() => {
+  setShowLogin(false);
+  router.push("/sell");
+}}
+              className="w-full py-2 text-gray-400 mt-3"
+            >
+              {lang === "ar" ? "إلغاء" : "Cancel"}
+            </button>
+
           </div>
-
-          <input
-            placeholder="Email"
-            className="w-full p-3 mb-2 bg-black border rounded"
-            onChange={(e) =>
-              setAuthData({ ...authData, email: e.target.value })
-            }
-          />
-
-          <input
-            type="password"
-            placeholder="Password"
-            className="w-full p-3 mb-3 bg-black border rounded"
-            onChange={(e) =>
-              setAuthData({ ...authData, password: e.target.value })
-            }
-          />
-
-          <button
-            onClick={handleAuth}
-            className="w-full py-3 rounded-lg font-semibold"
-            style={{
-              background: "linear-gradient(90deg, #bc9b6a, #8c6a3f)",
-            }}
-          >
-            {lang === "ar" ? "دخول" : "Login"}
-          </button>
-        </>
+        </div>
       )}
-
-      {/* REGISTER */}
-      {authMode === "register" && (
-        <>
-          <h2 className="text-xl mb-4">
-            {lang === "ar" ? "إنشاء حساب" : "Register"}
-          </h2>
-
-          <button
-            onClick={handleGoogleLogin}
-            className="w-full py-3 rounded-lg mb-3 flex items-center justify-center gap-2 font-semibold"
-            style={{ background: "#fff", color: "#000" }}
-          >
-            <FcGoogle size={20} />
-            Google
-          </button>
-
-          <button
-            onClick={handleAppleLogin}
-            className="w-full py-3 rounded-lg mb-4 flex items-center justify-center gap-2 font-semibold"
-            style={{ background: "#000", color: "#fff" }}
-          >
-            <FaApple size={18} />
-            Apple
-          </button>
-
-          <div className="flex items-center my-3">
-            <div className="flex-1 h-px bg-gray-600"></div>
-            <span className="px-2 text-gray-400 text-sm">OR</span>
-            <div className="flex-1 h-px bg-gray-600"></div>
-          </div>
-
-          <input
-            placeholder="Email"
-            className="w-full p-3 mb-2 bg-black border rounded"
-            onChange={(e) =>
-              setAuthData({ ...authData, email: e.target.value })
-            }
-          />
-
-          <input
-            type="password"
-            placeholder="Password"
-            className="w-full p-3 mb-3 bg-black border rounded"
-            onChange={(e) =>
-              setAuthData({ ...authData, password: e.target.value })
-            }
-          />
-
-          <button
-            onClick={handleRegister}
-            className="w-full py-3 rounded-lg font-semibold"
-            style={{
-              background: "linear-gradient(90deg, #bc9b6a, #8c6a3f)",
-            }}
-          >
-            {lang === "ar" ? "إنشاء الحساب" : "Register"}
-          </button>
-        </>
-      )}
-
-      {/* CANCEL */}
-      <button
-        onClick={() => setShowLogin(false)}
-        className="w-full py-2 text-gray-400 mt-3"
-      >
-        {lang === "ar" ? "إلغاء" : "Cancel"}
-      </button>
-
     </div>
-  </div>
-)}   </div>
   );
 }

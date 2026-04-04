@@ -1,14 +1,9 @@
-import type { NextConfig } from "next";
-
-const nextConfig: NextConfig = {
+const nextConfig = {
+  output: 'export',
+  trailingSlash: true, // 🔥 هذا المهم
   images: {
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "firebasestorage.googleapis.com",
-      },
-    ],
+    unoptimized: true,
   },
 };
 
-export default nextConfig;
+module.exports = nextConfig;

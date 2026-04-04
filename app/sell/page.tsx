@@ -6,6 +6,12 @@ import Image from "next/image";
 import { auth } from "@/lib/firebase"; // ✅ إضافة
 import { FcGoogle } from "react-icons/fc";
 import { FaApple } from "react-icons/fa";
+import { useRouter } from "next/navigation";
+
+
+import { getRedirectResult } from "firebase/auth";
+
+
 
 const gold = "#bc9b6a";
 
@@ -16,13 +22,25 @@ export default function SellHorsePage() {
   const [horses, setHorses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [lastDoc, setLastDoc] = useState<any>(null);
-
+  const router = useRouter();
   const [showLogin, setShowLogin] = useState(false); // ✅ إضافة
 const [authMode, setAuthMode] = useState("choose");
 const [authData, setAuthData] = useState({
   email: "",
   password: "",
 });
+
+useEffect(() => {
+  getRedirectResult(auth)
+    .then((result) => {
+      if (result?.user) {
+        setShowLogin(false);
+      }
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+}, []);
 
 const handleAuth = async () => {
   try {
@@ -42,12 +60,12 @@ const handleAuth = async () => {
 
 const handleGoogleLogin = async () => {
   try {
-    const { GoogleAuthProvider, signInWithPopup } = await import("firebase/auth");
+    const { GoogleAuthProvider, signInWithRedirect } = await import("firebase/auth");
 
     const provider = new GoogleAuthProvider();
-    await signInWithPopup(auth, provider);
 
-    setShowLogin(false);
+    await signInWithRedirect(auth, provider);
+
   } catch (err) {
     alert("Google login error");
   }
@@ -134,7 +152,7 @@ const handleRegister = async () => {
       return;
     }
 
-    window.location.href = "/sell/my-horses";
+    window.location.href = "/sell/my-horses/";
   };
 
   return (
@@ -167,7 +185,7 @@ const handleRegister = async () => {
 
           {/* Add */}
           <button
-            onClick={() => window.location.href = "/sell/add"}
+            onClick={() => router.replace("/sell/add")}
             className="flex items-center gap-3 px-6 py-3 rounded-xl border transition-all duration-300 hover:scale-105 hover:bg-[#bc9b6a]/10"
             style={{
               borderColor: gold,
