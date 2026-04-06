@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import { motion, Variants } from "framer-motion"; // 🔥 أضفنا Variants هنا
 import Image from "next/image";
 
 const gold = "#bc9b6a";
@@ -29,13 +29,13 @@ export default function AboutPage() {
 
   const isAr = lang === "ar";
 
-  // إعدادات الأنيميشن المشتركة
-  const fadeInUp = {
+  // 🔥 الحل هنا: أخبرنا TypeScript أن هذه المتغيرات من نوع Variants
+  const fadeInUp: Variants = {
     hidden: { opacity: 0, y: 50 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: "easeOut" } }
   };
 
-  const staggerContainer = {
+  const staggerContainer: Variants = {
     hidden: { opacity: 0 },
     visible: { opacity: 1, transition: { staggerChildren: 0.2 } }
   };
@@ -116,7 +116,7 @@ export default function AboutPage() {
             
             <div className="flex-1">
               <h2 className="text-3xl md:text-5xl font-bold mb-6" style={{ color: gold }}>
-                {isAr ? "Kuwait Shows عن" : "About Kuwait Shows"}
+                {isAr ? "عن كويت شووز" : "About Kuwait Shows"}
               </h2>
               <p className="text-gray-300 leading-relaxed text-lg font-light">
                 {isAr ? (

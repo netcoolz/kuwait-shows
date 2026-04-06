@@ -13,7 +13,7 @@ import {
   FaWhatsapp,
   FaEnvelope,
 } from "react-icons/fa";
-import { motion } from "framer-motion";
+import { motion, Variants } from "framer-motion"; // 🔥 أضفنا Variants هنا
 
 const gold = "#bc9b6a";
 
@@ -93,8 +93,8 @@ export default function CorporateSponsor() {
   const icons = [FaGem, FaHandshake, FaUsers, FaChartLine, FaBullhorn, FaGlobe];
   const mediaIcons = [FaHashtag, FaUsers, FaGem, FaTv, FaGlobe];
 
-  // أنيميشن الظهور المتدرج
-  const fadeUpVariant = {
+  // 🔥 الحل هنا: تعريف المتغير كـ Variants
+  const fadeUpVariant: Variants = {
     hidden: { opacity: 0, y: 30 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } }
   };
@@ -113,8 +113,8 @@ export default function CorporateSponsor() {
       {/* Overlay داكن لضمان قراءة النصوص */}
       <div className="absolute inset-0 bg-black/40 z-0 pointer-events-none" />
 
-      {/* المحتوى الرئيسي مع تجنب تداخل القائمة الجانبية (Sidebar) */}
-      <div className="relative z-10 w-full md:pr-[250px] px-4 md:px-8 pt-10">
+      {/* المحتوى الرئيسي */}
+      <div className="relative z-10 w-full lg:ml-[90px] lg:w-[calc(100%-90px)] px-4 md:px-8 pt-10">
         
         <div className="max-w-6xl mx-auto">
           

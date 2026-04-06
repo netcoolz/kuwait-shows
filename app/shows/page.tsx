@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, Variants } from "framer-motion"; // 🔥 أضفنا Variants هنا
 
 const gold = "#bc9b6a";
 
@@ -55,7 +55,7 @@ export default function ShowsPage() {
       id: 4,
       title_en: "Breeder Cup SE",
       title_ar: "كأس المربين للخيل المصرية ",
-      image: "/horse3.jpg", // يمكنك تغيير هذه الصورة لاحقاً إذا أردت
+      image: "/horse3.jpg", 
       link: "/register/",
       status: "soon",
     },
@@ -82,8 +82,8 @@ export default function ShowsPage() {
     },
   };
 
-  // إعدادات الأنيميشن للكروت (Stagger Effect)
-  const containerVariants = {
+  // 🔥 الحل هنا: أخبرنا TypeScript أن هذه المتغيرات من نوع Variants
+  const containerVariants: Variants = {
     hidden: { opacity: 0 },
     show: {
       opacity: 1,
@@ -93,7 +93,7 @@ export default function ShowsPage() {
     },
   };
 
-  const itemVariants = {
+  const itemVariants: Variants = {
     hidden: { opacity: 0, y: 30 },
     show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } },
   };

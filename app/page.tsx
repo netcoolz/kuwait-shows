@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, Variants } from "framer-motion"; // 🔥 أضفنا Variants هنا
 import { FaWhatsapp, FaEnvelope, FaGlobe, FaChevronRight, FaChevronLeft } from "react-icons/fa";
 import Image from "next/image";
 
@@ -35,7 +35,7 @@ export default function Home() {
     return () => window.removeEventListener("languageChange", handleLangChange);
   }, []);
 
-  // 🌟 الكود السحري للتمرير التلقائي عند القدوم من صفحة أخرى
+  // الكود السحري للتمرير التلقائي عند القدوم من صفحة أخرى
   useEffect(() => {
     const hash = window.location.hash;
     if (hash) {
@@ -52,7 +52,7 @@ export default function Home() {
   useEffect(() => {
     const interval = setInterval(() => {
       setSlide((prev) => (prev + 1) % slides.length);
-    }, 5000); // إبطاء السلايدر قليلاً ليعطي إحساساً بالفخامة
+    }, 5000); 
     return () => clearInterval(interval);
   }, []);
 
@@ -121,19 +121,19 @@ export default function Home() {
       services: "خدماتنا",
       subtitle: "إدارة احترافية لبطولات الخيل\nمن المنصة إلى التتويج نحن نديرها",
       ctaTitle: "التميز يبدأ بمحادثة",
-      ctaDesc: "تواصل معنا لمناقشة الشراكات والتنسيق الرسمي واستراتيجيات تنفيذ البطولة المصممة خصيصاً",
+      ctaDesc: "تواصل مع كويت شووز لمناقشة الشراكات والتنسيق الرسمي واستراتيجيات تنفيذ البطولة المصممة خصيصاً",
       contact: "تواصل معنا",
-      luxTitle: "سوق الخيل",
+      luxTitle: "سوق الخيل الفاخر",
     },
   };
 
-  // إعدادات حركة الظهور
-  const fadeInUp = {
+  // 🔥 الحل هنا: أخبرنا TypeScript أن هذه المتغيرات من نوع Variants
+  const fadeInUp: Variants = {
     hidden: { opacity: 0, y: 40 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: "easeOut" } }
   };
 
-  const staggerContainer = {
+  const staggerContainer: Variants = {
     hidden: { opacity: 0 },
     visible: { opacity: 1, transition: { staggerChildren: 0.2 } }
   };
@@ -173,7 +173,6 @@ export default function Home() {
 
       {/* -------------------- HERO SECTION -------------------- */}
       <section className="relative h-screen flex flex-col justify-center items-center text-center overflow-hidden">
-        {/* Animated Background Image */}
         <div className="absolute inset-0 z-0">
           <Image
             src="/hero.jpg"
@@ -185,7 +184,6 @@ export default function Home() {
           <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black" />
         </div>
 
-        {/* Hero Content */}
         <div className="relative z-10 px-4 max-w-4xl mt-20">
           <motion.div
             initial={{ opacity: 0, scale: 0.9, filter: "blur(10px)" }}
@@ -220,7 +218,6 @@ export default function Home() {
           </motion.div>
         </div>
 
-        {/* Scroll Indicator */}
         <motion.a
           href="#explore"
           initial={{ opacity: 0 }}
@@ -245,14 +242,13 @@ export default function Home() {
                 <div className="w-full md:w-1/2 p-10 md:p-16 text-center md:text-start z-10">
                   <h2 className="text-3xl md:text-4xl font-bold mb-4" style={{ color: gold }}>{t[lang].luxTitle}</h2>
                   <p className="text-gray-400 mb-8 max-w-sm mx-auto md:mx-0">
-                    {lang === "ar" ? "اكتشف منصتنا الحصرية لبيع وشراء أرقى سلالات الخيل." : "Discover our exclusive platform for buying and selling the finest Horses."}
+                    {lang === "ar" ? "اكتشف منصتنا الحصرية لبيع وشراء أرقى سلالات الخيل العربية الأصيلة." : "Discover our exclusive platform for buying and selling the finest Arabian horse breeds."}
                   </p>
                   <span className="inline-block px-8 py-3 rounded-full bg-transparent border border-[#bc9b6a] text-[#bc9b6a] font-semibold tracking-wider group-hover:bg-[#bc9b6a] group-hover:text-black transition-colors duration-300">
                     {lang === "ar" ? "تصفح الخيل" : "Explore Horses"}
                   </span>
                 </div>
                 <div className="w-full md:w-1/2 relative h-[300px] md:h-[400px]">
-                  {/* استخدمنا الصورة الفاخرة للبانر */}
                   <Image src="/lux.jpg" alt="Luxury Horses" fill className="object-cover object-center group-hover:scale-105 transition-transform duration-1000" />
                   <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-black/80 via-black/20 to-transparent" />
                 </div>
@@ -282,7 +278,6 @@ export default function Home() {
               />
             </AnimatePresence>
             
-            {/* أزرار التحكم المخفية تظهر عند المرور */}
             <div className="absolute inset-0 flex items-center justify-between px-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
               <button onClick={() => setSlide((prev) => (prev === 0 ? slides.length - 1 : prev - 1))} className="p-3 rounded-full bg-black/50 text-white hover:bg-[#bc9b6a] transition backdrop-blur-sm">
                 <FaChevronLeft />
@@ -292,7 +287,6 @@ export default function Home() {
               </button>
             </div>
 
-            {/* نقاط السلايدر */}
             <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-3 z-10">
               {slides.map((_, i) => (
                 <button
