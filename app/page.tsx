@@ -58,7 +58,8 @@ export default function Home() {
     visible: { opacity: 1, transition: { staggerChildren: 0.15 } }
   };
 
-  const slideVariants = {
+  // 🔥 تم إصلاح هذا الجزء بإضافة "as const" لحل خطأ TypeScript النهائي
+  const slideVariants: Variants = {
     enter: (direction: number) => ({
       x: direction > 0 ? "100%" : "-100%",
       opacity: 0,
@@ -69,14 +70,20 @@ export default function Home() {
       x: 0,
       opacity: 1,
       scale: 1,
-      transition: { x: { type: "spring", stiffness: 300, damping: 30 }, opacity: { duration: 0.5 } }
+      transition: { 
+        x: { type: "spring" as const, stiffness: 300, damping: 30 }, 
+        opacity: { duration: 0.5 } 
+      }
     },
     exit: (direction: number) => ({
       zIndex: 0,
       x: direction < 0 ? "100%" : "-100%",
       opacity: 0,
       scale: 0.95,
-      transition: { x: { type: "spring", stiffness: 300, damping: 30 }, opacity: { duration: 0.5 } }
+      transition: { 
+        x: { type: "spring" as const, stiffness: 300, damping: 30 }, 
+        opacity: { duration: 0.5 } 
+      }
     })
   };
 
@@ -124,14 +131,13 @@ export default function Home() {
       />
       <div className="fixed inset-0 -z-10 bg-black/40 pointer-events-none" />
 
-      {/* 🌍 Language Switcher */}
+      {/* 🌍 محول اللغة */}
       <motion.button onClick={toggleLang} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="fixed top-6 right-6 z-50 flex items-center gap-3 px-4 py-2 rounded-full border border-[#bc9b6a44] bg-black/60 backdrop-blur-md shadow-lg hover:border-[#bc9b6a] transition-all">
         <FaGlobe className="text-[#bc9b6a]" />
         <span className="font-semibold text-sm">{lang === "en" ? "العربية" : "English"}</span>
       </motion.button>
 
       {/* -------------------- HERO SECTION (FULL SCREEN) -------------------- */}
-      {/* 🔥 تم تعديل الارتفاع إلى h-screen ليملأ الشاشة بالكامل عند الدخول */}
       <section className="relative h-screen flex flex-col justify-center items-center text-center overflow-hidden">
         <div className="absolute inset-0 z-0">
           <Image
@@ -141,7 +147,6 @@ export default function Home() {
             priority
             className="object-cover object-[75%_center] md:object-top opacity-70 scale-105 animate-[slowZoom_20s_infinite_alternate]"
           />
-          {/* تدرج لوني يدمج الصورة مع الخلفية بشكل انسيابي في الأسفل */}
           <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/90" />
         </div>
 
@@ -158,15 +163,12 @@ export default function Home() {
           </motion.div>
         </div>
 
-        {/* سهم مؤشر للنزول */}
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.5, duration: 1 }} className="absolute bottom-10 flex flex-col items-center gap-1 text-[#bc9b6a]">
           <span className="text-[10px] uppercase tracking-[0.3em] mb-2 opacity-70">Scroll Down</span>
           <div className="w-px h-12 bg-gradient-to-b from-[#bc9b6a] to-transparent animate-bounce" />
         </motion.div>
       </section>
 
-      {/* -------------------- باقي المحتوى يظهر عند النزول -------------------- */}
-      
       {/* MARKETPLACE BANNER */}
       <section id="explore" className="py-24 max-w-6xl mx-auto px-4">
           <Link href="/sell" className="block group">
