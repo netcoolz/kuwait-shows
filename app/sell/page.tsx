@@ -1,12 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { FaPlusCircle, FaSignInAlt, FaUserPlus, FaSignOutAlt, FaWhatsapp } from "react-icons/fa";
+import { FaPlusCircle, FaSignInAlt, FaUserPlus, FaSignOutAlt } from "react-icons/fa";
 import Image from "next/image";
 import { auth } from "@/lib/firebase"; 
 import { useRouter } from "next/navigation";
 import { getRedirectResult, onAuthStateChanged, signOut } from "firebase/auth"; 
-import { motion, AnimatePresence } from "framer-motion";
 
 const gold = "#bc9b6a";
 
@@ -93,6 +92,14 @@ export default function SellHorsePage() {
   useEffect(() => {
     const saved = localStorage.getItem("lang");
     if (saved) setLang(saved);
+
+    const handleLangChange = () => {
+      const newLang = localStorage.getItem("lang");
+      if (newLang) setLang(newLang);
+    };
+
+    window.addEventListener("languageChange", handleLangChange);
+    return () => window.removeEventListener("languageChange", handleLangChange);
   }, []);
 
   const fetchHorses = async (loadMore = false) => {
@@ -101,7 +108,6 @@ export default function SellHorsePage() {
       const { db } = await import("@/lib/firebase");
 
       let q;
-      // 🔥 سحب 12 إعلان بدلاً من 6 ليتناسب مع حجم الكروت الجديد ويملأ الشاشة
       const fetchLimit = 12; 
 
       if (loadMore && lastDoc) {
@@ -131,28 +137,17 @@ export default function SellHorsePage() {
     fetchHorses();
   }, []);
 
-  // أنيميشن للكروت
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    show: { opacity: 1, transition: { staggerChildren: 0.1 } }
-  };
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    show: { opacity: 1, y: 0, transition: { duration: 0.5 } }
-  };
-
   return (
     <div
       dir={lang === "ar" ? "rtl" : "ltr"}
-      className="min-h-screen text-white px-4 sm:px-6 py-12 sm:py-16"
+      className="min-h-screen text-white px-4 sm:px-6 py-12 sm:py-24"
       style={{
         backgroundImage: "url('/bg.png')",
         backgroundSize: "cover",
         backgroundPosition: "center",
-        backgroundAttachment: "fixed",
       }}
     >
-      <div className="md:pr-[300px]">
+      <div className="w-full max-w-7xl mx-auto pt-10">
 
         {/* HEADER */}
         <div className="text-center mb-10 max-w-2xl mx-auto">
@@ -170,7 +165,6 @@ export default function SellHorsePage() {
         {/* CTA - الأزرار */}
         <div className="flex flex-wrap justify-center gap-3 mb-12">
           
-          {/* 🌟 الزر الثابت للجميع: إضافة إعلان */}
           <button
             onClick={() => router.push("/sell/add")}
             className="flex items-center gap-2 px-6 py-2.5 rounded-xl font-semibold transition-all duration-300 hover:scale-105"
@@ -181,7 +175,6 @@ export default function SellHorsePage() {
           </button>
 
           {user ? (
-            // 🟢 إذا كان المستخدم مسجل دخول
             <>
               <button
                 onClick={() => router.push("/sell/my-horses/")}
@@ -200,7 +193,6 @@ export default function SellHorsePage() {
               </button>
             </>
           ) : (
-            // 🔴 إذا لم يكن مسجل دخول
             <>
               <button
                 onClick={() => { setAuthMode("login"); setShowLogin(true); }}
@@ -239,21 +231,16 @@ export default function SellHorsePage() {
         )}
 
         {/* CARDS */}
-        {/* 🔥 التعديل هنا: 4 أعمدة في الشاشات الكبيرة، 3 للآيباد، 2 للجوال (ليصبح الكارت أصغر بـ 20-25%) */}
-        <motion.div 
-          variants={containerVariants} initial="hidden" animate="show"
-          className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4 max-w-6xl mx-auto"
-        >
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4 max-w-6xl mx-auto">
           {horses.map((horse) => (
-            <motion.div
-              variants={itemVariants}
+            <div
               key={horse.id}
               onClick={() => setSelectedHorse(horse)}
               className="group bg-[#111] rounded-xl overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105"
               style={{ border: "1px solid rgba(188,155,106,0.2)" }}
             >
-              {/* صورة الكارت المعروض (مقاسات محسنة للحجم الجديد) - بدون كواليتي */}
               <div className="aspect-square overflow-hidden relative bg-[#222]">
+                {/* تم إزالة quality لتجاوز عطل Vercel */}
                 <Image
                   src={horse.images?.[0] || "/placeholder.png"}
                   alt={horse.name}
@@ -272,9 +259,9 @@ export default function SellHorsePage() {
                   {horse.father} × {horse.mother}
                 </p>
               </div>
-            </motion.div>
+            </div>
           ))}
-        </motion.div>
+        </div>
 
         {/* LOAD MORE */}
         {lastDoc && (
@@ -292,193 +279,174 @@ export default function SellHorsePage() {
       </div>
 
       {/* LOGIN/REGISTER POPUP */}
-      <AnimatePresence>
-        {showLogin && (
-          <motion.div
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center px-4"
+      {showLogin && (
+        <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center px-4">
+          <div
+            className="bg-[#111] p-6 rounded-xl w-full max-w-sm text-center relative"
+            style={{ border: `1px solid ${gold}`, boxShadow: "0 0 30px #bc9b6a66" }}
           >
-            <motion.div
-              initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }}
-              className="bg-[#111] p-6 rounded-xl w-full max-w-sm text-center relative"
-              style={{ border: `1px solid ${gold}`, boxShadow: "0 0 30px #bc9b6a66" }}
+            
+            {/* Login Form */}
+            {authMode === "login" && (
+              <>
+                <h2 className="text-2xl font-bold mb-6 text-white">
+                  {lang === "ar" ? "تسجيل الدخول" : "Login"}
+                </h2>
+
+                <input
+                  placeholder="Email"
+                  className="w-full p-3 mb-3 bg-[#222] border-none rounded outline-none text-white focus:ring-1 focus:ring-[#bc9b6a]"
+                  onChange={(e) => setAuthData({ ...authData, email: e.target.value })}
+                />
+
+                <input
+                  type="password"
+                  placeholder="Password"
+                  className="w-full p-3 mb-6 bg-[#222] border-none rounded outline-none text-white focus:ring-1 focus:ring-[#bc9b6a]"
+                  onChange={(e) => setAuthData({ ...authData, password: e.target.value })}
+                />
+
+                <button
+                  onClick={handleAuth}
+                  className="w-full py-3 rounded-lg font-bold text-white transition-all hover:opacity-90"
+                  style={{ background: "linear-gradient(90deg, #bc9b6a, #8c6a3f)" }}
+                >
+                  {lang === "ar" ? "دخول" : "Login"}
+                </button>
+
+                <p className="text-sm mt-5 text-gray-400">
+                  {lang === "ar" ? "ليس لديك حساب؟" : "Don't have an account?"}{" "}
+                  <span onClick={() => setAuthMode("register")} className="cursor-pointer hover:underline" style={{ color: gold }}>
+                    {lang === "ar" ? "سجل الآن" : "Register now"}
+                  </span>
+                </p>
+              </>
+            )}
+
+            {/* Register Form */}
+            {authMode === "register" && (
+              <>
+                <h2 className="text-2xl font-bold mb-6 text-white">
+                  {lang === "ar" ? "إنشاء حساب" : "Register"}
+                </h2>
+
+                <input
+                  placeholder={lang === "ar" ? "الاسم الكامل" : "Full Name"}
+                  className="w-full p-3 mb-3 bg-[#222] border-none rounded outline-none text-white focus:ring-1 focus:ring-[#bc9b6a]"
+                  onChange={(e) => setAuthData({ ...authData, name: e.target.value })}
+                />
+
+                <input
+                  placeholder={lang === "ar" ? "رقم الواتساب" : "WhatsApp Number"}
+                  type="tel"
+                  dir="ltr"
+                  className="w-full p-3 mb-3 bg-[#222] border-none rounded text-left outline-none text-white focus:ring-1 focus:ring-[#bc9b6a]"
+                  onChange={(e) => setAuthData({ ...authData, phone: e.target.value })}
+                />
+
+                <input
+                  placeholder="Email"
+                  className="w-full p-3 mb-3 bg-[#222] border-none rounded outline-none text-white focus:ring-1 focus:ring-[#bc9b6a]"
+                  onChange={(e) => setAuthData({ ...authData, email: e.target.value })}
+                />
+
+                <input
+                  type="password"
+                  placeholder="Password"
+                  className="w-full p-3 mb-6 bg-[#222] border-none rounded outline-none text-white focus:ring-1 focus:ring-[#bc9b6a]"
+                  onChange={(e) => setAuthData({ ...authData, password: e.target.value })}
+                />
+
+                <button
+                  onClick={handleRegister}
+                  className="w-full py-3 rounded-lg font-bold text-white transition-all hover:opacity-90"
+                  style={{ background: "linear-gradient(90deg, #bc9b6a, #8c6a3f)" }}
+                >
+                  {lang === "ar" ? "إنشاء حساب" : "Register"}
+                </button>
+
+                <p className="text-sm mt-5 text-gray-400">
+                  {lang === "ar" ? "لديك حساب بالفعل؟" : "Already have an account?"}{" "}
+                  <span onClick={() => setAuthMode("login")} className="cursor-pointer hover:underline" style={{ color: gold }}>
+                    {lang === "ar" ? "تسجيل الدخول" : "Login here"}
+                  </span>
+                </p>
+              </>
+            )}
+
+            <button
+              onClick={() => setShowLogin(false)}
+              className="absolute top-3 right-4 text-gray-500 hover:text-white text-xl"
             >
-              
-              {/* Login Form */}
-              {authMode === "login" && (
-                <>
-                  <h2 className="text-2xl font-bold mb-6 text-white">
-                    {lang === "ar" ? "تسجيل الدخول" : "Login"}
-                  </h2>
+              ✕
+            </button>
 
-                  <input
-                    placeholder="Email"
-                    className="w-full p-3 mb-3 bg-[#222] border-none rounded outline-none text-white focus:ring-1 focus:ring-[#bc9b6a]"
-                    onChange={(e) => setAuthData({ ...authData, email: e.target.value })}
-                  />
-
-                  <input
-                    type="password"
-                    placeholder="Password"
-                    className="w-full p-3 mb-6 bg-[#222] border-none rounded outline-none text-white focus:ring-1 focus:ring-[#bc9b6a]"
-                    onChange={(e) => setAuthData({ ...authData, password: e.target.value })}
-                  />
-
-                  <button
-                    onClick={handleAuth}
-                    className="w-full py-3 rounded-lg font-bold text-white transition-all hover:opacity-90"
-                    style={{ background: "linear-gradient(90deg, #bc9b6a, #8c6a3f)" }}
-                  >
-                    {lang === "ar" ? "دخول" : "Login"}
-                  </button>
-
-                  <p className="text-sm mt-5 text-gray-400">
-                    {lang === "ar" ? "ليس لديك حساب؟" : "Don't have an account?"}{" "}
-                    <span onClick={() => setAuthMode("register")} className="cursor-pointer hover:underline" style={{ color: gold }}>
-                      {lang === "ar" ? "سجل الآن" : "Register now"}
-                    </span>
-                  </p>
-                </>
-              )}
-
-              {/* Register Form */}
-              {authMode === "register" && (
-                <>
-                  <h2 className="text-2xl font-bold mb-6 text-white">
-                    {lang === "ar" ? "إنشاء حساب" : "Register"}
-                  </h2>
-
-                  <input
-                    placeholder={lang === "ar" ? "الاسم الكامل" : "Full Name"}
-                    className="w-full p-3 mb-3 bg-[#222] border-none rounded outline-none text-white focus:ring-1 focus:ring-[#bc9b6a]"
-                    onChange={(e) => setAuthData({ ...authData, name: e.target.value })}
-                  />
-
-                  <input
-                    placeholder={lang === "ar" ? "رقم الواتساب" : "WhatsApp Number"}
-                    type="tel"
-                    dir="ltr"
-                    className="w-full p-3 mb-3 bg-[#222] border-none rounded text-left outline-none text-white focus:ring-1 focus:ring-[#bc9b6a]"
-                    onChange={(e) => setAuthData({ ...authData, phone: e.target.value })}
-                  />
-
-                  <input
-                    placeholder="Email"
-                    className="w-full p-3 mb-3 bg-[#222] border-none rounded outline-none text-white focus:ring-1 focus:ring-[#bc9b6a]"
-                    onChange={(e) => setAuthData({ ...authData, email: e.target.value })}
-                  />
-
-                  <input
-                    type="password"
-                    placeholder="Password"
-                    className="w-full p-3 mb-6 bg-[#222] border-none rounded outline-none text-white focus:ring-1 focus:ring-[#bc9b6a]"
-                    onChange={(e) => setAuthData({ ...authData, password: e.target.value })}
-                  />
-
-                  <button
-                    onClick={handleRegister}
-                    className="w-full py-3 rounded-lg font-bold text-white transition-all hover:opacity-90"
-                    style={{ background: "linear-gradient(90deg, #bc9b6a, #8c6a3f)" }}
-                  >
-                    {lang === "ar" ? "إنشاء حساب" : "Register"}
-                  </button>
-
-                  <p className="text-sm mt-5 text-gray-400">
-                    {lang === "ar" ? "لديك حساب بالفعل؟" : "Already have an account?"}{" "}
-                    <span onClick={() => setAuthMode("login")} className="cursor-pointer hover:underline" style={{ color: gold }}>
-                      {lang === "ar" ? "تسجيل الدخول" : "Login here"}
-                    </span>
-                  </p>
-                </>
-              )}
-
-              <button
-                onClick={() => setShowLogin(false)}
-                className="absolute top-3 right-4 text-gray-500 hover:text-white text-xl"
-              >
-                ✕
-              </button>
-
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          </div>
+        </div>
+      )}
 
       {/* MODAL HORSE PREVIEW */}
-      <AnimatePresence>
-        {selectedHorse && (
-          <motion.div
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            onClick={() => setSelectedHorse(null)}
-            className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center px-4"
+      {selectedHorse && (
+        <div
+          onClick={() => setSelectedHorse(null)}
+          className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center px-4"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-[#111] p-5 sm:p-6 rounded-xl max-w-2xl w-full relative"
+            style={{ border: `1px solid ${gold}`, boxShadow: "0 0 30px #bc9b6a66" }}
           >
-            <motion.div
-              initial={{ scale: 0.95, y: 30 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95, y: 30 }}
-              onClick={(e) => e.stopPropagation()}
-              className="bg-[#111] p-5 sm:p-6 rounded-xl max-w-2xl w-full relative"
-              style={{ border: `1px solid ${gold}`, boxShadow: "0 0 30px #bc9b6a66" }}
+            {/* صور المصغرات - تم إزالة quality لتجاوز الخطأ */}
+            <div className="flex gap-2 overflow-x-auto mb-4 pb-2">
+              {selectedHorse.images?.map((img: string, i: number) => (
+                <div key={i} className="relative h-32 sm:h-40 w-32 sm:w-40 shrink-0 bg-[#222] rounded cursor-pointer overflow-hidden transition hover:opacity-80">
+                  <Image
+                    src={img}
+                    alt="horse thumbnail"
+                    fill
+                    sizes="(max-width: 768px) 50vw, 33vw"
+                    onClick={() => setActiveImage(img)}
+                    className="object-cover"
+                  />
+                </div>
+              ))}
+            </div>
+
+            <h2 className="text-xl sm:text-2xl font-bold mb-2">{selectedHorse.name}</h2>
+            <p className="text-gray-300 text-sm mb-2"><span style={{ color: gold }}>{lang === "ar" ? "العمر:" : "Age:"}</span> {selectedHorse.age}</p>
+            <p className="text-gray-300 text-sm"><span style={{ color: gold }}>{lang === "ar" ? "الأب:" : "Father:"}</span> {selectedHorse.father}</p>
+            <p className="text-gray-300 text-sm"><span style={{ color: gold }}>{lang === "ar" ? "الأم:" : "Mother:"}</span> {selectedHorse.mother}</p>
+            <p className="text-gray-400 mt-3 text-sm">{selectedHorse.description}</p>
+
+            <a
+              href={`https://wa.me/${selectedHorse.phone}`}
+              target="_blank"
+              className="block mt-5 text-center py-3 rounded-lg font-semibold transition hover:opacity-90"
+              style={{ background: "linear-gradient(90deg, #25D366, #1ebe5d)" }}
             >
-              {/* صور المصغرات - بدون كواليتي */}
-              <div className="flex gap-2 overflow-x-auto mb-4 pb-2 custom-scrollbar">
-                {selectedHorse.images?.map((img: string, i: number) => (
-                  <div key={i} className="relative h-32 sm:h-40 w-32 sm:w-40 shrink-0 bg-[#222] rounded cursor-pointer overflow-hidden transition hover:opacity-80">
-                    <Image
-                      src={img}
-                      alt="horse thumbnail"
-                      fill
-                      sizes="(max-width: 768px) 50vw, 33vw"
-                      onClick={() => setActiveImage(img)}
-                      className="object-cover"
-                    />
-                  </div>
-                ))}
-              </div>
-
-              <h2 className="text-xl sm:text-2xl font-bold mb-2">{selectedHorse.name}</h2>
-              <p className="text-gray-300 text-sm mb-2"><span style={{ color: gold }}>{lang === "ar" ? "العمر:" : "Age:"}</span> {selectedHorse.age}</p>
-              <p className="text-gray-300 text-sm"><span style={{ color: gold }}>{lang === "ar" ? "الأب:" : "Father:"}</span> {selectedHorse.father}</p>
-              <p className="text-gray-300 text-sm"><span style={{ color: gold }}>{lang === "ar" ? "الأم:" : "Mother:"}</span> {selectedHorse.mother}</p>
-              <p className="text-gray-400 mt-3 text-sm">{selectedHorse.description}</p>
-
-              <a
-                href={`https://wa.me/${selectedHorse.phone}`}
-                target="_blank"
-                className="block mt-5 text-center py-3 rounded-lg font-semibold transition hover:opacity-90"
-                style={{ background: "linear-gradient(90deg, #25D366, #1ebe5d)" }}
-              >
-                {lang === "ar" ? "تواصل واتساب" : "Contact WhatsApp"}
-              </a>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+              {lang === "ar" ? "تواصل واتساب" : "Contact WhatsApp"}
+            </a>
+          </div>
+        </div>
+      )}
 
       {/* LIGHTBOX (الصورة العالية الدقة الخام) */}
-      <AnimatePresence>
-        {activeImage && (
-          <motion.div
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            onClick={() => setActiveImage(null)}
-            className="fixed inset-0 bg-black/95 z-[60] flex items-center justify-center p-4"
-          >
-            <div className="relative w-full h-full max-w-5xl max-h-[90vh]">
-              <Image
-                src={activeImage}
-                alt="horse zoom"
-                fill
-                unoptimized={true} 
-                className="object-contain rounded-lg shadow-2xl"
-              />
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      <style jsx global>{`
-        .custom-scrollbar::-webkit-scrollbar { height: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(188,155,106,0.3); border-radius: 10px; }
-      `}</style>
+      {activeImage && (
+        <div
+          onClick={() => setActiveImage(null)}
+          className="fixed inset-0 bg-black/95 z-[60] flex items-center justify-center p-4"
+        >
+          <div className="relative w-full h-full max-w-5xl max-h-[90vh]">
+            <Image
+              src={activeImage}
+              alt="horse zoom"
+              fill
+              unoptimized={true} 
+              className="object-contain rounded-lg shadow-2xl"
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
