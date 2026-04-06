@@ -1,50 +1,42 @@
 "use client";
 
 import Link from "next/link";
-import { FaInstagram, FaFacebookF, FaWhatsapp } from "react-icons/fa";
+import { FaInstagram, FaFacebookF, FaWhatsapp, FaGlobe, FaChevronDown, FaChevronUp } from "react-icons/fa";
 import { useState, useEffect } from "react";
-import { FaGlobe } from "react-icons/fa";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { usePathname } from "next/navigation";
 
-const gold = "#D4AF37";
-const brandGold = "#CDAF81"; // ✅ لونك
+const brandGold = "#bc9b6a";
+const goldGradient = "linear-gradient(135deg, #ddc9ab 0%, #bc9b6a 50%, #8c6a3f 100%)";
 
 export default function Sidebar() {
-
   const pathname = usePathname();
-  const isHome = pathname === "/";
-
-  const [lang, setLang] = useState("ar");
-  const [mounted, setMounted] = useState(false);
+  const [lang, setLang] = useState("en");
   const [open, setOpen] = useState(false);
-  const [hovered, setHovered] = useState(false);
-
   const [policyOpen, setPolicyOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
- useEffect(() => {
-  const saved = localStorage.getItem("lang");
-  if (saved) {
-    setLang(saved);
-  } else {
-    localStorage.setItem("lang", "ar");
-  }
-}, []);
-
-useEffect(() => {
-  const handleLangChange = () => {
-    const newLang = localStorage.getItem("lang");
-    if (newLang) {
-      setLang(newLang);
+  useEffect(() => {
+    setMounted(true);
+    const saved = localStorage.getItem("lang");
+    if (saved) {
+      setLang(saved);
     }
-  };
 
-  window.addEventListener("languageChange", handleLangChange);
+    const handleLangChange = () => {
+      const newLang = localStorage.getItem("lang");
+      if (newLang) setLang(newLang);
+    };
 
-  return () => {
-    window.removeEventListener("languageChange", handleLangChange);
-  };
-}, []);
+    window.addEventListener("languageChange", handleLangChange);
+    return () => window.removeEventListener("languageChange", handleLangChange);
+  }, []);
+
+  // إغلاق القائمة كإجراء أمان إضافي عند تغير المسار
+  useEffect(() => {
+    setOpen(false);
+    setPolicyOpen(false);
+  }, [pathname]);
 
   const toggleLang = () => {
     const newLang = lang === "en" ? "ar" : "en";
@@ -53,245 +45,198 @@ useEffect(() => {
     window.dispatchEvent(new Event("languageChange"));
   };
 
+  if (!mounted) return null;
+
   return (
     <>
-      {/* زر المينيو */}
+      {/* 🌟 Floating Menu Button (Always Visible) */}
       <motion.button
-        onClick={() => setOpen(prev => !prev)}
-        whileTap={{ scale: 0.9 }}
-        initial={{ opacity: 0, x: -20 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.6 }}
-        className="md:hidden fixed top-4 left-4 z-50
-                   border px-4 py-3 rounded-xl
-                   bg-black/40 backdrop-blur-sm
-                   flex items-center justify-center
-                   transition-all duration-300"
-        style={{ 
-          borderColor: brandGold,
-          boxShadow: `0 0 12px ${brandGold}`
-        }}
+        onClick={() => setOpen(true)}
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        className="fixed top-6 left-6 z-50 flex items-center justify-center w-12 h-12 md:w-14 md:h-14 rounded-full bg-black/60 backdrop-blur-md border border-[#bc9b6a44] shadow-[0_0_15px_rgba(188,155,106,0.2)] hover:border-[#bc9b6a] hover:shadow-[0_0_20px_rgba(188,155,106,0.5)] transition-all duration-300"
       >
-        <motion.span
-          key={open ? "close" : "menu"}
-          className="text-xl"
-          style={{ color: brandGold }}
-        >
-          {open ? "✕" : "☰"}
-        </motion.span>
+        <div className="flex flex-col gap-1.5 items-center justify-center w-6">
+          <span className="w-full h-0.5 bg-[#bc9b6a] rounded-full" />
+          <span className="w-4/5 h-0.5 bg-[#bc9b6a] rounded-full" />
+          <span className="w-full h-0.5 bg-[#bc9b6a] rounded-full" />
+        </div>
       </motion.button>
 
-      {/* الخلفية */}
-      {open && (
-        <div
-          onClick={() => setOpen(false)}
-          className="fixed inset-0 bg-black/60 z-40 md:hidden"
-        />
-      )}
-
-      <aside
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
-        className={`
-          fixed right-0 top-0 h-screen
-          border-l border-[#D4AF37]/30
-          flex flex-col justify-between z-50
-          transition-all duration-300
-
-          ${open ? "translate-x-0" : "translate-x-full"}
-          md:translate-x-0 md:flex
-          ${!isHome && !hovered ? "md:w-[90px]" : "md:w-[290px]"}
-        `}
-        style={{
-          backgroundImage: `
-            linear-gradient(rgba(10,7,5,0.75), rgba(10,7,5,0.85)),
-            url('/gold-texture.png')
-          `,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundBlendMode: "multiply"
-        }}
-      >
-
-        <div className="md:hidden p-3 text-left">
-          <button 
-            onClick={() => setOpen(false)}
-            style={{ color: brandGold }}
-          >
-            ✕
-          </button>
-        </div>
-
-        {/* LOGO */}
-      <div className="py-0 px-0 md:p-4 text-center border-b border-[#D4AF37]/30">
-          <img src="/logo.png" className="w-12 h-12 mx-auto mb-0" />
-         <h2
-  className="font-semibold tracking-wide bg-gradient-to-r from-[#bc9b6a] via-[#f5e6c8] to-[#bc9b6a] bg-clip-text text-transparent"
-  style={{
-    textShadow: "0 1px 10px rgba(0,0,0,0.8)",
-  }}
->
-  Kuwait Shows
-</h2>
-        </div>
-
-        {/* MENU */}
-        {/* MENU + SCROLL */}
-<div className="flex-1 overflow-y-auto">
-  <div className="flex flex-col text-base text-[#ffffff]">
-
+      {/* 🌌 Background Overlay */}
+      <AnimatePresence>
+        {open && (
           <motion.div
-            onClick={toggleLang}
-            className="py-3 border-b border-[#D4AF37]/30 text-center cursor-pointer
-                       flex justify-center items-center
-                       hover:bg-[#CDAF81]/10"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setOpen(false)}
+            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[60]"
+          />
+        )}
+      </AnimatePresence>
+
+      {/* 📜 The Drawer Menu */}
+      <AnimatePresence>
+        {open && (
+          <motion.aside
+            initial={{ x: "-100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "-100%" }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            className="fixed left-0 top-0 h-screen w-[280px] md:w-[350px] z-[70] flex flex-col justify-between border-r border-[#bc9b6a33] bg-[#050505]/95 backdrop-blur-xl shadow-[20px_0_50px_rgba(0,0,0,0.5)]"
           >
-            <div className="flex items-center gap-6">
-              <FaGlobe size={20} style={{ color: brandGold }} />
-              <span>{lang === "en" ? "🇰🇼" : "🇬🇧"}</span>
-            </div>
-          </motion.div>
-
-          <Link href="/" className="menu-item" onClick={() => setOpen(false)}>
-            {lang === "ar" ? "الرئيسية" : "Home"}
-          </Link>
-
-          <Link href="/shows" className="menu-item" onClick={() => setOpen(false)}>
-            {lang === "ar" ? "التسجيل" : "Register"}
-          </Link>
-
-          <Link href="/tables" className="menu-item" onClick={() => setOpen(false)}>
-            {lang === "ar" ? "الرعاة والطاولات" : "Tables & Sponsors"}
-          </Link>
-
-          <Link href="/#services" className="menu-item" onClick={() => setOpen(false)}>
-            {lang === "ar" ? "الخدمات" : "Services"}
-          </Link>
-
-          <Link href="/sell" className="menu-item" onClick={() => setOpen(false)}>
-            {lang === "ar" ? "خيل للبيع" : "Horses for Sale"}
-          </Link>
-
-
-          <Link href="/handlers" className="menu-item" onClick={() => setOpen(false)}>
-            {lang === "ar" ? "مدربين الخيل" : "Horse Trainers"}
-          </Link>
-
-          <Link href="/about" className="menu-item" onClick={() => setOpen(false)}>
-            {lang === "ar" ? "تعرف علينا" : "About us"}
-          </Link>
-
-          {/* POLICIES */}
-          <div>
-            <div
-              className="menu-item cursor-pointer flex justify-between items-center"
-              onClick={() => setPolicyOpen(prev => !prev)}
-            >
-              {lang === "ar" ? "السياسات" : "Policies"}
-
-              {/* سهم */}
-              <span style={{ color: brandGold }}>
-                {policyOpen ? "▾" : "▸"}
-              </span>
+            
+            {/* Header / Logo */}
+            <div className="p-6 border-b border-[#bc9b6a33] flex justify-between items-center">
+              <Link href="/" onClick={() => setOpen(false)} className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity">
+                <img src="/logo.png" alt="Logo" className="w-10 h-10 object-contain" />
+                <h2 className="font-bold tracking-wide text-transparent bg-clip-text" style={{ backgroundImage: goldGradient }}>
+                  Kuwait Shows
+                </h2>
+              </Link>
+              <button 
+                onClick={() => setOpen(false)}
+                className="w-8 h-8 flex items-center justify-center rounded-full bg-white/5 text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
+              >
+                ✕
+              </button>
             </div>
 
-            {/* تحت مباشرة */}
-            <div
-              className={`
-                overflow-hidden transition-all duration-300
-                ${policyOpen ? "max-h-[300px] opacity-100" : "max-h-0 opacity-0"}
-              `}
-            >
-              <Link 
-                href="/policies/privacy-policy" 
-                className="dropdown-item"
-                onClick={() => {
-                  setOpen(false);
-                  setPolicyOpen(false);
-                }}
+            {/* Menu Links */}
+            <div className="flex-1 overflow-y-auto py-4 custom-scrollbar">
+              
+              {/* Language Switch */}
+              <div 
+                onClick={toggleLang}
+                className="mx-4 mb-4 p-4 rounded-2xl bg-white/5 border border-white/5 hover:border-[#bc9b6a55] hover:bg-white/10 cursor-pointer flex justify-between items-center transition-all"
               >
-                {lang === "ar" ? "سياسة الخصوصية" : "Privacy Policy"}
-              </Link>
+                <div className="flex items-center gap-3">
+                  <FaGlobe className="text-[#bc9b6a] text-xl" />
+                  <span className="text-gray-200 font-medium">{lang === "ar" ? "اللغة" : "Language"}</span>
+                </div>
+                <span className="text-xl">{lang === "en" ? "🇰🇼" : "🇬🇧"}</span>
+              </div>
 
-              <Link 
-                href="/policies/terms-conditions" 
-                className="dropdown-item"
-                onClick={() => {
-                  setOpen(false);
-                  setPolicyOpen(false);
-                }}
-              >
-                {lang === "ar" ? "الشروط والأحكام" : "Terms & Conditions"}
-              </Link>
+              <nav className="flex flex-col px-2">
+                {/* 🌟 الإغلاق الفوري لجميع الروابط */}
+                <Link href="/" className="menu-link" onClick={() => setOpen(false)}>{lang === "ar" ? "الرئيسية" : "Home"}</Link>
+                <Link href="/shows" className="menu-link" onClick={() => setOpen(false)}>{lang === "ar" ? "التسجيل" : "Register"}</Link>
+                <Link href="/tables" className="menu-link" onClick={() => setOpen(false)}>{lang === "ar" ? "الرعاة والطاولات" : "Tables & Sponsors"}</Link>
+                
+                <a 
+                  href="/#services" 
+                  className="menu-link" 
+                  onClick={(e) => {
+                    setOpen(false);
+                    if (pathname === "/") {
+                      e.preventDefault();
+                      document.querySelector("#services")?.scrollIntoView({ behavior: "smooth" });
+                    }
+                  }}
+                >
+                  {lang === "ar" ? "الخدمات" : "Services"}
+                </a>
 
-              <Link 
-                href="/policies/refund-cancelation" 
-                className="dropdown-item"
-                onClick={() => {
-                  setOpen(false);
-                  setPolicyOpen(false);
-                }}
-              >
-                {lang === "ar" ? "الاسترجاع والإلغاء" : "Refund & cancellation"}
-              </Link>
+                <Link href="/sell" className="menu-link" onClick={() => setOpen(false)}>{lang === "ar" ? "خيل للبيع" : "Horses for Sale"}</Link>
+                <Link href="/handlers" className="menu-link" onClick={() => setOpen(false)}>{lang === "ar" ? "العارضين" : "Handlers"}</Link>
+                <Link href="/about" className="menu-link" onClick={() => setOpen(false)}>{lang === "ar" ? "تعرف علينا" : "About us"}</Link>
+
+                {/* Policies Dropdown */}
+                <div className="px-2 mt-2">
+                  <button 
+                    onClick={() => setPolicyOpen(!policyOpen)}
+                    className="w-full flex justify-between items-center p-4 rounded-xl text-gray-300 hover:text-white hover:bg-white/5 transition-colors"
+                  >
+                    <span className="font-medium tracking-wide">{lang === "ar" ? "السياسات" : "Policies"}</span>
+                    {policyOpen ? <FaChevronUp className="text-[#bc9b6a] text-xs" /> : <FaChevronDown className="text-[#bc9b6a] text-xs" />}
+                  </button>
+
+                  <AnimatePresence>
+                    {policyOpen && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className="overflow-hidden ml-4 border-l border-[#bc9b6a33] mt-1"
+                      >
+                        <Link href="/policies/privacy-policy" className="sub-menu-link" onClick={() => setOpen(false)}>{lang === "ar" ? "سياسة الخصوصية" : "Privacy Policy"}</Link>
+                        <Link href="/policies/terms-conditions" className="sub-menu-link" onClick={() => setOpen(false)}>{lang === "ar" ? "الشروط والأحكام" : "Terms & Conditions"}</Link>
+                        <Link href="/policies/refund-cancelation" className="sub-menu-link" onClick={() => setOpen(false)}>{lang === "ar" ? "الاسترجاع والإلغاء" : "Refund & Cancellation"}</Link>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+
+                <a 
+                  href="/#contact" 
+                  className="menu-link mt-2" 
+                  onClick={(e) => {
+                    setOpen(false);
+                    if (pathname === "/") {
+                      e.preventDefault();
+                      document.querySelector("#contact")?.scrollIntoView({ behavior: "smooth" });
+                    }
+                  }}
+                >
+                  {lang === "ar" ? "تواصل معنا" : "Contact"}
+                </a>
+              </nav>
             </div>
-          </div>
 
-          <Link href="/#contact" className="menu-item" onClick={() => setOpen(false)}>
-            {lang === "ar" ? "تواصل معنا" : "Contact"}
-          </Link>
+            {/* Footer / Social */}
+            <div className="p-6 border-t border-[#bc9b6a33] bg-black/40">
+              <div className="flex justify-center gap-6">
+                <a href="https://instagram.com/q8shows" target="_blank" rel="noreferrer" className="text-gray-400 hover:text-[#bc9b6a] hover:scale-110 transition-all text-xl"><FaInstagram /></a>
+                <a href="https://facebook.com/kuwaitshows" target="_blank" rel="noreferrer" className="text-gray-400 hover:text-[#bc9b6a] hover:scale-110 transition-all text-xl"><FaFacebookF /></a>
+                <a href="https://wa.me/96597944003" target="_blank" rel="noreferrer" className="text-gray-400 hover:text-[#25D366] hover:scale-110 transition-all text-xl"><FaWhatsapp /></a>
+              </div>
+            </div>
 
+          </motion.aside>
+        )}
+      </AnimatePresence>
 
-</div>
-        </div>
-
-        {/* SOCIAL */}
-        <div className="flex justify-center gap-2 p-3 border-t border-[#D4AF37]/30 text-xl">
-          <a href="https://instagram.com/q8shows" target="_blank" style={{ color: brandGold }}>
-            <FaInstagram />
-          </a>
-
-          <a href="https://facebook.com/kuwaitshows" target="_blank" style={{ color: brandGold }}>
-            <FaFacebookF />
-          </a>
-
-          <a href="https://wa.me/96597944003" target="_blank" style={{ color: brandGold }}>
-            <FaWhatsapp />
-          </a>
-        </div>
-
-      </aside>
-
-      {/* CSS */}
       <style jsx global>{`
-        .menu-item {
-          padding: 16px;
-          border-bottom: 1px solid rgba(212,175,55,0.2);
-          transition: 0.3s;
+        .menu-link {
+          display: block;
+          padding: 16px 20px;
+          margin: 4px 8px;
+          border-radius: 12px;
+          color: #d1d5db; /* gray-300 */
+          font-weight: 500;
+          letter-spacing: 0.05em;
+          transition: all 0.3s ease;
         }
-
-        .menu-item:hover {
-          background: linear-gradient(
-            90deg,
-            rgba(205,175,129,0.15),
-            transparent
-          );
-          color: #CDAF81;
+        .menu-link:hover {
+          background: rgba(188, 155, 106, 0.1);
+          color: #bc9b6a;
+          transform: translateX(5px);
         }
-
-        .dropdown-item {
+        .sub-menu-link {
           display: block;
           padding: 12px 20px;
-          border-bottom: 1px solid rgba(212,175,55,0.2);
-          background: rgba(0,0,0,0.2);
+          color: #9ca3af; /* gray-400 */
+          font-size: 0.9rem;
+          transition: all 0.3s ease;
         }
-
-        .dropdown-item:hover {
-          background: rgba(205,175,129,0.15);
-          color: #CDAF81;
+        .sub-menu-link:hover {
+          color: #bc9b6a;
+          background: rgba(255, 255, 255, 0.03);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: rgba(188, 155, 106, 0.3);
+          border-radius: 10px;
         }
       `}</style>
-
     </>
   );
 }
