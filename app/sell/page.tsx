@@ -1,17 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { FaPlusCircle } from "react-icons/fa";
+import { FaPlusCircle, FaSignInAlt, FaUserPlus, FaSignOutAlt } from "react-icons/fa";
 import Image from "next/image";
-import { auth } from "@/lib/firebase"; // ✅ إضافة
-import { FcGoogle } from "react-icons/fc";
-import { FaApple } from "react-icons/fa";
+import { auth } from "@/lib/firebase"; 
 import { useRouter } from "next/navigation";
-
-
-import { getRedirectResult } from "firebase/auth";
-
-
+import { getRedirectResult, onAuthStateChanged, signOut } from "firebase/auth"; 
 
 const gold = "#bc9b6a";
 
@@ -23,90 +17,91 @@ export default function SellHorsePage() {
   const [loading, setLoading] = useState(true);
   const [lastDoc, setLastDoc] = useState<any>(null);
   const router = useRouter();
-  const [showLogin, setShowLogin] = useState(false); // ✅ إضافة
-const [authMode, setAuthMode] = useState("choose");
-const [authData, setAuthData] = useState({
-  email: "",
-  password: "",
-});
+  
+  const [showLogin, setShowLogin] = useState(false); 
+  const [authMode, setAuthMode] = useState("login"); 
+  
+  const [user, setUser] = useState<any>(null);
 
-useEffect(() => {
-  getRedirectResult(auth)
-    .then((result) => {
-      if (result?.user) {
-        setShowLogin(false);
-      }
-    })
-    .catch((err) => {
-      console.log(err);
+  const [authData, setAuthData] = useState({
+    name: "",
+    phone: "",
+    email: "",
+    password: "",
+  });
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
     });
-}, []);
+    return () => unsubscribe();
+  }, []);
 
-const handleAuth = async () => {
-  try {
-    const { signInWithEmailAndPassword } = await import("firebase/auth");
+  useEffect(() => {
+    getRedirectResult(auth)
+      .then((result) => {
+        if (result?.user) {
+          setShowLogin(false);
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }, []);
 
-    await signInWithEmailAndPassword(
-      auth,
-      authData.email,
-      authData.password
-    );
+  const handleAuth = async () => {
+    try {
+      const { signInWithEmailAndPassword } = await import("firebase/auth");
+      await signInWithEmailAndPassword(
+        auth,
+        authData.email,
+        authData.password
+      );
+      setShowLogin(false);
+    } catch (err) {
+      alert("Login error: Please check your email and password.");
+    }
+  };
 
-    setShowLogin(false);
-  } catch (err) {
-    alert("Login error");
-  }
-};
+  const handleRegister = async () => {
+    if (!authData.name || !authData.phone || !authData.email || !authData.password) {
+      alert(lang === "ar" ? "الرجاء تعبئة جميع الحقول" : "Please fill all fields");
+      return;
+    }
 
-const handleGoogleLogin = async () => {
-  try {
-    const { GoogleAuthProvider, signInWithRedirect } = await import("firebase/auth");
+    try {
+      const { createUserWithEmailAndPassword, updateProfile } = await import("firebase/auth");
+      const { doc, setDoc } = await import("firebase/firestore");
+      const { db } = await import("@/lib/firebase");
 
-    const provider = new GoogleAuthProvider();
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        authData.email,
+        authData.password
+      );
+      const newUser = userCredential.user;
 
-    await signInWithRedirect(auth, provider);
+      await updateProfile(newUser, {
+        displayName: authData.name
+      });
 
-  } catch (err) {
-    alert("Google login error");
-  }
-};
+      await setDoc(doc(db, "users", newUser.uid), {
+        name: authData.name,
+        phone: authData.phone,
+        email: authData.email,
+        createdAt: new Date().toISOString()
+      });
 
-const handleAppleLogin = async () => {
-  try {
-    const { OAuthProvider, signInWithPopup } = await import("firebase/auth");
+      setShowLogin(false);
+    } catch (err) {
+      alert("Register error: The email might already be in use.");
+    }
+  };
 
-    const provider = new OAuthProvider("apple.com");
-    await signInWithPopup(auth, provider);
-
-    setShowLogin(false);
-  } catch (err) {
-    alert("Apple login error");
-  }
-};
-
-const handleRegister = async () => {
-  try {
-    const { createUserWithEmailAndPassword } = await import("firebase/auth");
-
-    await createUserWithEmailAndPassword(
-      auth,
-      authData.email,
-      authData.password
-    );
-
-    setShowLogin(false);
-  } catch (err) {
-    alert("Register error");
-  }
-};
   useEffect(() => {
     const saved = localStorage.getItem("lang");
     if (saved) setLang(saved);
   }, []);
-
-
-
-
 
   const fetchHorses = async (loadMore = false) => {
     try {
@@ -129,7 +124,6 @@ const handleRegister = async () => {
       }));
 
       setHorses((prev) => (loadMore ? [...prev, ...data] : data));
-
       setLastDoc(snapshot.docs[snapshot.docs.length - 1]);
 
     } catch (error) {
@@ -142,18 +136,6 @@ const handleRegister = async () => {
   useEffect(() => {
     fetchHorses();
   }, []);
-
-  // ✅ My Horses logic
-  const handleMyHorses = () => {
-    const user = auth.currentUser;
-
-    if (!user) {
-      setShowLogin(true);
-      return;
-    }
-
-    window.location.href = "/sell/my-horses/";
-  };
 
   return (
     <div
@@ -180,35 +162,60 @@ const handleRegister = async () => {
           </p>
         </div>
 
-        {/* CTA */}
-        <div className="flex justify-center gap-4 mb-10">
-
-          {/* Add */}
+        {/* CTA - الأزرار */}
+        <div className="flex flex-wrap justify-center gap-3 mb-12">
+          
+          {/* 🌟 الزر الثابت للجميع: إضافة إعلان */}
           <button
-            onClick={() => router.replace("/sell/add")}
-            className="flex items-center gap-3 px-6 py-3 rounded-xl border transition-all duration-300 hover:scale-105 hover:bg-[#bc9b6a]/10"
-            style={{
-              borderColor: gold,
-              color: gold,
-              boxShadow: "0 0 20px #bc9b6a55",
-            }}
+            onClick={() => router.push("/sell/add")}
+            className="flex items-center gap-2 px-6 py-2.5 rounded-xl font-semibold transition-all duration-300 hover:scale-105"
+            style={{ background: "linear-gradient(90deg, #bc9b6a, #8c6a3f)", color: "#fff", boxShadow: "0 0 15px #bc9b6a66" }}
           >
             <FaPlusCircle />
             {lang === "ar" ? "اعرض خيلك هنا" : "List Your Horse"}
           </button>
 
-          {/* ✅ My Horses */}
-          <button
-            onClick={handleMyHorses}
-            className="flex items-center gap-3 px-6 py-3 rounded-xl border transition-all duration-300 hover:scale-105 hover:bg-[#bc9b6a]/10"
-            style={{
-              borderColor: gold,
-              color: gold,
-              boxShadow: "0 0 20px #bc9b6a55",
-            }}
-          >
-            🐎 {lang === "ar" ? "الخيل التي اضفتها" : "My Horses"}
-          </button>
+          {user ? (
+            // 🟢 إذا كان المستخدم مسجل دخول (يظهر إعلاناتي وخروج بجانب إضافة الإعلان)
+            <>
+              <button
+                onClick={() => router.push("/sell/my-horses/")}
+                className="flex items-center gap-2 px-5 py-2.5 rounded-xl border transition-all duration-300 hover:scale-105 hover:bg-[#bc9b6a]/10"
+                style={{ borderColor: gold, color: gold }}
+              >
+                🐎 {lang === "ar" ? "اعلاناتي وحسابي" : "My Horses & Profile"}
+              </button>
+
+              <button
+                onClick={() => signOut(auth)}
+                className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-red-500/50 text-red-400 transition-all duration-300 hover:bg-red-500/10"
+              >
+                <FaSignOutAlt />
+                {lang === "ar" ? "خروج" : "Logout"}
+              </button>
+            </>
+          ) : (
+            // 🔴 إذا لم يكن مسجل دخول (يظهر تسجيل وإنشاء حساب بجانب إضافة الإعلان)
+            <>
+              <button
+                onClick={() => { setAuthMode("login"); setShowLogin(true); }}
+                className="flex items-center gap-2 px-5 py-2.5 rounded-xl border font-semibold transition-all duration-300 hover:scale-105 hover:bg-[#bc9b6a]/10"
+                style={{ borderColor: gold, color: gold }}
+              >
+                <FaSignInAlt />
+                {lang === "ar" ? "تسجيل دخول" : "Login"}
+              </button>
+
+              <button
+                onClick={() => { setAuthMode("register"); setShowLogin(true); }}
+                className="flex items-center gap-2 px-5 py-2.5 rounded-xl border font-semibold transition-all duration-300 hover:scale-105 hover:bg-[#bc9b6a]/10"
+                style={{ borderColor: gold, color: gold }}
+              >
+                <FaUserPlus />
+                {lang === "ar" ? "إنشاء حساب" : "Register"}
+              </button>
+            </>
+          )}
 
         </div>
 
@@ -233,9 +240,7 @@ const handleRegister = async () => {
               key={horse.id}
               onClick={() => setSelectedHorse(horse)}
               className="group bg-[#111] rounded-xl overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105"
-              style={{
-                border: "1px solid rgba(188,155,106,0.2)",
-              }}
+              style={{ border: "1px solid rgba(188,155,106,0.2)" }}
             >
               <div className="aspect-square overflow-hidden relative">
                 <Image
@@ -251,7 +256,6 @@ const handleRegister = async () => {
                 <h3 className="font-semibold text-sm sm:text-base mb-1">
                   {horse.name}
                 </h3>
-
                 <p className="text-xs sm:text-sm text-gray-400">
                   {horse.father} × {horse.mother}
                 </p>
@@ -275,174 +279,114 @@ const handleRegister = async () => {
 
       </div>
 
-      {/* ❗ هنا فقط hook للبوب (تربطه مع popup حقك الحالي) */}
-    {/* LOGIN POPUP */}
-{showLogin && (
-  <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center px-4">
-    <div
-      className="bg-[#111] p-6 rounded-xl w-full max-w-sm text-center"
-      style={{
-        border: `1px solid ${gold}`,
-        boxShadow: "0 0 30px #bc9b6a66",
-      }}
-    >
-
-      {authMode === "choose" && (
-        <>
-          <h2 className="text-xl mb-4">
-            {lang === "ar" ? "اختر" : "Choose"}
-          </h2>
-
-          <button
-            onClick={() => setAuthMode("login")}
-            className="w-full py-3 rounded-lg mb-3 font-semibold"
-            style={{
-              background: "linear-gradient(90deg, #bc9b6a, #8c6a3f)",
-            }}
+      {/* LOGIN/REGISTER POPUP */}
+      {showLogin && (
+        <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center px-4">
+          <div
+            className="bg-[#111] p-6 rounded-xl w-full max-w-sm text-center relative"
+            style={{ border: `1px solid ${gold}`, boxShadow: "0 0 30px #bc9b6a66" }}
           >
-            {lang === "ar" ? "تسجيل دخول" : "Login"}
-          </button>
+            
+            {/* Login Form */}
+            {authMode === "login" && (
+              <>
+                <h2 className="text-2xl font-bold mb-6 text-white">
+                  {lang === "ar" ? "تسجيل الدخول" : "Login"}
+                </h2>
 
-          <button
-            onClick={() => setAuthMode("register")}
-            className="w-full py-3 rounded-lg font-semibold border"
-            style={{ borderColor: gold }}
-          >
-            {lang === "ar" ? "إنشاء حساب" : "Register"}
-          </button>
-        </>
-      )}
+                <input
+                  placeholder="Email"
+                  className="w-full p-3 mb-3 bg-[#222] border-none rounded outline-none text-white focus:ring-1 focus:ring-[#bc9b6a]"
+                  onChange={(e) => setAuthData({ ...authData, email: e.target.value })}
+                />
 
-      {authMode === "login" && (
-        <>
-          <h2 className="text-xl mb-4">
-            {lang === "ar" ? "تسجيل الدخول" : "Login"}
-          </h2>
+                <input
+                  type="password"
+                  placeholder="Password"
+                  className="w-full p-3 mb-6 bg-[#222] border-none rounded outline-none text-white focus:ring-1 focus:ring-[#bc9b6a]"
+                  onChange={(e) => setAuthData({ ...authData, password: e.target.value })}
+                />
 
-          <button
-            onClick={handleGoogleLogin}
-            className="w-full py-3 rounded-lg mb-3 flex items-center justify-center gap-2 font-semibold"
-            style={{ background: "#fff", color: "#000" }}
-          >
-            <FcGoogle size={20} />
-            Google
-          </button>
+                <button
+                  onClick={handleAuth}
+                  className="w-full py-3 rounded-lg font-bold text-white transition-all hover:opacity-90"
+                  style={{ background: "linear-gradient(90deg, #bc9b6a, #8c6a3f)" }}
+                >
+                  {lang === "ar" ? "دخول" : "Login"}
+                </button>
 
-          <button
-            onClick={handleAppleLogin}
-            className="w-full py-3 rounded-lg mb-4 flex items-center justify-center gap-2 font-semibold"
-            style={{ background: "#000", color: "#fff" }}
-          >
-            <FaApple size={18} />
-            Apple
-          </button>
+                <p className="text-sm mt-5 text-gray-400">
+                  {lang === "ar" ? "ليس لديك حساب؟" : "Don't have an account?"}{" "}
+                  <span onClick={() => setAuthMode("register")} className="cursor-pointer hover:underline" style={{ color: gold }}>
+                    {lang === "ar" ? "سجل الآن" : "Register now"}
+                  </span>
+                </p>
+              </>
+            )}
 
-          <div className="flex items-center my-3">
-            <div className="flex-1 h-px bg-gray-600"></div>
-            <span className="px-2 text-gray-400 text-sm">OR</span>
-            <div className="flex-1 h-px bg-gray-600"></div>
+            {/* Register Form */}
+            {authMode === "register" && (
+              <>
+                <h2 className="text-2xl font-bold mb-6 text-white">
+                  {lang === "ar" ? "إنشاء حساب" : "Register"}
+                </h2>
+
+                <input
+                  placeholder={lang === "ar" ? "الاسم الكامل" : "Full Name"}
+                  className="w-full p-3 mb-3 bg-[#222] border-none rounded outline-none text-white focus:ring-1 focus:ring-[#bc9b6a]"
+                  onChange={(e) => setAuthData({ ...authData, name: e.target.value })}
+                />
+
+                <input
+                  placeholder={lang === "ar" ? "رقم الواتساب" : "WhatsApp Number"}
+                  type="tel"
+                  dir="ltr"
+                  className="w-full p-3 mb-3 bg-[#222] border-none rounded text-left outline-none text-white focus:ring-1 focus:ring-[#bc9b6a]"
+                  onChange={(e) => setAuthData({ ...authData, phone: e.target.value })}
+                />
+
+                <input
+                  placeholder="Email"
+                  className="w-full p-3 mb-3 bg-[#222] border-none rounded outline-none text-white focus:ring-1 focus:ring-[#bc9b6a]"
+                  onChange={(e) => setAuthData({ ...authData, email: e.target.value })}
+                />
+
+                <input
+                  type="password"
+                  placeholder="Password"
+                  className="w-full p-3 mb-6 bg-[#222] border-none rounded outline-none text-white focus:ring-1 focus:ring-[#bc9b6a]"
+                  onChange={(e) => setAuthData({ ...authData, password: e.target.value })}
+                />
+
+                <button
+                  onClick={handleRegister}
+                  className="w-full py-3 rounded-lg font-bold text-white transition-all hover:opacity-90"
+                  style={{ background: "linear-gradient(90deg, #bc9b6a, #8c6a3f)" }}
+                >
+                  {lang === "ar" ? "إنشاء حساب" : "Register"}
+                </button>
+
+                <p className="text-sm mt-5 text-gray-400">
+                  {lang === "ar" ? "لديك حساب بالفعل؟" : "Already have an account?"}{" "}
+                  <span onClick={() => setAuthMode("login")} className="cursor-pointer hover:underline" style={{ color: gold }}>
+                    {lang === "ar" ? "تسجيل الدخول" : "Login here"}
+                  </span>
+                </p>
+              </>
+            )}
+
+            <button
+              onClick={() => setShowLogin(false)}
+              className="absolute top-3 right-4 text-gray-500 hover:text-white text-xl"
+            >
+              ✕
+            </button>
+
           </div>
-
-          <input
-            placeholder="Email"
-            className="w-full p-3 mb-2 bg-black border rounded"
-            onChange={(e) =>
-              setAuthData({ ...authData, email: e.target.value })
-            }
-          />
-
-          <input
-            type="password"
-            placeholder="Password"
-            className="w-full p-3 mb-3 bg-black border rounded"
-            onChange={(e) =>
-              setAuthData({ ...authData, password: e.target.value })
-            }
-          />
-
-          <button
-            onClick={handleAuth}
-            className="w-full py-3 rounded-lg font-semibold"
-            style={{
-              background: "linear-gradient(90deg, #bc9b6a, #8c6a3f)",
-            }}
-          >
-            {lang === "ar" ? "دخول" : "Login"}
-          </button>
-        </>
+        </div>
       )}
 
-      {authMode === "register" && (
-        <>
-          <h2 className="text-xl mb-4">
-            {lang === "ar" ? "إنشاء حساب" : "Register"}
-          </h2>
-
-          <button
-            onClick={handleGoogleLogin}
-            className="w-full py-3 rounded-lg mb-3 flex items-center justify-center gap-2 font-semibold"
-            style={{ background: "#fff", color: "#000" }}
-          >
-            <FcGoogle size={20} />
-            Google
-          </button>
-
-          <button
-            onClick={handleAppleLogin}
-            className="w-full py-3 rounded-lg mb-4 flex items-center justify-center gap-2 font-semibold"
-            style={{ background: "#000", color: "#fff" }}
-          >
-            <FaApple size={18} />
-            Apple
-          </button>
-
-          <div className="flex items-center my-3">
-            <div className="flex-1 h-px bg-gray-600"></div>
-            <span className="px-2 text-gray-400 text-sm">OR</span>
-            <div className="flex-1 h-px bg-gray-600"></div>
-          </div>
-
-          <input
-            placeholder="Email"
-            className="w-full p-3 mb-2 bg-black border rounded"
-            onChange={(e) =>
-              setAuthData({ ...authData, email: e.target.value })
-            }
-          />
-
-          <input
-            type="password"
-            placeholder="Password"
-            className="w-full p-3 mb-3 bg-black border rounded"
-            onChange={(e) =>
-              setAuthData({ ...authData, password: e.target.value })
-            }
-          />
-
-          <button
-            onClick={handleRegister}
-            className="w-full py-3 rounded-lg font-semibold"
-            style={{
-              background: "linear-gradient(90deg, #bc9b6a, #8c6a3f)",
-            }}
-          >
-            {lang === "ar" ? "إنشاء الحساب" : "Register"}
-          </button>
-        </>
-      )}
-
-      <button
-        onClick={() => setShowLogin(false)}
-        className="w-full py-2 text-gray-400 mt-3"
-      >
-        {lang === "ar" ? "إلغاء" : "Cancel"}
-      </button>
-
-    </div>
-  </div>
-)}
-
-      {/* MODAL */}
+      {/* MODAL HORSE PREVIEW */}
       {selectedHorse && (
         <div
           onClick={() => setSelectedHorse(null)}
@@ -451,12 +395,8 @@ const handleRegister = async () => {
           <div
             onClick={(e) => e.stopPropagation()}
             className="bg-[#111] p-5 sm:p-6 rounded-xl max-w-2xl w-full relative"
-            style={{
-              border: `1px solid ${gold}`,
-              boxShadow: "0 0 30px #bc9b6a66",
-            }}
+            style={{ border: `1px solid ${gold}`, boxShadow: "0 0 30px #bc9b6a66" }}
           >
-
             <div className="flex gap-2 overflow-x-auto mb-4">
               {selectedHorse.images?.map((img: string, i: number) => (
                 <Image
@@ -471,42 +411,17 @@ const handleRegister = async () => {
               ))}
             </div>
 
-            <h2 className="text-xl sm:text-2xl font-bold mb-2">
-              {selectedHorse.name}
-            </h2>
-
-            <p className="text-gray-300 text-sm mb-2">
-              <span style={{ color: gold }}>
-                {lang === "ar" ? "العمر:" : "Age:"}
-              </span>{" "}
-              {selectedHorse.age}
-            </p>
-
-            <p className="text-gray-300 text-sm">
-              <span style={{ color: gold }}>
-                {lang === "ar" ? "الأب:" : "Father:"}
-              </span>{" "}
-              {selectedHorse.father}
-            </p>
-
-            <p className="text-gray-300 text-sm">
-              <span style={{ color: gold }}>
-                {lang === "ar" ? "الأم:" : "Mother:"}
-              </span>{" "}
-              {selectedHorse.mother}
-            </p>
-
-            <p className="text-gray-400 mt-3 text-sm">
-              {selectedHorse.description}
-            </p>
+            <h2 className="text-xl sm:text-2xl font-bold mb-2">{selectedHorse.name}</h2>
+            <p className="text-gray-300 text-sm mb-2"><span style={{ color: gold }}>{lang === "ar" ? "العمر:" : "Age:"}</span> {selectedHorse.age}</p>
+            <p className="text-gray-300 text-sm"><span style={{ color: gold }}>{lang === "ar" ? "الأب:" : "Father:"}</span> {selectedHorse.father}</p>
+            <p className="text-gray-300 text-sm"><span style={{ color: gold }}>{lang === "ar" ? "الأم:" : "Mother:"}</span> {selectedHorse.mother}</p>
+            <p className="text-gray-400 mt-3 text-sm">{selectedHorse.description}</p>
 
             <a
               href={`https://wa.me/${selectedHorse.phone}`}
               target="_blank"
               className="block mt-5 text-center py-3 rounded-lg font-semibold transition"
-              style={{
-                background: "linear-gradient(90deg, #25D366, #1ebe5d)",
-              }}
+              style={{ background: "linear-gradient(90deg, #25D366, #1ebe5d)" }}
             >
               {lang === "ar" ? "تواصل واتساب" : "Contact WhatsApp"}
             </a>

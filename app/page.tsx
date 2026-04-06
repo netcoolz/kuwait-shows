@@ -5,76 +5,68 @@ import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FaInstagram, FaFacebookF, FaWhatsapp, FaEnvelope } from "react-icons/fa";
 import { FaGlobe } from "react-icons/fa";
-import Splash from "@/components/Splash";
-
 
 const gold = "#bc9b6a";
 
 export default function Home() { 
 
-const [showSplash, setShowSplash] = useState(true);
-
-useEffect(() => {
-  const timer = setTimeout(() => {
-    setShowSplash(false);
-  }, 2000);
-
-  return () => clearTimeout(timer);
-}, []);
-
   const [slide, setSlide] = useState(0);
   const [lang, setLang] = useState<"ar" | "en">("en");
-const toggleLang = () => {
-  const newLang = lang === "en" ? "ar" : "en";
-  localStorage.setItem("lang", newLang);
-  setLang(newLang);
+  
+  const toggleLang = () => {
+    const newLang = lang === "en" ? "ar" : "en";
+    localStorage.setItem("lang", newLang);
+    setLang(newLang);
 
-  window.dispatchEvent(new Event("languageChange"));
-};
+    window.dispatchEvent(new Event("languageChange"));
+  };
 
-const [isInteracting, setIsInteracting] = useState(false);
-useEffect(() => {
-  if (isInteracting) return;
+  const [isInteracting, setIsInteracting] = useState(false);
+  
+  useEffect(() => {
+    if (isInteracting) return;
 
-  const interval = setInterval(() => {
-    setSlide((prev) => (prev + 1) % slides.length);
-  }, 4000);
+    const interval = setInterval(() => {
+      setSlide((prev) => (prev + 1) % slides.length);
+    }, 4000);
 
-  return () => clearInterval(interval);
-}, [isInteracting]);
+    return () => clearInterval(interval);
+  }, [isInteracting]);
+  
   const [activeService, setActiveService] = useState<string | null>(null);
 
   const slides = ["/slide1.jpg", "/slide2.jpg", "/slide3.jpg"];
 
-useEffect(() => {
-  const interval = setInterval(() => {
-    setSlide((prev) => (prev + 1) % slides.length);
-  }, 4000);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setSlide((prev) => (prev + 1) % slides.length);
+    }, 4000);
 
-  return () => clearInterval(interval);
-}, []);
+    return () => clearInterval(interval);
+  }, []);
 
-useEffect(() => {
-  const savedLang = localStorage.getItem("lang");
+  useEffect(() => {
+    const savedLang = localStorage.getItem("lang");
 
-  if (savedLang === "ar" || savedLang === "en") {
-    setLang(savedLang);
-  }
-
-  const handleLangChange = () => {
-    const newLang = localStorage.getItem("lang");
-
-    if (newLang === "ar" || newLang === "en") {
-      setLang(newLang);
+    if (savedLang === "ar" || savedLang === "en") {
+      setLang(savedLang);
     }
-  };
 
-  window.addEventListener("languageChange", handleLangChange);
+    const handleLangChange = () => {
+      const newLang = localStorage.getItem("lang");
 
-  return () => {
-    window.removeEventListener("languageChange", handleLangChange);
-  };
-}, []);
+      if (newLang === "ar" || newLang === "en") {
+        setLang(newLang);
+      }
+    };
+
+    window.addEventListener("languageChange", handleLangChange);
+
+    return () => {
+      window.removeEventListener("languageChange", handleLangChange);
+    };
+  }, []);
+  
   const services = [
     ["نظام التسجيل", "Registration System", "/service1.jpg"],
     ["حجز الطاولات والرعايات", "Tables & Sponsors", "/service2.jpg"],
@@ -85,11 +77,10 @@ useEffect(() => {
     ["الإعلام والتسويق", "Media & Marketing", "/service7.jpg"],
   ];
 
- const servicesDetails = {
-
-  "Registration System": {
-    title: "Registration System",
-    desc: `Digital Registration & Scoring Solutions
+  const servicesDetails = {
+    "Registration System": {
+      title: "Registration System",
+      desc: `Digital Registration & Scoring Solutions
 
 We provide a complete digital system for managing Horse Championship registrations with high accuracy and professionalism, including:
 • Full registration and fee collection system
@@ -98,7 +89,7 @@ We provide a complete digital system for managing Horse Championship registratio
 • Registration status management (Pending, Approved, Rejected)
 • Integrated scoring and judging system
 • Detailed reports for results and classifications`,
-    descAr: `حلول التسجيل والتقييم الرقمية
+      descAr: `حلول التسجيل والتقييم الرقمية
 
 نقدم نظامًا رقميًا متكاملًا لإدارة تسجيل بطولات الخيل بدقة واحترافية عالية، ويشمل
 • نظام كامل للتسجيل وتحصيل الرسوم
@@ -107,11 +98,11 @@ We provide a complete digital system for managing Horse Championship registratio
 • إدارة حالات التسجيل (قيد الانتظار، مقبول، مرفوض)
 • نظام متكامل للتقييم والتحكيم
 • تقارير تفصيلية للنتائج`
-  },
+    },
 
-  "Tables & Sponsors": {
-    title: "Tables & Sponsors",
-    desc: `VIP Tables & Sponsorship Management
+    "Tables & Sponsors": {
+      title: "Tables & Sponsors",
+      desc: `VIP Tables & Sponsorship Management
 
 We offer a comprehensive system to manage VIP tables and sponsorship packages:
 • Online booking system for VIP and public tables
@@ -119,7 +110,7 @@ We offer a comprehensive system to manage VIP tables and sponsorship packages:
 • Secure fee collection
 • VIP access control
 • Seating and venue planning`,
-    descAr: `إدارة حجز الطاولات والرعايات
+      descAr: `إدارة حجز الطاولات والرعايات
 
 نقدم نظامًا شاملًا لإدارة الطاولات والرعايات
 • نظام حجز إلكتروني
@@ -127,11 +118,11 @@ We offer a comprehensive system to manage VIP tables and sponsorship packages:
 • تحصيل آمن للرسوم
 • التحكم في دخول VIP
 • تنظيم الجلسات وتخطيط الموقع`
-  },
+    },
 
-  "Event Management": {
-    title: "Event Management",
-    desc: `Full Championship Management
+    "Event Management": {
+      title: "Event Management",
+      desc: `Full Championship Management
 
 We provide full organization services:
 • Planning and operations management
@@ -140,7 +131,7 @@ We provide full organization services:
 • Arena setup
 • European tents & horse boxes
 • Full supervision`,
-    descAr: `إدارة متكاملة للبطولة
+      descAr: `إدارة متكاملة للبطولة
 
 نقدم خدمات تنظيم شاملة
 • التخطيط والإدارة
@@ -149,11 +140,11 @@ We provide full organization services:
 • تجهيز ساحة العرض
 • تركيب الخيام والبوكسات
 • إشراف كامل`
-  },
+    },
 
-  "Awards & Trophies": {
-    title: "Awards & Trophies",
-    desc: `Awards & Prize Management
+    "Awards & Trophies": {
+      title: "Awards & Trophies",
+      desc: `Awards & Prize Management
 
 We handle all awards:
 • Organizing categories
@@ -161,7 +152,7 @@ We handle all awards:
 • Final rankings
 • Trophy arrangements
 • Prize distribution`,
-    descAr: `إدارة الجوائز والتكريم
+      descAr: `إدارة الجوائز والتكريم
 
 نتولى جميع جوانب الجوائز
 • تنظيم الفئات
@@ -169,47 +160,47 @@ We handle all awards:
 • قوائم الفائزين
 • تجهيز الكؤوس
 • توزيع الجوائز`
-  },
+    },
 
-  "Government Coordination": {
-    title: "Government Coordination",
-    desc: `Official & Government Liaison
+    "Government Coordination": {
+      title: "Government Coordination",
+      desc: `Official & Government Liaison
 
 We manage all coordination:
 • Security, ambulance, fire services
 • Media & TV coordination
 • Official communication
 • Hotels & flights`,
-    descAr: `التنسيق الرسمي والحكومي
+      descAr: `التنسيق الرسمي والحكومي
 
 نقوم بإدارة التنسيق:
 • الجهات الأمنية والإسعاف
 • الإعلام والتلفزيون
 • المراسلات الرسمية
 • الفنادق والطيران`
-  },
+    },
 
-  "Security & Support": {
-    title: "Security & Support",
-    desc: `Safety & Operational Support
+    "Security & Support": {
+      title: "Security & Support",
+      desc: `Safety & Operational Support
 
 We provide:
 • Professional security
 • Cleaning teams
 • Hostesses
 • Crowd control systems`,
-    descAr: `الأمن والخدمات المساندة
+      descAr: `الأمن والخدمات المساندة
 
 نقدم
 • خدمات أمن احترافية
 • فرق تنظيف
 • طاقم استقبال
 • إدارة الحشود`
-  },
+    },
 
-  "Media & Marketing": {
-    title: "Media & Marketing",
-    desc: `Media Production & Promotion
+    "Media & Marketing": {
+      title: "Media & Marketing",
+      desc: `Media Production & Promotion
 
 We deliver:
 • LED screens
@@ -217,7 +208,7 @@ We deliver:
 • Photography & video
 • Media coverage
 • Official catalog design`,
-    descAr: `الخدمات الإعلامية والتسويقية
+      descAr: `الخدمات الإعلامية والتسويقية
 
 نقدم:
 • شاشات عرض
@@ -225,9 +216,9 @@ We deliver:
 • تصوير احترافي
 • تغطية إعلامية
 • تصميم الكتالوج`
-  }
-
-};
+    }
+  };
+  
   const t = {
     en: {
       menu: ["Home","Register","Tables & Sponsors","Services","Handlers","Policies","Contact"],
@@ -244,7 +235,7 @@ From planning to podium, we manage it all`,
       menu: ["الرئيسية","التسجيل","الطاولات والرعايات","خدماتنا","العارضين","السياسات","تواصل معنا"],
       updates: "آخر التحديثات",
       services: "خدماتنا",
-   subtitle: `إدارة احترافية لبطولات الخيل
+      subtitle: `إدارة احترافية لبطولات الخيل
 من المنصة إلى التتويج نحن نديرها`,
       ctaTitle: "التميز يبدأ بمحادثة",
       ctaDesc:
@@ -253,370 +244,330 @@ From planning to podium, we manage it all`,
     },
   };
 
- 
-if (showSplash) return <Splash />;
- return (
-<motion.main
- key={lang}
-  initial={{ opacity: 0, y: 40 }}
-  animate={{ opacity: 1, y: 0 }}
-  transition={{ duration: 0.7 }}
-  className="text-white flex"
->
-
-
-<div
-  className="fixed inset-0 -z-10"
-  style={{
-    backgroundImage: "url('/bg.png')",
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-  }}
-/>
-
-{/* overlay */}
-<div className="fixed inset-0 -z-10 bg-black/50" />
-
-<motion.div
-  onClick={toggleLang}
-  whileTap={{ scale: 0.92 }}
-  initial={{ opacity: 0, y: -20 }}
-  animate={{ opacity: 1, y: 0 }}
-  transition={{ duration: 0.6 }}
-  className="fixed top-4 right-4 z-50"
->
-
-  <div
-    className="border border-[#bc9b6a] rounded-xl px-3 py-2
-               bg-black/40 backdrop-blur-sm cursor-pointer
-               flex items-center gap-2
-               transition-all duration-300
-               hover:bg-[#bc9b6a]/20"
-    style={{
-      boxShadow: "0 0 10px #bc9b6a"
-    }}
-  >
-
-    {/* 🌍 الأيقونة مع Glow */}
-    <FaGlobe
-      size={20}
-      className="text-[#bc9b6a]"
-      style={{
-        filter: "drop-shadow(0 0 6px #bc9b6a)"
-      }}
-    />
-
-    {/* 🇰🇼 / 🇬🇧 */}
-    <motion.span
+  return (
+    <motion.main
       key={lang}
-      initial={{ opacity: 0, y: 5 }}
+      initial={{ opacity: 0, y: 40 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-      className="text-lg"
-      style={{
-        filter: "drop-shadow(0 0 4px #bc9b6a)"
-      }}
+      transition={{ duration: 0.7 }}
+      className="text-white flex"
     >
-      {lang === "en" ? "🇰🇼" : "🇬🇧"}
-    </motion.span>
 
-  </div>
+      <div
+        className="fixed inset-0 -z-10"
+        style={{
+          backgroundImage: "url('/bg.png')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      />
 
-</motion.div>
+      {/* overlay */}
+      <div className="fixed inset-0 -z-10 bg-black/50" />
 
-<div className="w-full">
+      <motion.div
+        onClick={toggleLang}
+        whileTap={{ scale: 0.92 }}
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="fixed top-4 right-4 z-50"
+      >
+        <div
+          className="border border-[#bc9b6a] rounded-xl px-3 py-2
+                     bg-black/40 backdrop-blur-sm cursor-pointer
+                     flex items-center gap-2
+                     transition-all duration-300
+                     hover:bg-[#bc9b6a]/20"
+          style={{
+            boxShadow: "0 0 10px #bc9b6a"
+          }}
+        >
+          {/* 🌍 الأيقونة مع Glow */}
+          <FaGlobe
+            size={20}
+            className="text-[#bc9b6a]"
+            style={{
+              filter: "drop-shadow(0 0 6px #bc9b6a)"
+            }}
+          />
 
+          {/* 🇰🇼 / 🇬🇧 */}
+          <motion.span
+            key={lang}
+            initial={{ opacity: 0, y: 5 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            className="text-lg"
+            style={{
+              filter: "drop-shadow(0 0 4px #bc9b6a)"
+            }}
+          >
+            {lang === "en" ? "🇰🇼" : "🇬🇧"}
+          </motion.span>
+        </div>
+      </motion.div>
 
-<section className="relative h-[90vh] md:h-screen flex items-center justify-center">
-<img src="/hero.png" className="absolute w-full h-full object-cover" />
-<div className="absolute inset-0 bg-black/40">
+      <div className="w-full">
 
-<img
-  src="hero.jpg"
-  className="absolute w-full h-full object-cover object-[50%_30%] scale-[1.05] will-change-transform"
-/>
+        <section className="relative h-[90vh] md:h-screen flex items-center justify-center">
+          <img src="/hero.png" className="absolute w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-black/40">
+            <img
+              src="hero.jpg"
+              className="absolute w-full h-full object-cover object-[50%_30%] scale-[1.05] will-change-transform"
+            />
+            <motion.div
+              initial={{ x: 0 }}
+              animate={{ x: "-100%" }}
+              transition={{ duration: 1.4, ease: "easeInOut" }}
+              className="absolute inset-0 bg-black z-20"
+            />
+          </div>
 
-<motion.div
-  initial={{ x: 0 }}
-  animate={{ x: "-100%" }}
-  transition={{ duration: 1.4, ease: "easeInOut" }}
-  className="absolute inset-0 bg-black z-20"
-/>
+          <div className="relative z-10 flex flex-col items-center justify-center text-center w-full px-4">
+            {/* العنوان */}
+            <motion.h1
+              className="text-5xl md:text-6xl font-extrabold tracking-wide"
+              style={{
+                color: "#bc9b6a",
+                textShadow: `
+                  0 0 2px rgba(192,161,114,0.8),
+                  0 0 10px rgba(192,161,114,0.7),
+                  0 0 00px rgba(192,161,114,0.6),
+                  0 0 60px rgba(192,161,114,0.4),
+                  0 2px 10px rgba(0,0,0,0.9)
+                `
+              }}
+            >
+              Kuwait Shows
+            </motion.h1>
 
+            {/* خط ذهبي تحت العنوان */}
+            <motion.div
+              initial={{ width: 0 }}
+              animate={{ width: "120px" }}
+              transition={{ duration: 0.8, delay: 0.5 }}
+              className="h-[4px] bg-[#bc9b6a] my-4"
+            />
 
-</div>
+            {/* النص */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1, delay: 0.6 }}
+              className="text-center max-w-xl"
+            >
+              <p className="text-lg font-bold opacity-100">
+                {t[lang].subtitle.split("\n")[0]}
+              </p>
+              <p 
+                className="mt-2 text-lg md:text-xl font-semibold tracking-wide"
+                style={{
+                  color: "#ddc9ab",
+                  textShadow: "0 2px 15px rgba(0,0,0,0.9)"
+                }}
+              >
+                {t[lang].subtitle.split("\n")[1]}
+              </p>
+            </motion.div>
+          </div>
 
-<div className="relative z-10 flex flex-col items-center justify-center text-center w-full px-4">
+          <a href="#slider" className="absolute bottom-10 text-3xl animate-bounce">↓</a>
+        </section>
 
-  {/* العنوان */}
-<motion.h1
-  className="text-5xl md:text-6xl font-extrabold tracking-wide"
-  style={{
-    color: "#bc9b6a",
-    textShadow: `
-      0 0 2px rgba(192,161,114,0.8),
-      0 0 10px rgba(192,161,114,0.7),
-      0 0 00px rgba(192,161,114,0.6),
-      0 0 60px rgba(192,161,114,0.4),
-      0 2px 10px rgba(0,0,0,0.9)
-    `
-  }}
->
-    Kuwait Shows
-  </motion.h1>
+        <section className="py-20 flex justify-center">
+          <div className="flex justify-center items-center px-4 md:pr-[190px]">
+            <Link href="/sell" className="block">
+              <div className="inline-block mx-auto rounded-2xl border border-[#c9a96e] shadow-lg animate-[pulse_3s_ease-in-out_infinite]">
+                <img
+                  src="/lux.jpg"
+                  className="block mx-auto w-full h-auto object-contain max-h-[300px] sm:max-h-[400px] md:max-h-[460px]"
+                />
+              </div>
+            </Link>
+          </div>
+        </section>
 
-  {/* خط ذهبي تحت العنوان */}
-  <motion.div
-    initial={{ width: 0 }}
-    animate={{ width: "120px" }}
-    transition={{ duration: 0.8, delay: 0.5 }}
-    className="h-[4px] bg-[#bc9b6a] my-4"
-  />
+        <section id="slider" className="py-3 text-center">
+          <div className="flex justify-center px-4 md:pr-[190px]">
+            <div className="w-full max-w-[900px] text-center">
+              <h2 className="mb-6 text-2xl" style={{ color: gold }}>
+                {t[lang].updates}
+              </h2>
+            </div>
+          </div>
 
-  {/* النص */}
-  <motion.div
-    initial={{ opacity: 0, y: 30 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 1, delay: 0.6 }}
-    className="text-center max-w-xl"
+          <div className="flex justify-center px-4 md:pr-[190px]">
+            <div className="w-full max-w-[700px] relative">
+              <AnimatePresence mode="wait">
+                <motion.img
+                  key={slide}
+                  src={slides[slide]}
+                  className="w-full h-full object-cover rounded-2xl"
+                  initial={{ x: 100, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  exit={{ x: -100, opacity: 0 }}
+                  transition={{
+                    duration: 0.5,
+                    ease: "easeInOut"
+                  }}
+                />
+              </AnimatePresence>
+              {/* سهم يسار */}
+              <button
+                onClick={() =>
+                  setSlide((prev) => (prev === 0 ? slides.length - 1 : prev - 1))
+                }
+                className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 px-3 py-2 rounded-full text-white"
+              >
+                ←
+              </button>
 
-  >
-    <p className="text-lg font-bold opacity-100">
-      {t[lang].subtitle.split("\n")[0]}
-    </p>
+              {/* سهم يمين */}
+              <button
+                onClick={() =>
+                  setSlide((prev) => (prev + 1) % slides.length)
+                }
+                className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 px-3 py-2 rounded-full text-white"
+              >
+                →
+              </button>
 
-   <p 
-  className="mt-2 text-lg md:text-xl font-semibold tracking-wide"
-  style={{
-    color: "#ddc9ab",
-    textShadow: "0 2px 15px rgba(0,0,0,0.9)"
-  }}
->
-      {t[lang].subtitle.split("\n")[1]}
-    </p>
-  </motion.div>
+              <div className="flex justify-center mt-4 gap-2">
+                {slides.map((_, i) => (
+                  <div
+                    key={i}
+                    onClick={() => setSlide(i)}
+                    className={`w-2 h-2 rounded-full cursor-pointer ${
+                      i === slide ? "bg-[#bc9b6a]" : "bg-gray-500"
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
 
-</div>
+        <section id="services" className="py-20">
+          <div className="flex justify-center px-4 md:pr-[190px]">
+            <div className="w-full max-w-[900px] text-center">
+              <h2 className="text-3xl mb-10" style={{ color: gold }}>
+                {t[lang].services}
+              </h2>
 
-<a href="#slider" className="absolute bottom-10 text-3xl animate-bounce">↓</a>
-</section>
+              <div className="grid grid-cols-2 gap-6">
+                {services.map((item, i) => (
+                  <motion.div
+                    key={i}
+                    onClick={() => setActiveService(item[1])}
+                    whileHover={{ scale: 1.05 }}
+                    className="border border-[#bc9b6a] rounded-2xl overflow-hidden cursor-pointer"
+                  >
+                    <img src={item[2]} className="w-full h-32 object-cover" />
+                    <div className="p-3">
+                      <h3>{lang === "en" ? item[1] : item[0]}</h3>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
 
+        <AnimatePresence>
+          {activeService && (
+            <motion.div
+              onClick={() => setActiveService(null)}
+              className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <motion.div
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.8, opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                className="bg-black border border-[#bc9b6a] max-w-xl w-full rounded-2xl overflow-hidden relative"
+              >
+                <button
+                  onClick={() => setActiveService(null)}
+                  className="absolute top-3 right-4 text-xl z-10"
+                >
+                  ×
+                </button>
 
-<section className="py-20 flex justify-center">
-  <div className="flex justify-center items-center px-4 md:pr-[190px]">
+                <img
+                  src={services.find(s => s[1] === activeService)?.[2]}
+                  className="w-full max-h-[300px] object-contain bg-black"
+                />
 
+                <div className="p-6">
+                  <h2 className="text-2xl mb-4 text-[#bc9b6a]">
+                    {activeService && servicesDetails[activeService as keyof typeof servicesDetails]?.title}
+                  </h2>
 
-    <Link href="/sell" className="block">
+                  <p className="text-gray-300 whitespace-pre-line leading-relaxed">
+                    {activeService &&
+                      (lang === "en"
+                        ? servicesDetails[activeService as keyof typeof servicesDetails]?.desc
+                        : servicesDetails[activeService as keyof typeof servicesDetails]?.descAr)}
+                  </p>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-<div className="inline-block mx-auto rounded-2xl border border-[#c9a96e] shadow-lg animate-[pulse_3s_ease-in-out_infinite]">
+        <section id="contact" className="py-10 text-center max-w-3xl mx-auto px-4">
+          <h2 style={{ color: gold }}>{t[lang].ctaTitle}</h2>
+          <p className="mb-6">{t[lang].ctaDesc}</p>
 
-      <img
-  src="/lux.jpg"
-  className="block mx-auto w-full h-auto object-contain max-h-[300px] sm:max-h-[400px] md:max-h-[460px]"
-/>
+          <div className="flex flex-col items-center gap-3 mt-4">
+            {/* Email */}
+            <a
+              href="mailto:admin@kuwaitshows.com"
+              className="flex items-center gap-2 text-gray-300 hover:text-[#bc9b6a] transition"
+            >
+              <FaEnvelope />
+              <span>admin@kuwaitshows.com</span>
+            </a>
+
+            {/* WhatsApp */}
+            <a
+              href="https://wa.me/96597944003"
+              target="_blank"
+              className="flex items-center gap-2 text-gray-300 hover:text-[#bc9b6a] transition"
+            >
+              <FaWhatsapp />
+              <span>+965 97944003</span>
+            </a>
+
+            {/* Location */}
+            <div className="flex items-center gap-2 text-gray-300">
+              <span>📍</span>
+              <span>Kuwait 🇰🇼</span>
+            </div>
+
+            <div className="flex flex-col items-center mt-6">
+              <img 
+                src="/logo.png" 
+                alt="Kuwait Shows"
+                className="w-14 mb-2 object-contain"
+              />
+              <p className="text-xs bg-gradient-to-r from-[#bc9b6a] via-[#f5e6c8] to-[#bc9b6a] bg-clip-text text-transparent">
+                Kuwait Shows
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <footer className="py-6 text-center border-t border-gray-800" style={{ color: gold }}>
+          © Kuwait Shows All Right Reserved
+        </footer>
 
       </div>
-
-    </Link>
-
-  </div>
-</section>
-
-
-<section id="slider" className="py-3 text-center">
-<div className="flex justify-center px-4 md:pr-[190px]">
-<div className="w-full max-w-[900px] text-center">
-<h2 className="mb-6 text-2xl" style={{ color: gold }}>
-{t[lang].updates}
-</h2>
-</div>
-</div>
-
-<div className="flex justify-center px-4 md:pr-[190px]">
-<div className="w-full max-w-[700px] relative">
-
-<AnimatePresence mode="wait">
-  <motion.img
-    key={slide}
-    src={slides[slide]}
-    className="w-full h-full object-cover rounded-2xl"
-
-initial={{ x: 100, opacity: 0 }}
-animate={{ x: 0, opacity: 1 }}
-exit={{ x: -100, opacity: 0 }}
-
-transition={{
-  duration: 0.5,
-  ease: "easeInOut"
-}}
-  />
-</AnimatePresence>
-{/* سهم يسار */}
-<button
-  onClick={() =>
-    setSlide((prev) => (prev === 0 ? slides.length - 1 : prev - 1))
-  }
-  className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 px-3 py-2 rounded-full text-white"
->
-  ←
-</button>
-
-{/* سهم يمين */}
-<button
-  onClick={() =>
-    setSlide((prev) => (prev + 1) % slides.length)
-  }
-  className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 px-3 py-2 rounded-full text-white"
->
-  →
-</button>
-
-<div className="flex justify-center mt-4 gap-2">
-{slides.map((_, i) => (
-<div
-key={i}
-onClick={() => setSlide(i)}
-className={`w-2 h-2 rounded-full cursor-pointer ${
-i === slide ? "bg-[#bc9b6a]" : "bg-gray-500"
-}`}
-/>
-))}
-</div>
-</div>
-</div>
-</section>
-
-<section id="services" className="py-20">
-<div className="flex justify-center px-4 md:pr-[190px]">
-<div className="w-full max-w-[900px] text-center">
-
-<h2 className="text-3xl mb-10" style={{ color: gold }}>
-{t[lang].services}
-</h2>
-
-<div className="grid grid-cols-2 gap-6">
-{services.map((item, i) => (
-<motion.div
-key={i}
-onClick={() => setActiveService(item[1])}
-whileHover={{ scale: 1.05 }}
-className="border border-[#bc9b6a] rounded-2xl overflow-hidden cursor-pointer"
->
-<img src={item[2]} className="w-full h-32 object-cover" />
-<div className="p-3">
-<h3>{lang === "en" ? item[1] : item[0]}</h3>
-</div>
-</motion.div>
-))}
-</div>
-
-</div>
-</div>
-</section>
-
-<AnimatePresence>
-{activeService && (
-<motion.div
-  onClick={() => setActiveService(null)}
-  className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
-  initial={{ opacity: 0 }}
-  animate={{ opacity: 1 }}
-  exit={{ opacity: 0 }}
->
-
-<motion.div
-initial={{ scale: 0.8, opacity: 0 }}
-animate={{ scale: 1, opacity: 1 }}
-exit={{ scale: 0.8, opacity: 0 }}
-transition={{ duration: 0.3 }}
-className="bg-black border border-[#bc9b6a] max-w-xl w-full rounded-2xl overflow-hidden relative"
->
-
-<button
-onClick={() => setActiveService(null)}
-className="absolute top-3 right-4 text-xl z-10"
->
-×
-</button>
-
-<img
-src={services.find(s => s[1] === activeService)?.[2]}
-className="w-full max-h-[300px] object-contain bg-black"
-/>
-
-<div className="p-6">
-
-<h2 className="text-2xl mb-4 text-[#bc9b6a]">
-{activeService && servicesDetails[activeService as keyof typeof servicesDetails]?.title}
-</h2>
-
-<p className="text-gray-300 whitespace-pre-line leading-relaxed">
-  {activeService &&
-    (lang === "en"
-      ? servicesDetails[activeService as keyof typeof servicesDetails]?.desc
-      : servicesDetails[activeService as keyof typeof servicesDetails]?.descAr)}
-</p>
-
-</div>
-
-</motion.div>
-</motion.div>
-)}
-</AnimatePresence>
-
-<section id="contact" className="py-10 text-center max-w-3xl mx-auto px-4">
-<h2 style={{ color: gold }}>{t[lang].ctaTitle}</h2>
-<p className="mb-6">{t[lang].ctaDesc}</p>
-
-<div className="flex flex-col items-center gap-3 mt-4">
-
-  {/* Email */}
-  <a
-    href="mailto:admin@kuwaitshows.com"
-    className="flex items-center gap-2 text-gray-300 hover:text-[#bc9b6a] transition"
-  >
-    <FaEnvelope />
-    <span>admin@kuwaitshows.com</span>
-  </a>
-
-  {/* WhatsApp */}
-  <a
-    href="https://wa.me/96597944003"
-    target="_blank"
-    className="flex items-center gap-2 text-gray-300 hover:text-[#bc9b6a] transition"
-  >
-    <FaWhatsapp />
-    <span>+965 97944003</span>
-  </a>
-
-  {/* Location */}
-  <div className="flex items-center gap-2 text-gray-300">
-    <span>📍</span>
-    <span>Kuwait 🇰🇼</span>
-  </div>
-
-
-<div className="flex flex-col items-center mt-6">
-  <img 
-    src="/logo.png" 
-    alt="Kuwait Shows"
-    className="w-14 mb-2 object-contain"
-  />
-
-  <p className="text-xs bg-gradient-to-r from-[#bc9b6a] via-[#f5e6c8] to-[#bc9b6a] bg-clip-text text-transparent">
-    Kuwait Shows
-  </p>
-</div>
-
-
-</div>
-</section>
-
-<footer className="py-6 text-center border-t border-gray-800" style={{ color: gold }}>
-© Kuwait Shows All Right Reserved
-</footer>
-
-</div>
-</motion.main>
+    </motion.main>
   );
 }
