@@ -1,5 +1,7 @@
 import { MetadataRoute } from 'next'
 
+export const dynamic = 'force-static' // هذا هو السطر الذي يحل المشكلة
+
 export default function sitemap(): MetadataRoute.Sitemap {
   return [
     {
@@ -8,7 +10,5 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'daily',
       priority: 1,
     },
-    // يمكنك نسخ البلوك السابق وإضافة روابط صفحاتك الأخرى هنا
-    // مثل: https://www.kuwaitshows.com/events
   ]
 }
