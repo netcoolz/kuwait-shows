@@ -11,7 +11,7 @@ const translations = {
     subtitle: "فعاليات رسمية عريقة تقام لعرض وتقييم أعرق سلالات الخيل، تجسيداً للأصالة، القوة، والجمال الموروث.",
     quote: "\"هي أقرب إلى عرض فني حي، حيث يقف الجواد أمام الجمهور والحكّام ليُظهر أبهى صفاته الجمالية الموروثة عبر أجيال طويلة.\"",
     
-    essenceTitle: "🧬 الجوهر والأصالة",
+    essenceTitle: "الجوهر والأصالة",
     essenceDesc: "يتميز الخيل العربي بتاريخ عريق يرتبط بالجزيرة العربية، واكتسب شهرته العالمية من صفات فريدة محفوظة بعناية عبر مئات السنين:",
     head: "الرأس:", headDesc: "صغير ومميز بتقعر خفيف.",
     eyes: "العيون:", eyesDesc: "واسعة ومعبرة تدل على الذكاء.",
@@ -39,7 +39,7 @@ const translations = {
     toursTitle: "الجولات الكبرى",
     toursDesc: "أعلى مستوى من التنظيم والمنافسة، وتضم نخبة الخيل:",
     tour1: "جولة الأبطال العالمية (GCAT)",
-    tour2: "التاج الثلاثي (Triple Crown)",
+    tour2: "بطولة العالم (World Championship)",
     
     scoreTitle: "✨ معايير التقييم (Scorecard)",
     scoreDesc: "يتم تقييم كل جواد من قبل لجنة تحكيم دولية خبيرة وفق نظام نقاط دقيق وشامل يركز على المعايير الخمسة الأساسية لضمان النزاهة التامة:",
@@ -50,7 +50,10 @@ const translations = {
     score5Title: "الحركة (Movement):", score5Desc: "خفة الحركة، اندفاع الجواد، وارتفاع الخطوات الاستعراضية.",
     
     arenaTitle: "🎭 العرض داخل الحلبة",
-    arenaDesc: "عند دخول الجواد الحلبة، يتم تقديمه بواسطة **العارض** المسؤول عن إبراز مفاتنه. يقف الجواد لعرض تكوينه، ثم يُطلب منه الحركة لإظهار الانسيابية. وفي النهاية تتنافس الخيل في فئاتها على الألقاب الكبرى:",
+    arenaStep1: "1. التصفيات (Classes):",
+    arenaStep1Desc: "تتنافس الخيل في البداية حسب فئات عمرية (كلاسات). يتم تقييمها من قبل حكام دوليين رسميين معتمدين من منظمة (ECAHO)، ويُمنح الجواد فوزاً في الكلاس بناءً على مجموع النقاط المحققة.",
+    arenaStep2: "2. البطولة النهائية (Championship):",
+    arenaStep2Desc: "يتأهل المتصدرون من كل فئة للمنافسة النهائية، حيث يتم اختيار الأبطال رسمياً وتتويجهم بالألقاب الكبرى:",
     gold: "🥇 البطل الذهبي",
     silver: "🥈 البطل الفضي",
     bronze: "🥉 البطل البرونزي",
@@ -72,7 +75,7 @@ const translations = {
     subtitle: "Prestigious official events held to showcase and evaluate the most ancient horse breeds, embodying pure lineage, strength, and inherited beauty.",
     quote: "\"It is akin to a live art exhibition, where the horse stands before the audience and judges to display its finest aesthetic traits inherited over generations.\"",
     
-    essenceTitle: "🧬 Essence & Authenticity",
+    essenceTitle: "Essence & Authenticity",
     essenceDesc: "The Arabian horse boasts a rich history tied to the Arabian Peninsula, gaining global fame through unique traits carefully preserved over centuries:",
     head: "Head:", headDesc: "Small and distinct with a slightly concave profile (dish).",
     eyes: "Eyes:", eyesDesc: "Large and expressive, denoting intelligence.",
@@ -111,7 +114,10 @@ const translations = {
     score5Title: "Movement:", score5Desc: "Lightness of movement, impulsion, and elevated show trot.",
     
     arenaTitle: "🎭 Inside the Show Arena",
-    arenaDesc: "Upon entering the arena, the horse is presented by a **Handler** responsible for highlighting its best features. The horse stands for conformation evaluation, then is asked to move to show its fluidity. Ultimately, horses compete in their classes for the major titles:",
+    arenaStep1: "1. Qualification (Classes):",
+    arenaStep1Desc: "Horses initially compete by age groups (Classes). They are evaluated by official international judges accredited by (ECAHO). Winners in each class are determined based on their total points.",
+    arenaStep2: "2. The Finale (Championship):",
+    arenaStep2Desc: "The top winners from each class qualify for the final championship round, where judges select the ultimate champions for:",
     gold: "🥇 Gold Champion",
     silver: "🥈 Silver Champion",
     bronze: "🥉 Bronze Champion",
@@ -293,7 +299,7 @@ export default function AboutHorsesPage() {
           </div>
 
           {/* قسم التقييم وتجربة العرض */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-20 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-20 items-stretch">
             <div className="space-y-6">
               <h2 className="text-4xl font-bold text-white mb-6 drop-shadow-md">{t.scoreTitle}</h2>
               <p className="text-gray-200 mb-8 text-lg leading-loose bg-black/40 p-6 rounded-2xl backdrop-blur-sm border border-white/5">
@@ -317,16 +323,29 @@ export default function AboutHorsesPage() {
               </div>
             </div>
 
-            <div className="bg-gradient-to-br from-[#bc9b6a]/20 via-black/70 to-black backdrop-blur-3xl border border-[#bc9b6a]/40 p-12 md:p-16 rounded-[2.5rem] relative overflow-hidden shadow-2xl h-full flex flex-col justify-center border-t-[#bc9b6a]/60">
+            <div className="bg-gradient-to-br from-[#bc9b6a]/20 via-black/70 to-black backdrop-blur-3xl border border-[#bc9b6a]/40 p-10 md:p-14 rounded-[2.5rem] relative overflow-hidden shadow-2xl h-full flex flex-col border-t-[#bc9b6a]/60">
               <div className={`absolute -top-30 w-96 h-96 bg-[#bc9b6a] rounded-full blur-[130px] opacity-20 pointer-events-none ${lang === 'ar' ? '-right-30' : '-left-30'}`}></div>
               <h2 className="text-3xl font-bold text-[#bc9b6a] mb-8 relative z-10 flex items-center gap-3">{t.arenaTitle}</h2>
-              <p className="text-gray-200 text-lg leading-loose mb-12 relative z-10">
-                {t.arenaDesc}
-              </p>
-              <div className="flex flex-col sm:flex-row gap-5 relative z-10">
-                <span className="flex-1 text-center py-4 bg-gradient-to-r from-[#FFD700] to-[#DAA520] text-black font-bold text-lg rounded-xl shadow-lg ring-1 ring-white/20">{t.gold}</span>
-                <span className="flex-1 text-center py-4 bg-gradient-to-r from-[#E0E0E0] to-[#A9A9A9] text-black font-bold text-lg rounded-xl shadow-lg ring-1 ring-white/20">{t.silver}</span>
-                <span className="flex-1 text-center py-4 bg-gradient-to-r from-[#CD7F32] to-[#8B4513] text-white font-bold text-lg rounded-xl shadow-lg ring-1 ring-white/20">{t.bronze}</span>
+              
+              <div className="space-y-8 relative z-10">
+                <div className="bg-black/40 p-6 rounded-2xl border border-white/5 backdrop-blur-sm">
+                  <h3 className="text-[#bc9b6a] font-bold text-xl mb-3">{t.arenaStep1}</h3>
+                  <p className="text-gray-200 leading-relaxed">
+                    {t.arenaStep1Desc}
+                  </p>
+                </div>
+
+                <div className="bg-black/40 p-6 rounded-2xl border border-white/5 backdrop-blur-sm">
+                  <h3 className="text-[#bc9b6a] font-bold text-xl mb-3">{t.arenaStep2}</h3>
+                  <p className="text-gray-200 leading-relaxed mb-6">
+                    {t.arenaStep2Desc}
+                  </p>
+                  <div className="flex flex-col sm:flex-row gap-4">
+                    <span className="flex-1 text-center py-3 bg-gradient-to-r from-[#FFD700] to-[#DAA520] text-black font-bold rounded-xl shadow-lg ring-1 ring-white/20">{t.gold}</span>
+                    <span className="flex-1 text-center py-3 bg-gradient-to-r from-[#E0E0E0] to-[#A9A9A9] text-black font-bold rounded-xl shadow-lg ring-1 ring-white/20">{t.silver}</span>
+                    <span className="flex-1 text-center py-3 bg-gradient-to-r from-[#CD7F32] to-[#8B4513] text-white font-bold rounded-xl shadow-lg ring-1 ring-white/20">{t.bronze}</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -369,35 +388,25 @@ export default function AboutHorsesPage() {
             </p>
           </div>
 
-          {/* ---------------- الفوتر (الجزء المضاف حديثاً) ---------------- */}
+          {/* ---------------- الفوتر ---------------- */}
           <footer className="mt-8 pt-8 pb-6 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-6 px-4 relative z-10">
-            {/* أيقونات التواصل الاجتماعي */}
             <div className="flex items-center gap-6">
-              
-              {/* Instagram */}
-              <a href="#" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-[#bc9b6a] hover:scale-110 transition-all duration-300">
+              <a href="https://instagram.com/q8shows" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-[#bc9b6a] hover:scale-110 transition-all duration-300">
                 <svg className="w-6 h-6 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/>
                 </svg>
               </a>
-
-              {/* Facebook */}
-              <a href="#" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-[#bc9b6a] hover:scale-110 transition-all duration-300">
+              <a href="https://facebook.com/kuwaitshows" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-[#bc9b6a] hover:scale-110 transition-all duration-300">
                 <svg className="w-6 h-6 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.469h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.469h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
                 </svg>
               </a>
-
-              {/* WhatsApp */}
-              <a href="#" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-[#bc9b6a] hover:scale-110 transition-all duration-300">
+              <a href="https://wa.me/96597944003" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-[#bc9b6a] hover:scale-110 transition-all duration-300">
                 <svg className="w-6 h-6 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.405-.883-.733-1.48-1.638-1.653-1.935-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
                 </svg>
               </a>
-
             </div>
-
-            {/* حقوق النشر */}
             <p className="text-gray-400 text-sm font-light tracking-widest text-center md:text-right uppercase">
               © 2026 KUWAIT SHOWS. ALL RIGHTS RESERVED.
             </p>
