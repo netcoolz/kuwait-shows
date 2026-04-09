@@ -32,7 +32,6 @@ export default function Sidebar() {
     return () => window.removeEventListener("languageChange", handleLangChange);
   }, []);
 
-  // إغلاق القائمة كإجراء أمان إضافي عند تغير المسار
   useEffect(() => {
     setOpen(false);
     setPolicyOpen(false);
@@ -65,7 +64,7 @@ export default function Sidebar() {
         </div>
       </motion.button>
 
-      {/* 🌌 Background Overlay */}
+      {/* 🌌 Background Overlay للصفحة بالكامل عند فتح المنيو */}
       <AnimatePresence>
         {open && (
           <motion.div
@@ -73,7 +72,7 @@ export default function Sidebar() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setOpen(false)}
-            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[60]"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60]"
           />
         )}
       </AnimatePresence>
@@ -86,112 +85,129 @@ export default function Sidebar() {
             animate={{ x: 0 }}
             exit={{ x: "-100%" }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            className="fixed left-0 top-0 h-screen w-[280px] md:w-[350px] z-[70] flex flex-col justify-between border-r border-[#bc9b6a33] bg-[#050505]/95 backdrop-blur-xl shadow-[20px_0_50px_rgba(0,0,0,0.5)]"
+            /* 🔴 هنا استدعينا صورتك bg.png لتكون هي خلفية السايد بار بالكامل */
+            style={{ 
+              backgroundImage: "url('/bg.png')", 
+              backgroundSize: "cover", 
+              backgroundPosition: "center" 
+            }}
+            className="fixed left-0 top-0 h-screen w-[280px] md:w-[350px] z-[70] shadow-[20px_0_50px_rgba(0,0,0,0.7)] overflow-hidden"
           >
-            
-            {/* Header / Logo */}
-            <div className="p-6 border-b border-[#bc9b6a33] flex justify-between items-center">
-              <Link href="/" onClick={() => setOpen(false)} className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity">
-                <img src="/logo.png" alt="Logo" className="w-10 h-10 object-contain" />
-                <h2 className="font-bold tracking-wide text-transparent bg-clip-text" style={{ backgroundImage: goldGradient }}>
-                  Kuwait Shows
-                </h2>
-              </Link>
-              <button 
-                onClick={() => setOpen(false)}
-                className="w-8 h-8 flex items-center justify-center rounded-full bg-white/5 text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
-              >
-                ✕
-              </button>
-            </div>
+            {/* 🔴 طبقة تظليل خفيفة جداً (40% فقط) عشان تبان صورتك واضحة، وبنفس الوقت نقدر نقرأ النص */}
+            <div className="absolute inset-0 bg-black/40 backdrop-blur-sm z-0 pointer-events-none"></div>
 
-            {/* Menu Links */}
-            <div className="flex-1 overflow-y-auto py-4 custom-scrollbar">
+            {/* محتوى السايد بار */}
+            <div className="relative z-10 flex flex-col h-full justify-between">
               
-              {/* Language Switch */}
-              <div 
-                onClick={toggleLang}
-                className="mx-4 mb-4 p-4 rounded-2xl bg-white/5 border border-white/5 hover:border-[#bc9b6a55] hover:bg-white/10 cursor-pointer flex justify-between items-center transition-all"
-              >
-                <div className="flex items-center gap-3">
-                  <FaGlobe className="text-[#bc9b6a] text-xl" />
-                  <span className="text-gray-200 font-medium">{lang === "ar" ? "اللغة" : "Language"}</span>
-                </div>
-                <span className="text-xl">{lang === "en" ? "🇰🇼" : "🇬🇧"}</span>
+              {/* Header / Logo - شفاف لتبان الخلفية */}
+              <div className="p-6 border-b border-[#bc9b6a33] flex justify-between items-center bg-transparent">
+                <Link href="/" onClick={() => setOpen(false)} className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity">
+                  <img src="/logo.png" alt="Logo" className="w-10 h-10 object-contain" />
+                  <h2 className="font-bold tracking-wide text-transparent bg-clip-text" style={{ backgroundImage: goldGradient }}>
+                    Kuwait Shows
+                  </h2>
+                </Link>
+                <button 
+                  onClick={() => setOpen(false)}
+                  className="w-8 h-8 flex items-center justify-center rounded-full bg-white/10 text-gray-300 hover:text-white hover:bg-white/20 transition-colors"
+                >
+                  ✕
+                </button>
               </div>
 
-              <nav className="flex flex-col px-2">
-                {/* 🌟 الإغلاق الفوري لجميع الروابط */}
-                <Link href="/" className="menu-link" onClick={() => setOpen(false)}>{lang === "ar" ? "الرئيسية" : "Home"}</Link>
-                <Link href="/shows" className="menu-link" onClick={() => setOpen(false)}>{lang === "ar" ? "التسجيل" : "Register"}</Link>
-                <Link href="/tables" className="menu-link" onClick={() => setOpen(false)}>{lang === "ar" ? "الرعاة والطاولات" : "Tables & Sponsors"}</Link>
+              {/* Menu Links */}
+              <div className="flex-1 overflow-y-auto py-4 custom-scrollbar">
                 
-                <a 
-                  href="/#services" 
-                  className="menu-link" 
-                  onClick={(e) => {
-                    setOpen(false);
-                    if (pathname === "/") {
-                      e.preventDefault();
-                      document.querySelector("#services")?.scrollIntoView({ behavior: "smooth" });
-                    }
-                  }}
+                {/* Language Switch */}
+                <div 
+                  onClick={toggleLang}
+                  className="mx-4 mb-4 p-4 rounded-2xl bg-white/10 border border-white/10 hover:border-[#bc9b6a55] hover:bg-white/20 cursor-pointer flex justify-between items-center transition-all"
                 >
-                  {lang === "ar" ? "الخدمات" : "Services"}
-                </a>
-
-                <Link href="/sell" className="menu-link" onClick={() => setOpen(false)}>{lang === "ar" ? "خيل للبيع" : "Horses for Sale"}</Link>
-                <Link href="/handlers" className="menu-link" onClick={() => setOpen(false)}>{lang === "ar" ? "العارضين" : "Handlers"}</Link>
-                <Link href="/about" className="menu-link" onClick={() => setOpen(false)}>{lang === "ar" ? "تعرف علينا" : "About us"}</Link>
-
-                {/* Policies Dropdown */}
-                <div className="px-2 mt-2">
-                  <button 
-                    onClick={() => setPolicyOpen(!policyOpen)}
-                    className="w-full flex justify-between items-center p-4 rounded-xl text-gray-300 hover:text-white hover:bg-white/5 transition-colors"
-                  >
-                    <span className="font-medium tracking-wide">{lang === "ar" ? "السياسات" : "Policies"}</span>
-                    {policyOpen ? <FaChevronUp className="text-[#bc9b6a] text-xs" /> : <FaChevronDown className="text-[#bc9b6a] text-xs" />}
-                  </button>
-
-                  <AnimatePresence>
-                    {policyOpen && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: "auto", opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        className="overflow-hidden ml-4 border-l border-[#bc9b6a33] mt-1"
-                      >
-                        <Link href="/policies/privacy-policy" className="sub-menu-link" onClick={() => setOpen(false)}>{lang === "ar" ? "سياسة الخصوصية" : "Privacy Policy"}</Link>
-                        <Link href="/policies/terms-conditions" className="sub-menu-link" onClick={() => setOpen(false)}>{lang === "ar" ? "الشروط والأحكام" : "Terms & Conditions"}</Link>
-                        <Link href="/policies/refund-cancelation" className="sub-menu-link" onClick={() => setOpen(false)}>{lang === "ar" ? "الاسترجاع والإلغاء" : "Refund & Cancellation"}</Link>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                  <div className="flex items-center gap-3">
+                    <FaGlobe className="text-[#bc9b6a] text-xl" />
+                    <span className="text-white font-medium">{lang === "ar" ? "اللغة" : "Language"}</span>
+                  </div>
+                  <span className="text-xl">{lang === "en" ? "🇰🇼" : "🇬🇧"}</span>
                 </div>
 
-                <a 
-                  href="/#contact" 
-                  className="menu-link mt-2" 
-                  onClick={(e) => {
-                    setOpen(false);
-                    if (pathname === "/") {
-                      e.preventDefault();
-                      document.querySelector("#contact")?.scrollIntoView({ behavior: "smooth" });
-                    }
-                  }}
-                >
-                  {lang === "ar" ? "تواصل معنا" : "Contact"}
-                </a>
-              </nav>
-            </div>
+                <nav className="flex flex-col px-2">
+                  <Link href="/" className="menu-link" onClick={() => setOpen(false)}>{lang === "ar" ? "الرئيسية" : "Home"}</Link>
+                  
+                  {/* 🔴 الزر الجديد تمت إضافته هنا */}
+                  <Link href="/about-horses" className="menu-link" onClick={() => setOpen(false)}>
+                    {lang === "ar" ? "ماهي بطولات الجمال ؟" : "What are Beauty Shows?"}
+                  </Link>
 
-            {/* Footer / Social */}
-            <div className="p-6 border-t border-[#bc9b6a33] bg-black/40">
-              <div className="flex justify-center gap-6">
-                <a href="https://instagram.com/q8shows" target="_blank" rel="noreferrer" className="text-gray-400 hover:text-[#bc9b6a] hover:scale-110 transition-all text-xl"><FaInstagram /></a>
-                <a href="https://facebook.com/kuwaitshows" target="_blank" rel="noreferrer" className="text-gray-400 hover:text-[#bc9b6a] hover:scale-110 transition-all text-xl"><FaFacebookF /></a>
-                <a href="https://wa.me/96597944003" target="_blank" rel="noreferrer" className="text-gray-400 hover:text-[#25D366] hover:scale-110 transition-all text-xl"><FaWhatsapp /></a>
+                  <Link href="/shows" className="menu-link" onClick={() => setOpen(false)}>{lang === "ar" ? "التسجيل للبطولات" : "Registerto Shows"}</Link>
+                  <Link href="/tables" className="menu-link" onClick={() => setOpen(false)}>{lang === "ar" ? "الرعاة والطاولات" : "Tables & Sponsors"}</Link>
+                  
+                  <a 
+                    href="/#services" 
+                    className="menu-link" 
+                    onClick={(e) => {
+                      setOpen(false);
+                      if (pathname === "/") {
+                        e.preventDefault();
+                        document.querySelector("#services")?.scrollIntoView({ behavior: "smooth" });
+                      }
+                    }}
+                  >
+                    {lang === "ar" ? "الخدمات" : "Services"}
+                  </a>
+
+                  <Link href="/sell" className="menu-link" onClick={() => setOpen(false)}>{lang === "ar" ? "خيل للبيع" : "Horses for Sale"}</Link>
+                  <Link href="/handlers" className="menu-link" onClick={() => setOpen(false)}>{lang === "ar" ? "العارضين" : "Handlers"}</Link>
+                  <Link href="/about" className="menu-link" onClick={() => setOpen(false)}>{lang === "ar" ? "تعرف علينا" : "About us"}</Link>
+
+                  {/* Policies Dropdown */}
+                  <div className="px-2 mt-2">
+                    <button 
+                      onClick={() => setPolicyOpen(!policyOpen)}
+                      className="w-full flex justify-between items-center p-4 rounded-xl text-gray-200 hover:text-white hover:bg-white/10 transition-colors"
+                    >
+                      <span className="font-medium tracking-wide">{lang === "ar" ? "السياسات" : "Policies"}</span>
+                      {policyOpen ? <FaChevronUp className="text-[#bc9b6a] text-xs" /> : <FaChevronDown className="text-[#bc9b6a] text-xs" />}
+                    </button>
+
+                    <AnimatePresence>
+                      {policyOpen && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: "auto", opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          className="overflow-hidden ml-4 border-l border-[#bc9b6a33] mt-1"
+                        >
+                          <Link href="/policies/privacy-policy" className="sub-menu-link" onClick={() => setOpen(false)}>{lang === "ar" ? "سياسة الخصوصية" : "Privacy Policy"}</Link>
+                          <Link href="/policies/terms-conditions" className="sub-menu-link" onClick={() => setOpen(false)}>{lang === "ar" ? "الشروط والأحكام" : "Terms & Conditions"}</Link>
+                          <Link href="/policies/refund-cancelation" className="sub-menu-link" onClick={() => setOpen(false)}>{lang === "ar" ? "الاسترجاع والإلغاء" : "Refund & Cancellation"}</Link>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+
+                  <a 
+                    href="/#contact" 
+                    className="menu-link mt-2" 
+                    onClick={(e) => {
+                      setOpen(false);
+                      if (pathname === "/") {
+                        e.preventDefault();
+                        document.querySelector("#contact")?.scrollIntoView({ behavior: "smooth" });
+                      }
+                    }}
+                  >
+                    {lang === "ar" ? "تواصل معنا" : "Contact"}
+                  </a>
+                </nav>
+              </div>
+
+              {/* Footer / Social - شفاف لتبان الخلفية */}
+              <div className="p-6 border-t border-[#bc9b6a33] bg-transparent">
+                <div className="flex justify-center gap-6">
+                  <a href="https://instagram.com/q8shows" target="_blank" rel="noreferrer" className="text-gray-300 hover:text-[#bc9b6a] hover:scale-110 transition-all text-2xl"><FaInstagram /></a>
+                  <a href="https://facebook.com/kuwaitshows" target="_blank" rel="noreferrer" className="text-gray-300 hover:text-[#bc9b6a] hover:scale-110 transition-all text-2xl"><FaFacebookF /></a>
+                  <a href="https://wa.me/96597944003" target="_blank" rel="noreferrer" className="text-gray-300 hover:text-[#25D366] hover:scale-110 transition-all text-2xl"><FaWhatsapp /></a>
+                </div>
               </div>
             </div>
 
@@ -205,26 +221,26 @@ export default function Sidebar() {
           padding: 16px 20px;
           margin: 4px 8px;
           border-radius: 12px;
-          color: #d1d5db; /* gray-300 */
+          color: #e5e7eb; /* gray-200 */
           font-weight: 500;
           letter-spacing: 0.05em;
           transition: all 0.3s ease;
         }
         .menu-link:hover {
-          background: rgba(188, 155, 106, 0.1);
+          background: rgba(188, 155, 106, 0.2);
           color: #bc9b6a;
           transform: translateX(5px);
         }
         .sub-menu-link {
           display: block;
           padding: 12px 20px;
-          color: #9ca3af; /* gray-400 */
-          font-size: 0.9rem;
+          color: #d1d5db; /* gray-300 */
+          font-size: 0.95rem;
           transition: all 0.3s ease;
         }
         .sub-menu-link:hover {
           color: #bc9b6a;
-          background: rgba(255, 255, 255, 0.03);
+          background: rgba(255, 255, 255, 0.1);
         }
         .custom-scrollbar::-webkit-scrollbar {
           width: 4px;
@@ -233,7 +249,7 @@ export default function Sidebar() {
           background: transparent;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: rgba(188, 155, 106, 0.3);
+          background: rgba(188, 155, 106, 0.5);
           border-radius: 10px;
         }
       `}</style>

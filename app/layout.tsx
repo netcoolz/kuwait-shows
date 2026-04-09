@@ -21,9 +21,19 @@ export const metadata = {
   },
   description: "Arabian Horse Championships & VIP Events | بطولات الخيل العربية والفعاليات",
   
-  // تم إضافة كود تفعيل جوجل هنا 👇
   verification: {
     google: "0Nq0nnaxUqVI-kQN5g50k2dJZPpiMlAfaOsmWD_dlHo",
+  },
+
+  // 👇 الجزء الذي تم إضافته لإظهار شعارك في جوجل بدلاً من فيرسل
+  icons: {
+    icon: [
+      { url: '/favicon.ico' },
+      { url: '/icon.png', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/apple-icon.png' },
+    ],
   },
 
   openGraph: {
@@ -51,9 +61,42 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  // كود Schema Markup (البيانات المنظمة) لمحركات البحث
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "name": "Kuwait Shows",
+        "url": "https://www.kuwaitshows.com",
+        "logo": "https://www.kuwaitshows.com/preview2.png",
+        "sameAs": [
+          "https://www.instagram.com/q8show"
+        ]
+      },
+      {
+        "@type": "SoftwareApplication",
+        "name": "Kuwait Shows",
+        "operatingSystem": "Android, iOS",
+        "applicationCategory": "SportsApplication",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        }
+      }
+    ]
+  };
+
   return (
     <html lang="en">
       <body className={`${inter.className} ${cairo.className} bg-black text-white`}>
+        {/* حقن البيانات المنظمة في الصفحة */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+        
         <Sidebar />
         <main className="w-full md:mr-[190px] relative z-0">
           <AnimatePresence mode="wait">
