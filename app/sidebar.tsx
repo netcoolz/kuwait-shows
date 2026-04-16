@@ -154,7 +154,7 @@ export default function Sidebar() {
                   >
                     {lang === "ar" ? "الخدمات" : "Services"}
                   </a>
-
+ <Link href="/judges" className="menu-link" onClick={() => setOpen(false)}>{lang === "ar" ? "دليل التحكيم" : "Judging Guide"}</Link>
                   <Link href="/sell" className="menu-link" onClick={() => setOpen(false)}>{lang === "ar" ? "خيل للبيع" : "Horses for Sale"}</Link>
                   <Link href="/handlers" className="menu-link" onClick={() => setOpen(false)}>{lang === "ar" ? "العارضين" : "Handlers"}</Link>
                   <Link href="/about" className="menu-link" onClick={() => setOpen(false)}>{lang === "ar" ? "تعرف علينا" : "About us"}</Link>
