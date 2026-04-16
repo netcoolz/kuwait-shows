@@ -257,7 +257,7 @@ export default function ECAHOJudgingGuidePage() {
           {/* ----- Hero Section ----- */}
           <div className="relative rounded-[2.5rem] overflow-hidden mb-16 h-[55vh] min-h-[550px] flex items-center justify-center border border-[#bc9b6a]/50 shadow-[0_0_60px_rgba(188,155,106,0.2)]">
             <img 
-              src="/about3.png" 
+              src="/about4.png" 
               alt="ECAHO Arabian Horse Judging Syllabus" 
               className="absolute inset-0 w-full h-full object-cover opacity-70"
             />
