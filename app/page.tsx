@@ -1,70 +1,26 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { motion, AnimatePresence, Variants } from "framer-motion";
-import { FaWhatsapp, FaEnvelope, FaGlobe, FaChevronRight, FaChevronLeft, FaInfoCircle, FaTimes } from "react-icons/fa";
+import { FaWhatsapp, FaEnvelope, FaGlobe, FaArrowLeft, FaArrowRight, FaTimes } from "react-icons/fa";
 import Image from "next/image";
 
 const gold = "#bc9b6a";
-const goldGradient = "linear-gradient(135deg, #ddc9ab 0%, #bc9b6a 50%, #8c6a3f 100%)";
 
 export default function Home() {
-  const [slide, setSlide] = useState(0);
-  const [direction, setDirection] = useState(0);
   const [lang, setLang] = useState<"ar" | "en">("en");
   const [mounted, setMounted] = useState(false);
-  const [activeService, setActiveService] = useState<string | null>(null);
-
-  const slides = ["/slide1.jpg", "/slide2.jpg", "/slide3.jpg"];
+  const [activeService, setActiveService] = useState<number | null>(null);
+  const [popupService, setPopupService] = useState<any>(null);
 
   const services = [
-    ["نظام التسجيل", "Registration System", "/service1.jpg"],
-    ["حجز الطاولات والرعايات", "Tables & Sponsors", "/service2.jpg"],
-    ["تنظيم البطولة", "Event Management", "/service3.jpg"],
-    ["الكؤوس والدروع", "Awards & Trophies", "/service4.jpg"],
-    ["التنسيق الحكومي", "Government Coordination", "/service5.jpg"],
-    ["الأمن والخدمات المسانده", "Security & Support", "/service6.jpg"],
-    ["الإعلام والتسويق", "Media & Marketing", "/service7.jpg"],
+    { id: 1, titleAr: "التسجيل والتحكيم", titleEn: "Registration & Scoring", img: "/service1.jpg", descEn: "Full digital registration and automated scoring system tailored for ECAHO standards.", descAr: "نظام رقمي متكامل للتسجيل والتحكيم الآلي مصمم وفق أحدث معايير الإيكاهو بدقة متناهية." },
+    { id: 2, titleAr: "الطاولات والرعايات", titleEn: "VIP Tables", img: "/service2.jpg", descEn: "Exclusive management of VIP tables, ticketing, and premium sponsorship placements.", descAr: "إدارة حصرية وفارهة لحجوزات طاولات كبار الشخصيات وباقات الرعاية المتميزة." },
+    { id: 3, titleAr: "تنظيم البطولة", titleEn: "Event Management", img: "/service3.jpg", descEn: "End-to-end arena setup, from stabling to the final crowning podium.", descAr: "تجهيز متكامل للميدان، بدءاً من الإسطبلات الأوروبية وحتى منصة التتويج النهائية." },
+    { id: 4, titleAr: "الكؤوس والدروع", titleEn: "Awards & Trophies", img: "/service4.jpg", descEn: "Premium bespoke trophies, garlands, and award ceremony coordination.", descAr: "تصميم وتجهيز كؤوس وأكاليل فاخرة وتنسيق كامل لمراسم التتويج الملكية." },
+    { id: 5, titleAr: "الأمن والإعلام", titleEn: "Security & Media", img: "/service6.jpg", descEn: "Crowd control, LED broadcasting, and comprehensive media coverage.", descAr: "إدارة الحشود، بث مباشر عبر شاشات عملاقة، وتغطية إعلامية سينمائية للحدث." }
   ];
-
-  const servicesDetails: Record<string, any> = {
-    "Registration System": {
-      titleEn: "Registration System", titleAr: "نظام التسجيل",
-      desc: `Digital Registration & Scoring Solutions\n\n• Full registration and fee collection system\n• Secure online payment processing\n• Integrated scoring and judging system`,
-      descAr: `حلول التسجيل والتقييم الرقمية\n\n• نظام كامل للتسجيل وتحصيل الرسوم\n• معالجة آمنة للدفع الإلكتروني\n• نظام متكامل للتقييم والتحكيم`
-    },
-    "Tables & Sponsors": {
-      titleEn: "Tables & Sponsors", titleAr: "حجز الطاولات والرعايات",
-      desc: `VIP Tables & Sponsorship Management\n\n• Online booking system\n• Management of sponsorship packages\n• Secure fee collection`,
-      descAr: `إدارة حجز الطاولات والرعايات\n\n• نظام حجز إلكتروني للطاولات\n• إدارة باقات الرعاية\n• تحصيل آمن للرسوم`
-    },
-    "Event Management": {
-      titleEn: "Event Management", titleAr: "تنظيم البطولة",
-      desc: `Full Championship Management\n\n• Arena setup\n• European tents & horse boxes\n• Full supervision`,
-      descAr: `إدارة متكاملة للبطولة\n\n• تجهيز ساحة العرض\n• تركيب الخيام الأوروبية والبوكسات\n• إشراف كامل على الفعالية`
-    },
-    "Awards & Trophies": {
-      titleEn: "Awards & Trophies", titleAr: "الكؤوس والدروع",
-      desc: `Awards & Prize Management\n\n• Organizing categories\n• Award ceremonies\n• Trophy arrangements`,
-      descAr: `إدارة الجوائز والتكريم\n\n• تنظيم الفئات\n• حفلات التتويج\n• تجهيز وتنسيق الكؤوس`
-    },
-    "Government Coordination": {
-      titleEn: "Government Coordination", titleAr: "التنسيق الحكومي",
-      desc: `Official & Government Liaison\n\n• Security, ambulance, fire services\n• Official communication`,
-      descAr: `التنسيق الرسمي والحكومي\n\n• الجهات الأمنية والإسعاف والإطفاء\n• المراسلات الرسمية`
-    },
-    "Security & Support": {
-      titleEn: "Security & Support", titleAr: "الأمن والخدمات المسانده",
-      desc: `Safety & Operational Support\n\n• Professional security\n• Crowd control systems`,
-      descAr: `الأمن والخدمات المساندة\n\n• خدمات أمن احترافية\n• أنظمة إدارة الحشود`
-    },
-    "Media & Marketing": {
-      titleEn: "Media & Marketing", titleAr: "الإعلام والتسويق",
-      desc: `Media Production & Promotion\n\n• LED screens\n• Photography & video\n• Media coverage`,
-      descAr: `الخدمات الإعلامية والتسويقية\n\n• شاشات LED عملاقة\n• تصوير فوتوغرافي وفيديو\n• تغطية إعلامية شاملة`
-    }
-  };
 
   useEffect(() => {
     setMounted(true);
@@ -78,177 +34,246 @@ export default function Home() {
     return () => window.removeEventListener("languageChange", handleLangChange);
   }, []);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setDirection(1);
-      setSlide((prev) => (prev + 1) % slides.length);
-    }, 6000);
-    return () => clearInterval(interval);
-  }, [slides.length]);
-
-  const paginate = (newDirection: number) => {
-    setDirection(newDirection);
-    setSlide((prev) => (prev + newDirection + slides.length) % slides.length);
-  };
-
   const fadeInUp: Variants = {
-    hidden: { opacity: 0, y: 30 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: "easeOut" } }
+    hidden: { opacity: 0, y: 60 },
+    visible: { opacity: 1, y: 0, transition: { duration: 1.2, ease: [0.16, 1, 0.3, 1] } }
   };
 
-  const staggerContainer: Variants = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
-  };
-
-  const slideVariants: Variants = {
-    enter: (direction: number) => ({ x: direction > 0 ? "100%" : "-100%", opacity: 0 }),
-    center: { zIndex: 1, x: 0, opacity: 1, transition: { x: { type: "spring", stiffness: 300, damping: 30 }, opacity: { duration: 0.5 } } },
-    exit: (direction: number) => ({ zIndex: 0, x: direction < 0 ? "100%" : "-100%", opacity: 0 })
-  };
-
-  const t = {
+  const t = useMemo(() => ({
     en: {
-        updates: "Latest Updates", services: "Our Services", subtitle: "Horse Championship Management\nFrom planning to podium, we manage it all",
-        luxTitle: "Luxury Horse Marketplace", aboutTitle: "What are Beauty Shows?", aboutDesc: "Discover the world of purebred Arabian horse championships.",
-        ctaTitle: "Excellence Begins With a Conversation", ctaDesc: "Connect with Kuwait Shows to discuss championship strategies.",
-        explore: "Explore", learnMore: "Learn More", close: "Close"
+        heroSub: "The Elite Standard", heroTitle: "FROM THE ARENA\nTO THE PODIUM", heroDesc: "Mastering the art of Arabian Horse Championships through cutting-edge technology and flawless execution.",
+        marquee: "REGISTRATION OPEN FOR 2026 SEASON  •  NEW DIGITAL SCORING SYSTEM LIVE  •  BOOK YOUR VIP TABLE NOW  •  ",
+        aboutTitle: "The Marketplace", aboutDesc: "Where legacy meets opportunity. Discover world-class Arabian horses.",
+        guideTitle: "Show Guide", guideDesc: "The ultimate reference for ECAHO standards and beauty shows.",
+        servicesTitle: "OUR ECOSYSTEM",
+        ctaTitle: "LET'S BUILD YOUR NEXT EVENT", btn: "Contact Us", explore: "Discover"
     },
     ar: {
-        updates: "آخر التحديثات", services: "خدماتنا", subtitle: "إدارة احترافية لبطولات الخيل\nمن التخطيط إلى التتويج نحن نديرها",
-        luxTitle: "سوق الخيل", aboutTitle: "ماهي بطولات الجمال ؟", aboutDesc: "اكتشف عالم بطولات جمال الخيل العربية الأصيلة.",
-        ctaTitle: "التميز يبدأ بمحادثة", ctaDesc: "تواصل معنا لمناقشة استراتيجيات تنفيذ البطولة.",
-        explore: "اكتشف", learnMore: "اقرأ المزيد", close: "إغلاق"
+        heroSub: "المعيار النخبوي للبطولات", heroTitle: "من المنصة\nلتتويج", heroDesc: "نصنع الفخامة في إدارة بطولات الخيل العربية من خلال أحدث التقنيات الرقمية والتنفيذ الخالي من العيوب.",
+        marquee: "باب التسجيل مفتوح لموسم 2026  •  تم إطلاق نظام التحكيم الرقمي الجديد كلياً  •  احجز طاولتك الخاصة الآن  •  ",
+        aboutTitle: "سوق الخيل الفاخر", aboutDesc: "حيث تلتقي العراقة بالفرص. استكشف واقتنِ نخبة الخيل العربية الأصيلة.",
+        guideTitle: "دليل البطولات", guideDesc: "المرجع الشامل والدقيق لمعايير الإيكاهو وبطولات جمال الخيل.",
+        servicesTitle: "منظومتنا المتكاملة",
+        ctaTitle: "لنبني بطولتك القادمة", btn: "تواصل معنا للبدء", explore: "اكتشف الآن"
     }
-  };
+  }), []);
 
   if (!mounted) return null;
 
   return (
-    <main dir={lang === "ar" ? "rtl" : "ltr"} className="relative min-h-screen text-white pb-10 overflow-x-hidden">
-      <div className="fixed inset-0 -z-20 w-full h-full" style={{ backgroundImage: "url('/bg.png')", backgroundSize: "cover", backgroundPosition: "center", backgroundAttachment: "fixed" }} />
-      <div className="fixed inset-0 -z-10 bg-black/50 pointer-events-none" />
+    <main dir={lang === "ar" ? "rtl" : "ltr"} className="relative min-h-screen text-[#f4f4f4] selection:bg-[#bc9b6a] selection:text-[#050B18]">
+      
+      {/* 🌌 ORIGINAL FIXED BACKGROUND */}
+      <div className="fixed inset-0 z-[-20] w-full h-full pointer-events-none" style={{ backgroundImage: "url('/bg.png')", backgroundSize: "cover", backgroundPosition: "center", backgroundAttachment: "fixed" }} />
+      <div className="fixed inset-0 z-[-10] bg-gradient-to-b from-[#050B18]/90 via-[#050B18]/70 to-[#050B18]/95 pointer-events-none" />
 
-      <motion.button onClick={() => {
+      {/* LANGUAGE SWITCHER */}
+      <button onClick={() => {
         const newLang = lang === "en" ? "ar" : "en";
         localStorage.setItem("lang", newLang);
         setLang(newLang);
         window.dispatchEvent(new Event("languageChange"));
-      }} whileHover={{ scale: 1.05 }} className="fixed top-6 right-6 z-50 flex items-center gap-3 px-4 py-2 rounded-full border border-[#bc9b6a44] bg-black/60 backdrop-blur-md shadow-lg">
-        <FaGlobe className="text-[#bc9b6a]" />
-        <span className="font-semibold text-sm">{lang === "en" ? "العربية" : "English"}</span>
-      </motion.button>
+      }} className="fixed top-8 right-8 z-50 flex items-center gap-3 px-6 py-3 rounded-full bg-white/5 backdrop-blur-md border border-white/10 hover:border-[#bc9b6a] hover:text-[#bc9b6a] transition-all duration-500">
+        <FaGlobe className="text-xl" />
+        <span className={`font-bold text-xs uppercase ${lang === 'en' ? 'tracking-widest' : ''}`}>{lang === "en" ? "العربية" : "English"}</span>
+      </button>
 
-      {/* HERO SECTION WITH SCROLL DOWN */}
-      <section className="relative h-screen flex flex-col justify-center items-center text-center overflow-hidden">
-        <div className="absolute inset-0 z-0">
-          <Image src="/hero.jpg" alt="Hero" fill priority className="object-cover opacity-70 scale-105 animate-[slowZoom_20s_infinite_alternate]" />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/90" />
-        </div>
-        <div className="relative z-10 px-4 max-w-4xl">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1 }}>
-            <h1 className="text-5xl md:text-8xl font-extrabold tracking-tighter uppercase inline-block text-transparent bg-clip-text" style={{ backgroundImage: goldGradient }}>Kuwait Shows</h1>
-            <div className="h-1 bg-[#bc9b6a] w-20 md:w-24 mx-auto my-6 rounded-full shadow-[0_0_15px_#bc9b6a]" />
-            <p className="text-lg md:text-2xl font-bold text-white tracking-wide whitespace-pre-line drop-shadow-lg">{t[lang].subtitle}</p>
-          </motion.div>
-        </div>
-        {/* 🌟 السهم الفخم المفقود */}
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.5, duration: 1 }} className="absolute bottom-10 flex flex-col items-center gap-1 text-[#bc9b6a]">
-          <span className="text-[10px] uppercase tracking-[0.3em] mb-2 opacity-70">Scroll Down</span>
-          <div className="w-px h-12 bg-gradient-to-b from-[#bc9b6a] to-transparent animate-bounce" />
+      {/* 1. THE AWARD-WINNING HERO */}
+      <section className="relative w-full h-screen flex flex-col justify-center items-center overflow-hidden pt-10">
+        
+        {/* Massive Background Text moving slowly */}
+        <motion.div 
+            animate={{ x: ["-5%", "5%"] }} 
+            transition={{ repeat: Infinity, duration: 20, ease: "linear", repeatType: "reverse" }}
+            className="absolute top-1/4 w-full text-center z-0 pointer-events-none opacity-[0.03]"
+        >
+            <h1 className="text-[20vw] font-black uppercase tracking-tighter leading-none whitespace-nowrap">
+                KUWAIT SHOWS
+            </h1>
+        </motion.div>
+
+        {/* Foreground Arch Image */}
+        <motion.div initial={{ opacity: 0, y: 100 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }} className="relative z-10 w-[90%] max-w-[400px] h-[50vh] md:h-[55vh] mt-10 rounded-t-full rounded-b-3xl overflow-hidden border-2 border-[#bc9b6a]/30 shadow-[0_0_50px_rgba(188,155,106,0.1)]">
+            <Image src="/hero.jpg" alt="Hero" fill priority className="object-cover scale-110 animate-[slowZoom_20s_infinite_alternate]" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#050B18] via-transparent to-transparent opacity-80" />
+        </motion.div>
+
+        {/* Editorial Text Overlapping the Image */}
+        <motion.div initial="hidden" animate="visible" variants={fadeInUp} className="relative z-20 text-center -mt-16 md:-mt-24 px-4">
+            <h2 className="text-5xl md:text-7xl lg:text-[7rem] font-black text-[#bc9b6a] drop-shadow-[0_10px_20px_rgba(0,0,0,0.8)] leading-[1.2]">
+                {t[lang].heroTitle}
+            </h2>
+            <div className="flex flex-col items-center gap-4 mt-6">
+                <span className={`px-5 py-2 border border-[#bc9b6a]/50 text-[#bc9b6a] text-xs font-bold rounded-full bg-[#050B18]/50 backdrop-blur-md ${lang === 'en' ? 'uppercase tracking-[0.3em]' : ''}`}>
+                    {t[lang].heroSub}
+                </span>
+                <p className="text-lg md:text-xl text-gray-300 font-medium max-w-2xl leading-[1.8] drop-shadow-md">
+                    {t[lang].heroDesc}
+                </p>
+            </div>
         </motion.div>
       </section>
 
-      {/* MARKETPLACE & ABOUT */}
-      <section className="py-24 max-w-7xl mx-auto px-4 grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <Link href="/sell" className="group">
-            <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeInUp} className="relative h-[350px] md:h-[400px] rounded-3xl overflow-hidden border border-[#bc9b6a44] bg-black/40 backdrop-blur-md shadow-2xl group-hover:border-[#bc9b6a] transition-all">
-                <div className="p-10 flex flex-col h-full justify-between relative z-10">
-                  <h2 className="text-3xl font-bold" style={{ color: gold }}>{t[lang].luxTitle}</h2>
-                  <span className="inline-block w-fit px-8 py-3 rounded-full border border-[#bc9b6a] text-[#bc9b6a] group-hover:bg-[#bc9b6a] group-hover:text-black transition-all font-bold uppercase text-sm">{t[lang].explore}</span>
-                </div>
-                <Image src="/lux.jpg" alt="Lux" fill className="object-cover opacity-40 group-hover:scale-105 transition-transform duration-1000 z-0" />
-            </motion.div>
-          </Link>
+      {/* 2. THE INFINITE MARQUEE */}
+      <div className="w-full bg-[#bc9b6a] py-5 overflow-hidden flex items-center shadow-2xl relative z-30">
+        <motion.div 
+            animate={{ x: lang === 'en' ? ["0%", "-50%"] : ["-50%", "0%"] }} 
+            transition={{ repeat: Infinity, ease: "linear", duration: 30 }}
+            className={`flex whitespace-nowrap text-[#050B18] font-black text-sm md:text-base ${lang === 'en' ? 'uppercase tracking-[0.2em]' : ''}`}
+        >
+            <span>{t[lang].marquee}&nbsp;&nbsp;&nbsp;{t[lang].marquee}&nbsp;&nbsp;&nbsp;{t[lang].marquee}</span>
+        </motion.div>
+      </div>
 
-          <Link href="/about-horses" className="group">
-            <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeInUp} className="relative h-[350px] md:h-[400px] rounded-3xl overflow-hidden border border-[#bc9b6a44] bg-black/40 backdrop-blur-md shadow-2xl group-hover:border-[#bc9b6a] transition-all">
-                <div className="p-10 flex flex-col h-full justify-between relative z-10">
-                  <h2 className="text-3xl font-bold" style={{ color: gold }}>{t[lang].aboutTitle}</h2>
-                  <div className="flex items-center gap-3 text-[#bc9b6a] font-bold uppercase text-sm"><FaInfoCircle /> {t[lang].learnMore}</div>
-                </div>
-                <Image src="/about2.png" alt="About" fill className="object-cover opacity-40 group-hover:scale-105 transition-transform duration-1000 z-0" />
-            </motion.div>
-          </Link>
-      </section>
+      {/* 3. THE INTERACTIVE ACCORDION (الخدمات) */}
+      <section id="services" className="py-32 px-4 md:px-12 max-w-[1400px] mx-auto">
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeInUp} className="mb-16">
+              <h2 className="text-4xl md:text-6xl font-black text-[#bc9b6a] leading-[1.4]">
+                  {t[lang].servicesTitle}
+              </h2>
+              <div className="w-20 h-1 bg-[#bc9b6a] mt-6 opacity-50" />
+          </motion.div>
 
-      {/* UPDATES SLIDER */}
-      <section className="py-20 bg-white/5 border-y border-[#bc9b6a22] overflow-hidden">
-        <div className="max-w-6xl mx-auto px-4 text-center">
-          <motion.h2 initial="hidden" whileInView="visible" variants={fadeInUp} className="text-3xl md:text-4xl font-bold mb-12 uppercase tracking-widest" style={{ color: gold }}>{t[lang].updates}</motion.h2>
-          <div className="relative w-full aspect-video md:aspect-[21/9] rounded-3xl overflow-hidden shadow-2xl border border-white/10 group bg-black/20">
-            <AnimatePresence initial={false} custom={direction} mode="popLayout">
-              <motion.div key={slide} custom={direction} variants={slideVariants} initial="enter" animate="center" exit="exit" className="absolute inset-0 w-full h-full">
-                <Image src={slides[slide]} alt="Slide" fill className="object-cover" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-              </motion.div>
-            </AnimatePresence>
-            <div className="absolute inset-0 flex items-center justify-between px-4 z-20 opacity-0 group-hover:opacity-100 transition-opacity">
-              <button onClick={() => paginate(-1)} className="p-4 rounded-full bg-black/40 text-white hover:bg-[#bc9b6a] transition-all"><FaChevronLeft /></button>
-              <button onClick={() => paginate(1)} className="p-4 rounded-full bg-black/40 text-white hover:bg-[#bc9b6a] transition-all"><FaChevronRight /></button>
-            </div>
+          {/* Desktop Accordion */}
+          <div className="hidden md:flex w-full h-[60vh] min-h-[500px] gap-4">
+              {services.map((item) => (
+                  <div 
+                      key={item.id}
+                      onMouseEnter={() => setActiveService(item.id)}
+                      onMouseLeave={() => setActiveService(null)}
+                      onClick={() => setPopupService(item)}
+                      className={`relative rounded-3xl overflow-hidden cursor-pointer transition-all duration-[800ms] ease-[cubic-bezier(0.16,1,0.3,1)] flex border border-white/10 bg-[#050B18] group ${activeService === item.id ? 'flex-[4] shadow-[0_0_40px_rgba(188,155,106,0.2)] border-[#bc9b6a]/50' : activeService === null ? 'flex-1' : 'flex-[0.5] opacity-50 grayscale'}`}
+                  >
+                      <Image src={item.img} alt={item.titleEn} fill className="object-cover opacity-60 transition-transform duration-1000 group-hover:scale-105" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#050B18] via-[#050B18]/40 to-transparent" />
+                      
+                      {/* Vertical Title (When Collapsed) */}
+                      <div className={`absolute inset-0 flex items-end p-8 transition-opacity duration-500 ${activeService === item.id ? 'opacity-0' : 'opacity-100'}`}>
+                          <h3 className={`text-xl font-bold text-white whitespace-nowrap origin-bottom-left -rotate-90 translate-y-20 translate-x-4 ${lang === 'en' ? 'uppercase tracking-widest' : ''}`}>
+                              {lang === "en" ? item.titleEn : item.titleAr}
+                          </h3>
+                      </div>
+
+                      {/* Full Content (When Expanded) */}
+                      <div className={`absolute bottom-0 left-0 w-full p-10 transition-all duration-700 ${activeService === item.id ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+                          <h3 className="text-3xl lg:text-4xl font-black text-[#bc9b6a] mb-4 leading-[1.6]">
+                              {lang === "en" ? item.titleEn : item.titleAr}
+                          </h3>
+                          <p className="text-gray-300 font-medium text-lg max-w-lg leading-[1.8] line-clamp-2">
+                              {lang === "ar" ? item.descAr : item.descEn}
+                          </p>
+                          <span className={`mt-6 inline-flex items-center gap-3 text-white font-bold text-sm border-b border-[#bc9b6a] pb-1 hover:text-[#bc9b6a] transition-colors ${lang === 'en' ? 'tracking-widest uppercase' : ''}`}>
+                              {t[lang].explore} {lang === "ar" ? <FaArrowLeft /> : <FaArrowRight />}
+                          </span>
+                      </div>
+                  </div>
+              ))}
           </div>
-        </div>
+
+          {/* Mobile View */}
+          <div className="flex md:hidden flex-col gap-6">
+               {services.map((item) => (
+                  <motion.div 
+                      key={item.id}
+                      initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }} variants={fadeInUp}
+                      onClick={() => setPopupService(item)}
+                      className="relative h-[250px] rounded-3xl overflow-hidden border border-white/10"
+                  >
+                      <Image src={item.img} alt={item.titleEn} fill className="object-cover opacity-60" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#050B18] to-transparent" />
+                      <div className="absolute bottom-6 left-6 right-6">
+                          <h3 className="text-2xl font-black text-[#bc9b6a] mb-2 leading-[1.6]">{lang === "en" ? item.titleEn : item.titleAr}</h3>
+                          <p className="text-gray-300 text-sm font-medium line-clamp-2 leading-[1.8]">{lang === "ar" ? item.descAr : item.descEn}</p>
+                      </div>
+                  </motion.div>
+              ))}
+          </div>
       </section>
 
-      {/* SERVICES GRID - 2 COLUMNS ON MOBILE */}
-      <section id="services" className="py-24 max-w-7xl mx-auto px-4">
-          <motion.div initial="hidden" whileInView="visible" variants={fadeInUp} className="text-center mb-16">
-            <h2 className="text-3xl md:text-5xl font-extrabold inline-block pb-4 border-b border-[#bc9b6a44] uppercase tracking-widest" style={{ color: gold }}>{t[lang].services}</h2>
-          </motion.div>
-
-          {/* 🌟 شبكة الخدمات: كرتين بالموبايل (grid-cols-2) */}
-          <motion.div variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true }} className="grid grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
-            {services.map((item, i) => (
-              <motion.div
-                key={i}
-                variants={fadeInUp}
-                whileHover={{ y: -10 }}
-                onClick={() => setActiveService(item[1])}
-                className="group relative h-[180px] md:h-[300px] rounded-2xl md:rounded-3xl overflow-hidden cursor-pointer border border-[#bc9b6a22] hover:border-[#bc9b6a] transition-all shadow-2xl"
-              >
-                <Image src={item[2]} alt={item[1]} fill className="object-cover transition-transform duration-700 group-hover:scale-110" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/20 to-transparent" />
-                <div className="absolute bottom-0 left-0 w-full p-4 md:p-8">
-                  <h3 className="text-sm md:text-xl font-bold text-white group-hover:text-[#bc9b6a] transition-colors">{lang === "en" ? item[1] : item[0]}</h3>
-                </div>
+      {/* 4. SPLIT EDITORIAL CARDS (صورة كاملة بدون قص الأطراف) */}
+      <section className="py-20 px-6 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12">
+          <Link href="/sell" className="group">
+              <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeInUp} className="flex flex-col gap-6 h-full">
+                  {/* إزالة aspect ratio ليأخذ الصورة كاملة وبطبيعتها */}
+                  <div className="relative w-full h-[400px] md:h-[500px] overflow-hidden rounded-[2.5rem] bg-white/5 border border-white/10 group-hover:border-[#bc9b6a]/50 transition-colors duration-500">
+                      <Image src="/lux.jpg" alt="Lux" fill className="object-cover grayscale group-hover:grayscale-0 scale-105 group-hover:scale-100 transition-all duration-[1.5s] ease-[cubic-bezier(0.16,1,0.3,1)]" />
+                  </div>
+                  <div className="px-2">
+                      <h2 className="text-3xl md:text-4xl font-black mb-4 text-white group-hover:text-[#bc9b6a] transition-colors leading-[1.6]">{t[lang].aboutTitle}</h2>
+                      <p className="text-gray-400 font-medium text-lg leading-[1.8]">{t[lang].aboutDesc}</p>
+                  </div>
               </motion.div>
-            ))}
-          </motion.div>
+          </Link>
+
+          <Link href="/about-horses" className="group lg:mt-32">
+              <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeInUp} className="flex flex-col gap-6 h-full">
+                  <div className="relative w-full h-[400px] md:h-[500px] overflow-hidden rounded-[2.5rem] bg-white/5 border border-white/10 group-hover:border-[#bc9b6a]/50 transition-colors duration-500">
+                      <Image src="/about2.png" alt="Guide" fill className="object-cover grayscale group-hover:grayscale-0 scale-105 group-hover:scale-100 transition-all duration-[1.5s] ease-[cubic-bezier(0.16,1,0.3,1)]" />
+                  </div>
+                  <div className="px-2">
+                      <h2 className="text-3xl md:text-4xl font-black mb-4 text-white group-hover:text-[#bc9b6a] transition-colors leading-[1.6]">{t[lang].guideTitle}</h2>
+                      <p className="text-gray-400 font-medium text-lg leading-[1.8]">{t[lang].guideDesc}</p>
+                  </div>
+              </motion.div>
+          </Link>
       </section>
 
-      {/* POPUP & FOOTER (نفس الكود السابق مع تأكيد عمل البوب اب) */}
+      {/* POPUP MODAL FOR SERVICES */}
       <AnimatePresence>
-        {activeService && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-            <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }} className="relative bg-[#111] border border-[#bc9b6a] rounded-[2rem] p-6 md:p-12 max-w-2xl w-full shadow-2xl overflow-y-auto max-h-[85vh]">
-               <button onClick={() => setActiveService(null)} className="absolute top-6 right-6 text-gray-400 hover:text-[#bc9b6a] text-2xl"><FaTimes /></button>
-               <h2 className="text-2xl md:text-3xl font-bold mb-6 pr-8" style={{ color: gold }}>{lang === "ar" ? servicesDetails[activeService].titleAr : servicesDetails[activeService].titleEn}</h2>
-               <p className="text-gray-200 text-base md:text-lg leading-relaxed whitespace-pre-line font-light">{lang === "ar" ? servicesDetails[activeService].descAr : servicesDetails[activeService].desc}</p>
+        {popupService && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-[#050B18]/90 backdrop-blur-md">
+            <motion.div initial={{ scale: 0.95, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95, y: 20 }} className="relative bg-[#050B18] border border-[#bc9b6a]/30 rounded-[2.5rem] p-10 md:p-14 max-w-2xl w-full shadow-2xl">
+               <button onClick={() => setPopupService(null)} className="absolute top-6 right-6 text-gray-500 hover:text-white text-2xl p-2"><FaTimes /></button>
+               <span className={`text-[#bc9b6a] text-xs font-bold block mb-4 ${lang === 'en' ? 'uppercase tracking-[0.3em]' : ''}`}>Kuwait Shows Core</span>
+               <h2 className="text-3xl md:text-4xl font-black text-white mb-6 leading-[1.6]">
+                   {lang === "ar" ? popupService.titleAr : popupService.titleEn}
+               </h2>
+               <div className="w-full h-[1px] bg-white/10 mb-8" />
+               <p className="text-gray-300 text-lg md:text-xl leading-[1.8] font-medium">
+                   {lang === "ar" ? popupService.descAr : popupService.descEn}
+               </p>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      <footer id="contact" className="py-24 border-t border-[#bc9b6a22] text-center bg-black/40 backdrop-blur-md relative">
-        <Image src="/logo.png" alt="Logo" width={100} height={100} className="mx-auto mb-10 opacity-90" />
-        <h2 className="text-3xl md:text-4xl font-extrabold mb-4 px-4 uppercase tracking-tighter" style={{ color: gold }}>{t[lang].ctaTitle}</h2>
-        <div className="flex flex-wrap justify-center gap-6 px-4">
-            <a href="mailto:admin@kuwaitshows.com" className="flex items-center gap-4 py-4 px-8 rounded-2xl bg-white/5 border border-white/10 hover:border-[#bc9b6a] transition-all"><FaEnvelope className="text-[#bc9b6a]" /> <span className="text-sm md:text-base">admin@kuwaitshows.com</span></a>
-            <a href="https://wa.me/96597944003" className="flex items-center gap-4 py-4 px-8 rounded-2xl bg-white/5 border border-white/10 hover:border-[#25D366] transition-all"><FaWhatsapp className="text-[#25D366]" /> <span className="text-sm md:text-base" dir="ltr">+965 97944003</span></a>
+      {/* 5. MINIMALIST LUXURY CTA & FOOTER */}
+      <footer id="contact" className="pt-32 pb-12 relative max-w-5xl mx-auto px-6 text-center mt-20 border-t border-[#bc9b6a]/20">
+        
+        <h2 className="text-5xl md:text-7xl font-black mb-16 text-white leading-[1.4] drop-shadow-lg">{t[lang].ctaTitle}</h2>
+        
+        <div className="flex flex-col md:flex-row justify-center items-center gap-6 mb-32">
+            <a href="mailto:admin@kuwaitshows.com" className="w-full md:w-auto flex justify-center items-center gap-4 py-5 px-12 rounded-full bg-[#bc9b6a] text-[#050B18] font-bold hover:bg-white hover:scale-105 transition-all duration-300 shadow-[0_0_30px_rgba(188,155,106,0.3)]">
+                <FaEnvelope className="text-xl" /> <span className={lang === 'en' ? 'uppercase tracking-widest' : ''}>{t[lang].btn}</span>
+            </a>
+            <a href="https://wa.me/96597944003" dir="ltr" className="w-full md:w-auto flex justify-center items-center gap-4 py-5 px-12 rounded-full bg-white/5 text-white font-bold hover:bg-white/10 transition-colors border border-white/10">
+                <FaWhatsapp className="text-[#25D366] text-xl" /> +965 97944003
+            </a>
         </div>
-        <div className="mt-24 text-[10px] text-gray-500 font-medium tracking-[0.5em] uppercase">© {new Date().getFullYear()} KUWAIT SHOWS. ALL RIGHTS RESERVED.</div>
+        
+        <Image src="/logo.png" alt="Logo" width={80} height={80} className="mx-auto mb-6 opacity-30 hover:opacity-100 transition-opacity duration-500" />
+        <div className="text-[10px] text-gray-500 font-black tracking-[0.5em] uppercase">
+            © {new Date().getFullYear()} KUWAIT SHOWS.
+        </div>
       </footer>
+
+      {/* GLOBAL KEYFRAMES */}
+      <style jsx global>{`
+        @keyframes slowZoom {
+          0% { transform: scale(1.05); }
+          100% { transform: scale(1.15); }
+        }
+        ::-webkit-scrollbar {
+          width: 5px;
+        }
+        ::-webkit-scrollbar-track {
+          background: #050B18;
+        }
+        ::-webkit-scrollbar-thumb {
+          background: #bc9b6a;
+          border-radius: 10px;
+        }
+      `}</style>
     </main>
   );
 }
