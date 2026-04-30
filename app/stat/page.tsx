@@ -6,6 +6,29 @@ import {
   BarChart3, Dna, Palette, TrendingUp, Users, Info, HeartPulse, Award, Download, ShieldAlert, Baby, Globe, Star 
 } from "lucide-react";
 
+// 🔥 مكون ذكي لعداد الأرقام (يبدأ من 0 ويتصاعد للرقم المطلوب)
+const AnimatedNumber = ({ value }: { value: number }) => {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    let start = 0;
+    const duration = 1500; // مدة الحركة (1.5 ثانية)
+    const animate = (timestamp: number) => {
+      if (!start) start = timestamp;
+      const progress = Math.min((timestamp - start) / duration, 1);
+      // تأثير الانسيابية (Ease Out)
+      const ease = 1 - Math.pow(1 - progress, 4);
+      setCount(Math.floor(ease * value));
+      
+      if (progress < 1) requestAnimationFrame(animate);
+      else setCount(value);
+    };
+    requestAnimationFrame(animate);
+  }, [value]);
+
+  return <>{count}</>;
+};
+
 export default function GeneticsAnalyticsDashboard() {
   const [lang, setLang] = useState<"ar" | "en">("ar");
   const [mounted, setMounted] = useState(false);
@@ -16,7 +39,7 @@ export default function GeneticsAnalyticsDashboard() {
     if (savedLang) setLang(savedLang);
   }, []);
 
-  // --- دالة الطباعة السلسة والمباشرة للـ PDF ---
+  // --- دالة الطباعة السلسة للـ PDF ---
   const handlePrint = () => {
     window.print();
   };
@@ -57,7 +80,10 @@ export default function GeneticsAnalyticsDashboard() {
       damsTitle: "Dams Production",
       countLabel: "Count:",
       footerIdea: "Idea & Preparation",
-      footerDev: "Programming & Development"
+      footerDev: "Programming & Development",
+      thSireName: "Sire Name",
+      thDamName: "Dam Name",
+      thCount: "Count"
     },
     ar: {
       badge: "تحليلات مركز الجواد العربي • التقرير النهائي",
@@ -93,7 +119,10 @@ export default function GeneticsAnalyticsDashboard() {
       damsTitle: "إنتاج الأفراس",
       countLabel: "العدد:",
       footerIdea: "الفكرة والإعداد",
-      footerDev: "البرمجة والتصميم"
+      footerDev: "البرمجة والتصميم",
+      thSireName: "اسم الفحل",
+      thDamName: "اسم الفرس",
+      thCount: "العدد"
     }
   }), []);
 
@@ -209,7 +238,7 @@ export default function GeneticsAnalyticsDashboard() {
   if (!mounted) return null;
 
   return (
-    <div className="min-h-screen bg-[#050B18] text-white font-sans selection:bg-[#bc9b6a] selection:text-[#050B18] pb-10" dir={lang === "ar" ? "rtl" : "ltr"}>
+    <div className="min-h-screen bg-[#050B18] text-white font-sans selection:bg-[#bc9b6a] selection:text-[#050B18] pb-10 overflow-hidden" dir={lang === "ar" ? "rtl" : "ltr"}>
       
       {/* Background Decor */}
       <div className="fixed inset-0 z-0 opacity-[0.15] pointer-events-none no-print">
@@ -231,8 +260,13 @@ export default function GeneticsAnalyticsDashboard() {
       {/* المحتوى الرئيسي */}
       <div className="relative z-10 max-w-[1400px] mx-auto px-6 pt-24 text-start bg-[#050B18]">
         
-        {/* Header */}
-        <div className="mb-20 flex flex-col md:flex-row justify-between items-end gap-8 border-b border-white/10 pb-10">
+        {/* Header - Animated */}
+        <motion.div 
+          initial={{ opacity: 0, y: -30 }} 
+          animate={{ opacity: 1, y: 0 }} 
+          transition={{ duration: 0.8 }}
+          className="mb-20 flex flex-col md:flex-row justify-between items-end gap-8 border-b border-white/10 pb-10"
+        >
           <div>
             <span className="text-[#bc9b6a] text-sm font-black uppercase tracking-[0.3em] block mb-4">{t[lang].badge}</span>
             <h1 className="text-5xl md:text-7xl font-black leading-tight text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-500 whitespace-pre-line">
@@ -242,69 +276,91 @@ export default function GeneticsAnalyticsDashboard() {
           <div className="text-gray-400 max-w-xl font-medium leading-[1.8] text-start md:text-end">
             {t[lang].desc}
           </div>
-        </div>
+        </motion.div>
 
-        {/* TOP KPI CARDS */}
+        {/* TOP KPI CARDS - Animated */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
-          <div className="bg-black/40 border border-white/10 p-8 rounded-[2rem] backdrop-blur-xl relative overflow-hidden group">
-            <div className={`absolute -top-10 text-9xl text-white/[0.03] transition-colors ${lang === 'ar' ? '-right-10' : '-left-10'}`}><BarChart3 /></div>
-            <div className="text-gray-400 text-sm font-bold mb-4 uppercase tracking-widest">{t[lang].totHorses}</div>
-            <div className="text-6xl font-black text-white">{totalHorses}</div>
-            <div className="mt-4 text-xs font-bold text-green-400 bg-green-400/10 px-3 py-1.5 rounded-full inline-block">{t[lang].totHorsesSub}</div>
-          </div>
-          <div className="bg-black/40 border border-white/10 p-8 rounded-[2rem] backdrop-blur-xl relative overflow-hidden group">
-            <div className={`absolute -top-10 text-9xl text-white/[0.03] transition-colors ${lang === 'ar' ? '-right-10' : '-left-10'}`}><Dna /></div>
-            <div className="text-gray-400 text-sm font-bold mb-4 uppercase tracking-widest">{t[lang].famDiversity}</div>
-            <div className="text-6xl font-black text-white">{familiesCount}</div>
-            <div className="mt-4 text-xs font-bold text-[#bc9b6a] bg-[#bc9b6a]/10 px-3 py-1.5 rounded-full inline-block">{t[lang].famDiversitySub}</div>
-          </div>
-          <div className="bg-black/40 border border-white/10 p-8 rounded-[2rem] backdrop-blur-xl relative overflow-hidden group">
-            <div className={`absolute -top-10 text-9xl text-white/[0.03] transition-colors ${lang === 'ar' ? '-right-10' : '-left-10'}`}><Baby /></div>
-            <div className="text-gray-400 text-sm font-bold mb-4 uppercase tracking-widest">{t[lang].prodBase}</div>
-            <div className="text-6xl font-black text-white">58</div>
-            <div className="mt-4 text-xs font-bold text-blue-400 bg-blue-400/10 px-3 py-1.5 rounded-full inline-block">{t[lang].prodBaseSub}</div>
-          </div>
-          <div className="bg-black/40 border border-white/10 p-8 rounded-[2rem] backdrop-blur-xl relative overflow-hidden group">
-            <div className={`absolute -top-10 text-9xl text-white/[0.03] transition-colors ${lang === 'ar' ? '-right-10' : '-left-10'}`}><Users /></div>
-            <div className="text-gray-400 text-sm font-bold mb-4 uppercase tracking-widest">{t[lang].fullSib}</div>
-            <div className="text-6xl font-black text-white">{siblingGroups.length}</div>
-            <div className="mt-4 text-xs font-bold text-purple-400 bg-purple-400/10 px-3 py-1.5 rounded-full inline-block">{t[lang].fullSibSub}</div>
-          </div>
+          {[
+            { id: 1, icon: BarChart3, title: t[lang].totHorses, val: totalHorses, sub: t[lang].totHorsesSub, color: "text-green-400", bg: "bg-green-400/10" },
+            { id: 2, icon: Dna, title: t[lang].famDiversity, val: familiesCount, sub: t[lang].famDiversitySub, color: "text-[#bc9b6a]", bg: "bg-[#bc9b6a]/10" },
+            { id: 3, icon: Baby, title: t[lang].prodBase, val: 58, sub: t[lang].prodBaseSub, color: "text-blue-400", bg: "bg-blue-400/10" },
+            { id: 4, icon: Users, title: t[lang].fullSib, val: siblingGroups.length, sub: t[lang].fullSibSub, color: "text-purple-400", bg: "bg-purple-400/10" },
+          ].map((card, i) => (
+            <motion.div 
+              key={card.id}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.1 }}
+              transition={{ duration: 0.5, delay: i * 0.1 }}
+              className="bg-black/40 border border-white/10 p-8 rounded-[2rem] backdrop-blur-xl relative overflow-hidden group"
+            >
+              <div className={`absolute -top-10 text-9xl text-white/[0.03] transition-colors group-hover:text-white/5 ${lang === 'ar' ? '-right-10' : '-left-10'}`}><card.icon /></div>
+              <div className="text-gray-400 text-sm font-bold mb-4 uppercase tracking-widest">{card.title}</div>
+              <div className="text-6xl font-black text-white">
+                 <AnimatedNumber value={card.val as number} />
+              </div>
+              <div className={`mt-4 text-xs font-bold ${card.color} ${card.bg} px-3 py-1.5 rounded-full inline-block`}>{card.sub}</div>
+            </motion.div>
+          ))}
         </div>
 
         {/* --- الأرسان بقسم مخصص ومستقل --- */}
-        <div className="bg-white/5 border border-white/10 rounded-[2.5rem] p-10 md:p-14 mb-10 backdrop-blur-xl">
+        <motion.div 
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="bg-white/5 border border-white/10 rounded-[2.5rem] p-10 md:p-14 mb-10 backdrop-blur-xl"
+        >
            <div className="flex items-center gap-4 mb-10">
               <Award className="text-[#bc9b6a] w-8 h-8" />
               <h2 className="text-3xl font-black">{t[lang].strainsTitle}</h2>
            </div>
            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
               {strainsData.map((st, i) => (
-                <div key={i} className="bg-black/30 border border-white/5 p-6 rounded-3xl">
+                <motion.div 
+                  key={i} 
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.1 }}
+                  className="bg-black/30 border border-white/5 p-6 rounded-3xl"
+                >
                    <span className="block text-gray-400 text-sm font-bold mb-3 uppercase tracking-widest">{st.name}</span>
                    <div className="flex items-end justify-between mb-4">
-                      <span className="text-4xl font-black text-white">{st.percent}%</span>
-                      {/* إبراز العدد الحقيقي */}
-                      <span className="text-lg font-black text-black bg-[#bc9b6a] px-3 py-1 rounded-lg">{st.count}</span>
+                      <span className="text-4xl font-black text-white">
+                        <AnimatedNumber value={st.percent} />%
+                      </span>
+                      <span className="text-lg font-black text-black bg-[#bc9b6a] px-3 py-1 rounded-lg">
+                        <AnimatedNumber value={st.count} />
+                      </span>
                    </div>
                    <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
                       <motion.div 
                         initial={{width: 0}} 
-                        animate={{width: `${st.percent}%`}} 
-                        transition={{ duration: 1 }}
+                        whileInView={{width: `${st.percent}%`}} 
+                        viewport={{ once: true }}
+                        transition={{ duration: 1, delay: 0.5 }}
                         className={`h-full ${st.color}`} 
+                        style={{ width: `${st.percent}%` }}
                       />
                    </div>
-                </div>
+                </motion.div>
               ))}
            </div>
-        </div>
+        </motion.div>
 
         {/* TWO-COLUMN LAYOUT: DEMOGRAPHICS & HEALTH */}
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-10 mb-10">
           
           {/* AGE DEMOGRAPHICS */}
-          <div className="bg-gradient-to-b from-[#0A1A3A]/60 to-black/40 border border-white/10 rounded-[2.5rem] p-10 md:p-14 backdrop-blur-xl">
+          <motion.div 
+            initial={{ opacity: 0, x: lang === 'ar' ? 50 : -50 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="bg-gradient-to-b from-[#0A1A3A]/60 to-black/40 border border-white/10 rounded-[2.5rem] p-10 md:p-14 backdrop-blur-xl"
+          >
             <div className="flex items-center gap-4 mb-8">
               <TrendingUp className="text-blue-400 w-8 h-8" />
               <h2 className="text-3xl font-black">{t[lang].ageTitle}</h2>
@@ -319,26 +375,37 @@ export default function GeneticsAnalyticsDashboard() {
                       <h4 className="font-bold text-xl text-white">{lang === "ar" ? age.labelAr : age.labelEn}</h4>
                     </div>
                     <div className="flex items-center gap-4">
-                      <span className="text-3xl font-black text-white">{age.percent}%</span>
-                      {/* إبراز العدد الحقيقي */}
-                      <span className="text-lg font-black text-black bg-white px-3 py-1 rounded-lg">{age.count}</span>
+                      <span className="text-3xl font-black text-white">
+                        <AnimatedNumber value={age.percent} />%
+                      </span>
+                      <span className="text-lg font-black text-black bg-white px-3 py-1 rounded-lg">
+                        <AnimatedNumber value={age.count} />
+                      </span>
                     </div>
                   </div>
                   <div className="w-full h-2 bg-white/5 rounded-full overflow-hidden">
                     <motion.div 
                       initial={{ width: 0 }} 
-                      animate={{ width: `${age.percent}%` }} 
+                      whileInView={{ width: `${age.percent}%` }} 
+                      viewport={{ once: true }}
                       transition={{ duration: 1.5, ease: "easeOut" }}
                       className={`h-full ${age.color} rounded-full`}
+                      style={{ width: `${age.percent}%` }}
                     />
                   </div>
                 </div>
               ))}
             </div>
-          </div>
+          </motion.div>
 
           {/* HEALTH OVERVIEW */}
-          <div className="bg-gradient-to-b from-red-950/40 to-black/40 border border-red-900/30 rounded-[2.5rem] p-10 md:p-14 backdrop-blur-xl relative overflow-hidden">
+          <motion.div 
+            initial={{ opacity: 0, x: lang === 'ar' ? -50 : 50 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="bg-gradient-to-b from-red-950/40 to-black/40 border border-red-900/30 rounded-[2.5rem] p-10 md:p-14 backdrop-blur-xl relative overflow-hidden"
+          >
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-600 via-transparent to-transparent opacity-50" />
             
             <div className="flex items-center gap-4 mb-8">
@@ -359,25 +426,32 @@ export default function GeneticsAnalyticsDashboard() {
                   <div className="flex-1 h-14 bg-black/40 border border-white/5 rounded-xl flex items-center justify-between px-4 relative overflow-hidden">
                     <motion.div 
                       initial={{ width: 0 }} 
-                      animate={{ width: `${(disease.count / 25) * 100}%` }} 
+                      whileInView={{ width: `${(disease.count / 25) * 100}%` }} 
+                      viewport={{ once: true }}
                       transition={{ duration: 1.5 }}
                       className={`absolute ${lang === 'ar' ? 'right-0' : 'left-0'} top-0 h-full opacity-20 ${disease.severity === 'high' ? 'bg-red-500' : disease.severity === 'medium' ? 'bg-orange-500' : 'bg-yellow-500'}`}
+                      style={{ width: `${(disease.count / 25) * 100}%` }}
                     />
                     <span className="font-bold relative z-10 text-base">{lang === "ar" ? disease.nameAr : disease.nameEn}</span>
                     <div className="flex items-center gap-3 relative z-10">
                       <span className="text-red-400 font-black text-xl">{disease.percent}%</span>
-                      {/* إبراز العدد الحقيقي */}
                       <span className="bg-white/10 text-white px-3 py-1 rounded-lg font-black text-lg">{disease.count}</span>
                     </div>
                   </div>
                 </div>
               ))}
             </div>
-          </div>
+          </motion.div>
         </div>
 
         {/* --- DEEP GENETIC DISEASE TRACING --- */}
-        <div className="bg-black/60 border border-red-900/50 rounded-[2.5rem] p-10 md:p-14 backdrop-blur-xl mb-10 relative overflow-hidden">
+        <motion.div 
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="bg-black/60 border border-red-900/50 rounded-[2.5rem] p-10 md:p-14 backdrop-blur-xl mb-10 relative overflow-hidden"
+        >
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mb-10">
                 <div className="flex items-center gap-4">
                   <ShieldAlert className="text-red-500 w-10 h-10" />
@@ -390,22 +464,34 @@ export default function GeneticsAnalyticsDashboard() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {geneticTracing.map((trace, i) => (
-                    <div key={i} className="bg-red-950/20 border border-red-900/30 p-6 rounded-2xl">
+                    <motion.div 
+                      key={i} 
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      whileInView={{ opacity: 1, scale: 1 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: i * 0.1 }}
+                      className="bg-red-950/20 border border-red-900/30 p-6 rounded-2xl"
+                    >
                         <div className="flex justify-between items-start mb-3">
                            <h3 className="text-xl font-bold text-red-400">{lang === "ar" ? trace.diseaseAr : trace.diseaseEn}</h3>
                            <span className="text-sm font-black text-white bg-red-600 px-3 py-1 rounded-lg">{lang === "ar" ? trace.casesAr : trace.casesEn}</span>
                         </div>
                         <p className="text-gray-300 text-sm leading-[2] font-medium whitespace-pre-line">{lang === "ar" ? trace.sourceAr : trace.sourceEn}</p>
-                    </div>
+                    </motion.div>
                 ))}
             </div>
-        </div>
+        </motion.div>
 
         {/* THIRD ROW: FAMILIES & COLORS */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 mb-16">
           
           {/* Families Grid (العوائل) */}
-          <div className="lg:col-span-2 bg-white/5 border border-white/10 rounded-[2.5rem] p-10 md:p-14 backdrop-blur-xl relative">
+          <motion.div 
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="lg:col-span-2 bg-white/5 border border-white/10 rounded-[2.5rem] p-10 md:p-14 backdrop-blur-xl relative"
+          >
             <div className="flex items-center gap-4 mb-10">
               <Dna className="text-[#bc9b6a] w-8 h-8" />
               <h2 className="text-3xl font-black">{t[lang].famTitle}</h2>
@@ -423,17 +509,21 @@ export default function GeneticsAnalyticsDashboard() {
                 <div key={i} className="border-b border-white/10 pb-3 flex justify-between items-center p-2 rounded-lg">
                   <div>
                     <span className="font-bold text-lg text-white block mb-1">{fam.name}</span>
-                    {/* إبراز العدد الحقيقي */}
-                    <span className="text-sm font-black text-black bg-white/80 px-2 py-0.5 rounded inline-block">{t[lang].countLabel} {fam.count}</span>
+                    <span className="text-sm font-black text-black bg-white/80 px-2 py-0.5 rounded inline-block">{t[lang].countLabel} <AnimatedNumber value={fam.count} /></span>
                   </div>
-                  <span className="text-2xl font-black text-[#bc9b6a]">{fam.percent}%</span>
+                  <span className="text-2xl font-black text-[#bc9b6a]"><AnimatedNumber value={fam.percent} />%</span>
                 </div>
               ))}
             </div>
-          </div>
+          </motion.div>
 
           {/* Color Distribution */}
-          <div className="bg-white/5 border border-white/10 rounded-[2.5rem] p-10 md:p-14 backdrop-blur-xl flex flex-col justify-between">
+          <motion.div 
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="bg-white/5 border border-white/10 rounded-[2.5rem] p-10 md:p-14 backdrop-blur-xl flex flex-col justify-between"
+          >
             <div className="flex items-center gap-4 mb-8">
               <Palette className="text-[#bc9b6a] w-8 h-8" />
               <h2 className="text-3xl font-black">{t[lang].colorTitle}</h2>
@@ -445,24 +535,24 @@ export default function GeneticsAnalyticsDashboard() {
                   <div className="flex justify-between items-end mb-3">
                     <span className="font-bold text-lg text-white">{lang === "ar" ? color.nameAr : color.nameEn}</span>
                     <div className="flex items-center gap-3">
-                       <span className="font-black text-2xl text-white">{color.percent}%</span>
-                       {/* إبراز العدد الحقيقي */}
-                       <span className="font-black text-lg bg-[#bc9b6a] text-black px-3 py-1 rounded-lg">{color.count}</span>
+                       <span className="font-black text-2xl text-white"><AnimatedNumber value={color.percent} />%</span>
+                       <span className="font-black text-lg bg-[#bc9b6a] text-black px-3 py-1 rounded-lg"><AnimatedNumber value={color.count} /></span>
                     </div>
                   </div>
                   <div className="w-full h-2 bg-black/50 rounded-full overflow-hidden border border-white/5">
-                    {/* توحيد لون شريط التحميل ليكون ذهبياً لجميع الألوان */}
                     <motion.div 
                       initial={{ width: 0 }} 
-                      animate={{ width: `${color.percent}%` }} 
-                      transition={{ duration: 1 }}
+                      whileInView={{ width: `${color.percent}%` }} 
+                      viewport={{ once: true }}
+                      transition={{ duration: 1.2, ease: "easeOut" }}
                       className={`h-full rounded-full bg-[#bc9b6a]`}
+                      style={{ width: `${color.percent}%` }} 
                     />
                   </div>
                 </div>
               ))}
             </div>
-          </div>
+          </motion.div>
         </div>
 
         {/* --- SIBLING GROUPS (جروبات الأشقاء) --- */}
@@ -478,7 +568,6 @@ export default function GeneticsAnalyticsDashboard() {
               </p>
             </div>
             
-            {/* 🔥 الزر الذي يقوم بالطباعة المباشرة بصيغة PDF بكامل الألوان */}
             <button onClick={handlePrint} className="no-print bg-[#bc9b6a]/10 hover:bg-[#bc9b6a] text-[#bc9b6a] hover:text-[#050B18] border border-[#bc9b6a]/50 px-6 py-3 rounded-full font-bold transition-all duration-300 flex items-center gap-2">
               <Download className="w-5 h-5" />
               {t[lang].exportBtn}
@@ -487,7 +576,14 @@ export default function GeneticsAnalyticsDashboard() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {siblingGroups.map((group, idx) => (
-              <div key={idx} className="bg-[#050B18]/80 border border-[#bc9b6a]/30 rounded-[2.5rem] p-8 relative overflow-hidden group">
+              <motion.div 
+                key={idx}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: idx * 0.05 }}
+                className="bg-[#050B18]/80 border border-[#bc9b6a]/30 rounded-[2.5rem] p-8 relative overflow-hidden group"
+              >
                 <div className="mb-6 space-y-4 relative z-10">
                   <div className="bg-[#bc9b6a]/10 w-fit px-3 py-1 rounded-lg text-[10px] font-black text-[#bc9b6a] uppercase">
                     Group {idx + 1}
@@ -512,7 +608,8 @@ export default function GeneticsAnalyticsDashboard() {
                     ))}
                   </div>
                 </div>
-              </div>
+                <div className={`absolute -bottom-10 ${lang === 'ar' ? '-left-10' : '-right-10'} w-32 h-32 bg-[#bc9b6a]/5 blur-[50px] rounded-full pointer-events-none group-hover:bg-[#bc9b6a]/20 transition-all`} />
+              </motion.div>
             ))}
           </div>
         </div>
@@ -521,7 +618,12 @@ export default function GeneticsAnalyticsDashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 mb-10">
           
           {/* SIRES PRODUCTION TABLE */}
-          <div className="bg-[#050B18]/80 border border-blue-900/30 rounded-[2.5rem] p-10 backdrop-blur-xl shadow-2xl relative overflow-hidden">
+          <motion.div 
+            initial={{ opacity: 0, x: lang === 'ar' ? 50 : -50 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            className="bg-[#050B18]/80 border border-blue-900/30 rounded-[2.5rem] p-10 backdrop-blur-xl shadow-2xl relative overflow-hidden"
+          >
             <div className={`absolute top-0 ${lang === 'ar' ? 'left-0' : 'right-0'} w-64 h-64 bg-blue-500/5 blur-[100px] rounded-full pointer-events-none no-print`} />
             <div className="flex items-center gap-4 mb-8 relative z-10">
               <Award className="text-blue-400 w-8 h-8" />
@@ -550,10 +652,15 @@ export default function GeneticsAnalyticsDashboard() {
                 </tbody>
               </table>
             </div>
-          </div>
+          </motion.div>
 
           {/* DAMS PRODUCTION TABLE */}
-          <div className="bg-[#050B18]/80 border border-pink-900/30 rounded-[2.5rem] p-10 backdrop-blur-xl shadow-2xl relative overflow-hidden">
+          <motion.div 
+            initial={{ opacity: 0, x: lang === 'ar' ? -50 : 50 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            className="bg-[#050B18]/80 border border-pink-900/30 rounded-[2.5rem] p-10 backdrop-blur-xl shadow-2xl relative overflow-hidden"
+          >
             <div className={`absolute top-0 ${lang === 'ar' ? 'left-0' : 'right-0'} w-64 h-64 bg-pink-500/5 blur-[100px] rounded-full pointer-events-none no-print`} />
             <div className="flex items-center gap-4 mb-8 relative z-10">
               <Baby className="text-pink-400 w-8 h-8" />
@@ -582,11 +689,11 @@ export default function GeneticsAnalyticsDashboard() {
                 </tbody>
               </table>
             </div>
-          </div>
+          </motion.div>
 
         </div>
 
-        {/* 🔥 الفوتر المحدث والاحترافي جداً (مصمم ليكون بطاقات بارزة) */}
+        {/* 🔥 الفوتر المحدث والاحترافي جداً */}
         <footer className="mt-20 pt-10 border-t-2 border-white/10 flex flex-col md:flex-row justify-between items-center gap-8 relative z-10 bg-[#050B18]">
            
            <div className="flex items-center gap-4 bg-white/5 px-8 py-5 rounded-2xl border border-white/5 shadow-lg w-full md:w-auto justify-center md:justify-start">
@@ -613,7 +720,7 @@ export default function GeneticsAnalyticsDashboard() {
 
       </div>
 
-      {/* 🔥 أكواد الـ CSS الذكية لحل مشكلة اختفاء الألوان في الـ PDF تماماً */}
+      {/* 🔥 أكواد الـ CSS الذكية لحماية الطباعة وتثبيت الحركات */}
       <style jsx global>{`
         @media print {
           html, body {
@@ -628,6 +735,11 @@ export default function GeneticsAnalyticsDashboard() {
           * {
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
+            /* إلغاء الحركات في الطباعة لتجنب اختفاء العناصر */
+            transition: none !important;
+            animation: none !important;
+            opacity: 1 !important;
+            transform: none !important;
           }
         }
         
