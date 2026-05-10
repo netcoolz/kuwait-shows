@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
 import * as XLSX from "xlsx";
 import {
@@ -148,10 +148,10 @@ const Donut=({items,size=190,thick=34}:{items:{name:string;pct:number;hex:string
         const dash=(item.pct/100)*c,offset=c-acc*c/100;acc+=item.pct;
         return<motion.circle key={i} cx={size/2} cy={size/2} r={r} fill="none" stroke={item.hex}
           strokeWidth={hov===i?thick+8:thick} strokeDasharray={`${dash} ${c}`} strokeDashoffset={offset}
-          style={{transition:"stroke-width .2s,opacity .2s",opacity:hov!==null&&hov!==i?.25:1,cursor:"pointer"}}
+          style={{transition:"stroke-width .2s,opacity .2s",opacity: hov !== null && hov !== i ? 0.25 : 1,cursor:"pointer"}}
           onMouseEnter={()=>setHov(i)} onMouseLeave={()=>setHov(null)}
           initial={{strokeDashoffset:c}} whileInView={{strokeDashoffset:offset}} viewport={{once:true}}
-          transition={{duration:1.3,delay:i*.12,ease:"easeOut"}}/>;
+          transition={{duration:1.3,delay:i*0.12,ease:"easeOut"}}/>;
       })}
     </svg>
     <div className="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none">
@@ -241,7 +241,7 @@ export default function GeneticsAnalyticsDashboard(){
   const [loginError,setLoginError]=useState("");
 
   useEffect(()=>{
-    const ok=localStorage.getItem("ahc_auth");
+    const ok=typeof window!=="undefined" ? localStorage.getItem("ahc_auth") : null;
     if(ok==="yes"){
       setLoggedIn(true);
     }
@@ -298,7 +298,9 @@ export default function GeneticsAnalyticsDashboard(){
 
   // ─── AUTO SAVE ────────────────────────────────
   useEffect(()=>{
-    localStorage.setItem(STORAGE_KEY,JSON.stringify(horses));
+    if(typeof window!=="undefined"){
+      localStorage.setItem(STORAGE_KEY,JSON.stringify(horses));
+    }
   },[horses]);
 
   useEffect(()=>{setMounted(true);const s=localStorage.getItem("lang") as "ar"|"en"|null;if(s==="ar"||s==="en")setLang(s);},[]);
@@ -388,7 +390,7 @@ export default function GeneticsAnalyticsDashboard(){
     if(regFilter==="stallion")h=h.filter(x=>x.sex==="stallion");
     else if(regFilter==="mare")h=h.filter(x=>x.sex==="mare"||x.sex==="filly");
     else if(regFilter==="young")h=h.filter(x=>x.age<=2);
-    if(regQ){const q=regQ.toLowerCase();h=h.filter(x=>x.name.toLowerCase().includes(q)||x.nameAr.includes(regQ)||x.sire.toLowerCase().includes(q)||x.dam.toLowerCase().includes(q));}
+    if(regQ){const q=regQ.toLowerCase();h=h.filter(x=>x.name.toLowerCase().includes(q)||x.nameAr.includes(regQ)||(x.sire||"").toLowerCase().includes(q)||(x.dam||"").toLowerCase().includes(q));}
     return h;
   },[horses,regFilter,regQ]);
 
