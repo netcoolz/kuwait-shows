@@ -1012,7 +1012,7 @@ export default function GeneticsAnalyticsDashboard(){
 
         {/* Footer */}
         <footer className="py-12 flex flex-col sm:flex-row justify-between items-center gap-5 border-t" style={{borderColor:"rgba(255,255,255,0.05)"}}>
-          {[{label:tr.footerIdea,name:"ناصر الغيث",hex:GOLD},{label:tr.footerDev,name:"أحمد الصالح",hex:"#4f8ef7"}].map((f,i)=>(
+          {[{label:tr.footerIdea,name:"",hex:GOLD},{label:tr.footerDev,name:"أحمد الصالح",hex:"#4f8ef7"}].map((f,i)=>(
             <Cd key={i} accent={f.hex} className="px-7 py-5 flex items-center gap-4 w-full sm:w-auto">
               <div className="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0" style={{background:`${f.hex}15`,border:`1px solid ${f.hex}20`}}>
                 {i===0?<Star className="w-5 h-5" style={{color:f.hex}}/>:<Globe className="w-5 h-5" style={{color:f.hex}}/>}
