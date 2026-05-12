@@ -66,7 +66,7 @@ const T={
     siresTitle:"ترتيب إنتاج الفحول",damsTitle:"ترتيب إنتاج الأفراس",
     collapse:"طيّ",expand:"التفاصيل",offspring:"مُنتَج",
     footerIdea:"الفكرة والبيانات",footerDev:"التصميم والبرمجة",
-    colGrey:"أزرق (رمادي)",colChestnut:"أشقر",colBay:"أحمر",colBlack:"أسود",
+    colGrey:"أزرق",colChestnut:"أشقر",colBay:"أحمر",colBlack:"أسود",
     hMelanoma:"ميلانوما",hLaminitis:"حمرة الحافر",hEpilepsy:"صرع",
     hPig:"فقدان التصبغ",hFertility:"مشاكل خصوبة",hGuttural:"الأكياس الهوائية",hOvarian:"ورم المبيض",
     critical:"حرج",high:"مرتفع",medium:"متوسط",
@@ -75,23 +75,28 @@ const T={
   },
 } as const;
 
+// ─── CONSTANTS & THEME ────────────────────────────────────────────────────────
+const GOLD = "#D4AF37"; 
+const BG_DARK = "#0B101E"; 
+const TEXT_MUTED = "#94A3B8"; 
+const TEXT_LIGHT = "#F8FAFC"; 
+const CARD_BG = "rgba(30, 41, 59, 0.4)"; 
+const BORDER_COLOR = "rgba(255, 255, 255, 0.12)"; 
+
 const STRAINS:Strain[]  = ["Dahman Shahwan","Koheilan Rodan","Saqlawi Jidran","Obeyan Om Jreis","Hadban Enzahi"];
 const FAMILIES:Family[] = ["Ansata Meryta","Latiefa","Ansata White Nile","Alimaar Abbeyyah","Ansata Sherrara","Authentic Nabeelah","Ghazala Al Rayyan","Bilqis EV","Haifaa Al Waab","El Thay Maniha","NK Lubna","Loubna Al Waab","Rababa Al Rayyan"];
-const C_MAP:Record<Color,string>={grey:"#94a3b8",chestnut:"#b45309",bay:"#7f1d1d",black:"#374151"};
-const S_CLR:Record<Strain,string>={"Dahman Shahwan":"#4f8ef7","Koheilan Rodan":"#a78bfa","Saqlawi Jidran":"#34d399","Obeyan Om Jreis":"#c9a96e","Hadban Enzahi":"#fb7185"};
+const C_MAP:Record<Color,string>={grey:"#94A3B8",chestnut:"#D97706",bay:"#991B1B",black:"#334155"};
+const S_CLR:Record<Strain,string>={"Dahman Shahwan":"#60A5FA","Koheilan Rodan":"#A78BFA","Saqlawi Jidran":"#34D399","Obeyan Om Jreis":"#D4AF37","Hadban Enzahi":"#F472B6"};
 const HKEYS:Health[]=["melanoma","laminitis","epilepsy","pigmentation_loss","fertility","guttural_pouch","ovarian_tumor"];
 const AGE_BUCKETS=[
-  {min:0,max:1.9,hex:"#10b981"},{min:2,max:2.9,hex:"#14b8a6"},{min:3,max:3.9,hex:"#06b6d4"},
-  {min:4,max:6.9,hex:"#4f8ef7"},{min:7,max:10.9,hex:"#818cf8"},{min:11,max:13.9,hex:"#a78bfa"},
-  {min:14,max:17.9,hex:"#c9a96e"},{min:18,max:999,hex:"#fb7185"},
+  {min:0,max:1.9,hex:"#10B981"},{min:2,max:2.9,hex:"#14B8A6"},{min:3,max:3.9,hex:"#06B6D4"},
+  {min:4,max:6.9,hex:"#3B82F6"},{min:7,max:10.9,hex:"#6366F1"},{min:11,max:13.9,hex:"#8B5CF6"},
+  {min:14,max:17.9,hex:"#D4AF37"},{min:18,max:999,hex:"#F43F5E"},
 ];
-const GOLD="#C9A96E",BG="#06071A";
 
 // ─── DATA UTILITIES (SMART PARSING) ───────────────────────────────────────────
-
 function calculateAge(dateValue: any) {
   if (!dateValue) return 1;
-
   const today = new Date();
   let birthYear = today.getFullYear();
   let birthMonth = 0;
@@ -100,25 +105,16 @@ function calculateAge(dateValue: any) {
   try {
     if (typeof dateValue === 'number' || (typeof dateValue === 'string' && !isNaN(Number(dateValue)) && Number(dateValue) > 10000)) {
       const date = new Date(Math.round((Number(dateValue) - 25569) * 86400 * 1000));
-      birthYear = date.getFullYear();
-      birthMonth = date.getMonth();
-      birthDay = date.getDate();
+      birthYear = date.getFullYear(); birthMonth = date.getMonth(); birthDay = date.getDate();
     } else if (typeof dateValue === 'string') {
       if (dateValue.includes('/') || dateValue.includes('-')) {
         const parts = dateValue.split(/[\/\-]/);
         if (parts.length === 3) {
           if (parts[0].length === 4) {
-            birthYear = Number(parts[0]);
-            birthMonth = Number(parts[1]) - 1;
-            birthDay = Number(parts[2]);
+            birthYear = Number(parts[0]); birthMonth = Number(parts[1]) - 1; birthDay = Number(parts[2]);
           } else if (parts[2].length === 4) {
-            birthYear = Number(parts[2]);
-            birthMonth = Number(parts[1]) - 1;
-            birthDay = Number(parts[0]);
-            if (birthMonth > 11) {
-              birthMonth = Number(parts[0]) - 1;
-              birthDay = Number(parts[1]);
-            }
+            birthYear = Number(parts[2]); birthMonth = Number(parts[1]) - 1; birthDay = Number(parts[0]);
+            if (birthMonth > 11) { birthMonth = Number(parts[0]) - 1; birthDay = Number(parts[1]); }
           }
         } else {
           const d = new Date(dateValue);
@@ -131,37 +127,24 @@ function calculateAge(dateValue: any) {
         birthYear = d.getFullYear(); birthMonth = d.getMonth(); birthDay = d.getDate();
       }
     } else if (dateValue instanceof Date) {
-      birthYear = dateValue.getFullYear();
-      birthMonth = dateValue.getMonth();
-      birthDay = dateValue.getDate();
+      birthYear = dateValue.getFullYear(); birthMonth = dateValue.getMonth(); birthDay = dateValue.getDate();
     }
-  } catch (e) {
-    return 1;
-  }
+  } catch (e) { return 1; }
 
   if (isNaN(birthYear)) return 1;
-
   let age = today.getFullYear() - birthYear;
   const monthDiff = today.getMonth() - birthMonth;
-  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDay)) {
-    age--;
-  }
-  
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDay)) age--;
   return Math.max(1, age);
 }
 
-// 🛑 تم إصلاح مشكلة قراءة Female كـ Male 🛑
 function getHorseSex(gender: string, birthDate: any): Sex {
   const age = calculateAge(birthDate);
   if (!gender) return age <= 3 ? "filly" : "mare";
-  
   const g = String(gender).toLowerCase().trim();
-  
-  // نفحص بدقة هل هو ذكر صريح وليس مجرد أنه يحتوي كلمة male داخل female
   if (g === "male" || g === "m" || g.includes("stallion") || g.includes("colt")) {
     return age <= 3 ? "colt" : "stallion";
   }
-  
   return age <= 3 ? "filly" : "mare";
 }
 
@@ -194,11 +177,8 @@ function normalizeFamily(family:string):Family{
 function mapHealthConditions(health: any, otherHealth?: any): Health[] {
   const result: Health[] = [];
   let value = "";
-  if (Array.isArray(health)) {
-      value = health.join(" ").toLowerCase();
-  } else {
-      value = `${health || ""} ${otherHealth || ""}`.toLowerCase();
-  }
+  if (Array.isArray(health)) { value = health.join(" ").toLowerCase(); } 
+  else { value = `${health || ""} ${otherHealth || ""}`.toLowerCase(); }
 
   if(value.includes("melanoma")) result.push("melanoma");
   if(value.includes("laminit")) result.push("laminitis");
@@ -207,7 +187,6 @@ function mapHealthConditions(health: any, otherHealth?: any): Health[] {
   if(value.includes("fertil")) result.push("fertility");
   if(value.includes("guttural")) result.push("guttural_pouch");
   if(value.includes("ovarian") || value.includes("tumor")) result.push("ovarian_tumor");
-  
   return result;
 }
 
@@ -215,7 +194,7 @@ function mapHealthConditions(health: any, otherHealth?: any): Health[] {
 const mk=(text:string,q:string)=>{
   if(!q) return <>{text}</>;
   const re=new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")})`, "gi");
-  return <>{text.split(re).map((p,i)=>re.test(p)?<mark key={i} className="rounded-sm" style={{background:"rgba(201,169,110,0.45)",color:"white"}}>{p}</mark>:p)}</>;
+  return <>{text.split(re).map((p,i)=>re.test(p)?<mark key={i} className="rounded-sm" style={{background:"rgba(212,175,55,0.45)",color:TEXT_LIGHT}}>{p}</mark>:p)}</>;
 };
 const Num=({v,d=0}:{v:number;d?:number})=>{
   const [val,setVal]=useState("0");
@@ -227,16 +206,16 @@ const Num=({v,d=0}:{v:number;d?:number})=>{
     });return()=>cancelAnimationFrame(id);
   },[v,d]);return<>{val}</>;
 };
-const Bar=({pct,hex="#C9A96E",delay=0,h="h-2"}:{pct:number;hex?:string;delay?:number;h?:string})=>(
-  <div className={`w-full ${h} rounded-full overflow-hidden`} style={{background:"rgba(255,255,255,0.05)"}}>
+const Bar=({pct,hex=GOLD,delay=0,h="h-2.5"}:{pct:number;hex?:string;delay?:number;h?:string})=>(
+  <div className={`w-full ${h} rounded-full overflow-hidden`} style={{background:"rgba(255,255,255,0.06)", border: `1px solid ${BORDER_COLOR}`}}>
     <motion.div className="h-full rounded-full" style={{background:hex}}
       initial={{width:0}} whileInView={{width:`${Math.min(pct,100)}%`}} viewport={{once:true}} transition={{duration:1.2,ease:"easeOut",delay}}/>
   </div>
 );
-const Ring=({pct,hex,size=56,sw=4}:{pct:number;hex:string;size?:number;sw?:number})=>{
+const Ring=({pct,hex,size=56,sw=5}:{pct:number;hex:string;size?:number;sw?:number})=>{
   const r=(size-sw*2)/2,c=2*Math.PI*r;
   return(<svg width={size} height={size} className="-rotate-90">
-    <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth={sw}/>
+    <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth={sw}/>
     <motion.circle cx={size/2} cy={size/2} r={r} fill="none" stroke={hex} strokeWidth={sw} strokeLinecap="round"
       strokeDasharray={c} initial={{strokeDashoffset:c}} whileInView={{strokeDashoffset:c-(pct/100)*c}}
       viewport={{once:true}} transition={{duration:1.5,ease:"easeOut"}}/>
@@ -260,32 +239,32 @@ const Donut=({items,size=190,thick=34}:{items:{name:string;pct:number;hex:string
     </svg>
     <div className="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none">
       {hov!==null?<>
-        <span className="text-xl font-black text-white">{valid[hov]?.pct.toFixed(1)}%</span>
-        <span className="text-[10px] font-bold mt-0.5 max-w-[70px] leading-tight" style={{color:"rgba(255,255,255,0.5)"}}>{valid[hov]?.name}</span>
+        <span className="text-xl font-black" style={{color: TEXT_LIGHT}}>{valid[hov]?.pct.toFixed(1)}%</span>
+        <span className="text-[10px] font-bold mt-0.5 max-w-[70px] leading-tight" style={{color: TEXT_MUTED}}>{valid[hov]?.name}</span>
       </>:<span className="text-[10px] font-bold" style={{color:"rgba(255,255,255,0.2)"}}>hover</span>}
     </div>
   </div>);
 };
 const Cd=({children,className="",accent}:{children:React.ReactNode;className?:string;accent?:string})=>(
   <div className={`relative rounded-[1.75rem] overflow-hidden ${className}`}
-    style={{background:"linear-gradient(155deg,rgba(255,255,255,0.05) 0%,rgba(255,255,255,0.02) 100%)",border:"1px solid rgba(255,255,255,0.08)",backdropFilter:"blur(20px)"}}>
-    {accent&&<div className="absolute top-0 left-0 right-0 h-px" style={{background:`linear-gradient(90deg,transparent,${accent}55,transparent)`}}/>}
+    style={{background:CARD_BG, border:`1px solid ${BORDER_COLOR}`, backdropFilter:"blur(20px)", boxShadow: "0 10px 30px rgba(0,0,0,0.2)"}}>
+    {accent&&<div className="absolute top-0 left-0 right-0 h-1" style={{background:`linear-gradient(90deg,transparent,${accent}88,transparent)`}}/>}
     {children}
   </div>
 );
 const SecNum=({n,hex}:{n:string;hex:string})=>(
-  <span className="text-[100px] font-black absolute -top-4 leading-none select-none pointer-events-none" style={{color:hex,opacity:.04}}>{n}</span>
+  <span className="text-[100px] font-black absolute -top-4 leading-none select-none pointer-events-none" style={{color:hex,opacity:.05}}>{n}</span>
 );
 const SecHead=({n,icon:Icon,hex,title,sub}:{n:string;icon:React.ElementType;hex:string;title:string;sub?:string})=>(
-  <div className="relative mb-7">
+  <div className="relative mb-8">
     <SecNum n={n} hex={hex}/>
-    <div className="relative z-10 flex items-center gap-3">
-      <div className="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0" style={{background:`${hex}14`,border:`1px solid ${hex}22`}}>
-        <Icon className="w-5 h-5" style={{color:hex}}/>
+    <div className="relative z-10 flex items-center gap-4">
+      <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0" style={{background:`${hex}15`,border:`1px solid ${hex}30`,boxShadow:`0 4px 15px ${hex}20`}}>
+        <Icon className="w-6 h-6" style={{color:hex}}/>
       </div>
       <div>
-        <h2 className="text-2xl md:text-3xl font-black" style={{background:`linear-gradient(90deg,#fff,${hex})`,WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",backgroundClip:"text"}}>{title}</h2>
-        {sub&&<p className="text-xs mt-0.5" style={{color:"rgba(255,255,255,0.3)"}}>{sub}</p>}
+        <h2 className="text-3xl md:text-4xl font-black" style={{background:`linear-gradient(90deg,${TEXT_LIGHT},${hex})`,WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",backgroundClip:"text",letterSpacing:"-0.5px"}}>{title}</h2>
+        {sub&&<p className="text-sm mt-1" style={{color:TEXT_MUTED}}>{sub}</p>}
       </div>
     </div>
   </div>
@@ -293,11 +272,11 @@ const SecHead=({n,icon:Icon,hex,title,sub}:{n:string;icon:React.ElementType;hex:
 
 function SrchBox({value,onChange,placeholder,isAr}:{value:string;onChange:(v:string)=>void;placeholder:string;isAr:boolean}){
   return(<div className="relative">
-    <Search className={`absolute top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none ${isAr?"right-3.5":"left-3.5"}`} style={{color:"rgba(255,255,255,0.25)"}}/>
+    <Search className={`absolute top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none ${isAr?"right-4":"left-4"}`} style={{color:TEXT_MUTED}}/>
     <input value={value} onChange={e=>onChange(e.target.value)} placeholder={placeholder}
-      className={`w-full text-sm text-white placeholder-gray-600 focus:outline-none py-2.5 rounded-xl transition-colors ${isAr?"pr-10 pl-9":"pl-10 pr-9"}`}
-      style={{background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.09)"}} onFocus={e=>(e.target.style.borderColor=`${GOLD}45`)} onBlur={e=>(e.target.style.borderColor="rgba(255,255,255,0.09)")}/>
-    {value&&<button onClick={()=>onChange("")} className={`absolute top-1/2 -translate-y-1/2 ${isAr?"left-3":"right-3"}`} style={{color:"rgba(255,255,255,0.3)"}}><X className="w-3.5 h-3.5"/></button>}
+      className={`w-full text-sm text-white placeholder-slate-500 focus:outline-none py-3 rounded-xl transition-all ${isAr?"pr-11 pl-10":"pl-11 pr-10"}`}
+      style={{background:"rgba(255,255,255,0.04)",border:`1px solid ${BORDER_COLOR}`}} onFocus={e=>(e.target.style.borderColor=GOLD)} onBlur={e=>(e.target.style.borderColor=BORDER_COLOR)}/>
+    {value&&<button onClick={()=>onChange("")} className={`absolute top-1/2 -translate-y-1/2 ${isAr?"left-3":"right-3"}`} style={{color:TEXT_MUTED}}><X className="w-4 h-4"/></button>}
   </div>);
 }
 
@@ -331,7 +310,6 @@ export default function GeneticsAnalyticsDashboard(){
   const { scrollY } = useScroll();
   const prog = useTransform(scrollY, [0, 6000], ["0%", "100%"]);
 
-  // ─── SUPABASE LOAD ────────────────────────────────────────────────────────────
   useEffect(() => {
     const saved = localStorage.getItem("farm");
     if (!saved) { router.push("/farmlogin"); return; }
@@ -345,13 +323,11 @@ export default function GeneticsAnalyticsDashboard(){
     const { data, error } = await supabase.from("horses").select("*").eq("farm_id", farmId).order("created_at", { ascending: false });
     
     if (error) { console.error(error); setLoading(false); return; }
-    
     if (!data) { setHorses([]); setLoading(false); return; }
 
     const formatted: Horse[] = data.map((h: any, index: number) => {
       const rawBirthDate = h.birth_date || h.birthDate || h.BirthDate || h.dob || null;
       const rawNameAr = h.name_ar || h.nameAr || h.NameArabic;
-      
       return {
         id: h.id || `horse-${index}`,
         name: h.name || "",
@@ -366,7 +342,6 @@ export default function GeneticsAnalyticsDashboard(){
         health: mapHealthConditions(h.health, h.otherHealth || h.other_health)
       };
     });
-    
     setHorses(formatted);
     setLoading(false);
   }
@@ -400,7 +375,6 @@ export default function GeneticsAnalyticsDashboard(){
   }, []);
   const goTop = useCallback(() => window.scrollTo({ top: 0, behavior: "smooth" }), []);
 
-  // ─── COMPUTED SMART STATS ─────────────────────────────────────────────────────
   const S = useMemo(() => {
     const tot = horses.length;
     const ages = AGE_BUCKETS.map(b => horses.filter(h => h.age >= b.min && h.age <= b.max).length);
@@ -455,7 +429,6 @@ export default function GeneticsAnalyticsDashboard(){
       .map(([name, kids]) => ({ name, n: kids.length, kids }))
       .sort((a, b) => b.n - a.n);
       
-    // 🛑 تم التأكيد على أن الفرس المنتجة عمرها >= 4 سنوات ومصنفة أنثى
     const prodMares = horses.filter(h => (h.sex === "mare" || h.sex === "filly") && h.age >= 4).length;
 
     return { tot, ages, col, str, fam, dis, sibs, siresRanked, damsRanked, prodMares };
@@ -468,9 +441,9 @@ export default function GeneticsAnalyticsDashboard(){
 
   if (!mounted || loading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-[#06071A]">
-        <Dna className="w-12 h-12 text-[#C9A96E] animate-spin mb-4"/>
-        <p className="text-white/50 font-black tracking-widest uppercase">Analyzing Genetic Data...</p>
+      <div className="min-h-screen flex flex-col items-center justify-center p-6" style={{background: BG_DARK}}>
+        <Dna className="w-12 h-12 animate-spin mb-4" style={{color: GOLD}}/>
+        <p className="font-black tracking-widest uppercase" style={{color: TEXT_MUTED}}>Analyzing Genetic Data...</p>
       </div>
     );
   }
@@ -479,7 +452,7 @@ export default function GeneticsAnalyticsDashboard(){
 
   const hL = (k: Health) => ({ melanoma: tr.hMelanoma, laminitis: tr.hLaminitis, epilepsy: tr.hEpilepsy, pigmentation_loss: tr.hPig, fertility: tr.hFertility, guttural_pouch: tr.hGuttural, ovarian_tumor: tr.hOvarian })[k];
   const cL = (c: Color) => ({ grey: tr.colGrey, chestnut: tr.colChestnut, bay: tr.colBay, black: tr.colBlack })[c];
-  const sevClr = (k: Health) => ["melanoma", "epilepsy", "laminitis", "ovarian_tumor"].includes(k) ? "#fb7185" : k === "fertility" || k === "guttural_pouch" ? "#f97316" : "#facc15";
+  const sevClr = (k: Health) => ["melanoma", "epilepsy", "laminitis", "ovarian_tumor"].includes(k) ? "#F43F5E" : k === "fertility" || k === "guttural_pouch" ? "#F59E0B" : "#FBBF24";
   const sevLbl = (s: string) => s === "critical" ? tr.critical : s === "high" ? tr.high : tr.medium;
 
   const navItems = [
@@ -491,48 +464,44 @@ export default function GeneticsAnalyticsDashboard(){
   return (<>
     <style>{`
       @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=Cairo:wght@400;500;700;900&display=swap');
-      *{box-sizing:border-box;}body{font-family:'Inter','Cairo',sans-serif;background:${BG};}html{scroll-behavior:smooth;}
+      *{box-sizing:border-box;}body{font-family:'Inter','Cairo',sans-serif;background:${BG_DARK};}html{scroll-behavior:smooth;}
       @keyframes orb{0%,100%{transform:translate(0,0)}50%{transform:translate(35px,22px)}}
       @keyframes pg{0%,100%{opacity:.4}50%{opacity:1}}
       .ob1{animation:orb 22s ease-in-out infinite}.ob2{animation:orb 28s ease-in-out infinite reverse}
-      @media print{html,body{background:${BG}!important;color:white!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}.no-print{display:none!important;}*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;transition:none!important;animation:none!important;}}
-      ::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-track{background:rgba(255,255,255,.02)}::-webkit-scrollbar-thumb{background:rgba(201,169,110,.22);border-radius:9px}::-webkit-scrollbar-thumb:hover{background:rgba(201,169,110,.5)}
+      @media print{html,body{background:${BG_DARK}!important;color:white!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}.no-print{display:none!important;}*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;transition:none!important;animation:none!important;}}
+      ::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-track{background:rgba(255,255,255,.02)}::-webkit-scrollbar-thumb{background:rgba(212,175,55,.3);border-radius:9px}::-webkit-scrollbar-thumb:hover{background:rgba(212,175,55,.6)}
       input,select{color-scheme:dark}
     `}</style>
     
-    <div dir={dir} style={{ background: BG }} className="min-h-screen text-white pb-24 overflow-x-hidden">
+    <div dir={dir} style={{ background: BG_DARK }} className="min-h-screen text-white pb-24 overflow-x-hidden">
 
       <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden no-print">
-        <div className={`ob1 absolute ${isAr?"right-[-25%]":"left-[-25%]"} top-[-25%] w-[70vw] h-[70vw] rounded-full`} style={{background:"radial-gradient(circle,rgba(201,169,110,0.08) 0%,transparent 65%)"}}/>
-        <div className={`ob2 absolute ${isAr?"left-[-25%]":"right-[-25%]"} bottom-[-25%] w-[65vw] h-[65vw] rounded-full`} style={{background:"radial-gradient(circle,rgba(79,142,247,0.07) 0%,transparent 65%)"}}/>
-        <div className="absolute top-1/3 left-1/3 w-[40vw] h-[40vw] rounded-full" style={{background:"radial-gradient(circle,rgba(167,139,250,0.04) 0%,transparent 65%)"}}/>
-        <svg className="absolute inset-0 w-full h-full" style={{opacity:.022}} xmlns="http://www.w3.org/2000/svg">
-          <defs><pattern id="gr" width="56" height="56" patternUnits="userSpaceOnUse"><path d="M56 0L0 0 0 56" fill="none" stroke="white" strokeWidth=".5"/></pattern></defs>
-          <rect width="100%" height="100%" fill="url(#gr)"/>
-        </svg>
+        <div className={`ob1 absolute ${isAr?"right-[-25%]":"left-[-25%]"} top-[-25%] w-[70vw] h-[70vw] rounded-full`} style={{background:"radial-gradient(circle,rgba(212,175,55,0.06) 0%,transparent 65%)"}}/>
+        <div className={`ob2 absolute ${isAr?"left-[-25%]":"right-[-25%]"} bottom-[-25%] w-[65vw] h-[65vw] rounded-full`} style={{background:"radial-gradient(circle,rgba(59,130,246,0.05) 0%,transparent 65%)"}}/>
+        <div className="absolute top-1/3 left-1/3 w-[40vw] h-[40vw] rounded-full" style={{background:"radial-gradient(circle,rgba(167,139,250,0.03) 0%,transparent 65%)"}}/>
       </div>
 
-      <motion.div className="fixed top-[88px] left-0 h-[2px] z-[100] no-print origin-left" style={{width:prog,background:`linear-gradient(90deg,${GOLD},#fbbf24,${GOLD})`}}/>
+      <motion.div className="fixed top-[88px] left-0 h-[3px] z-[100] no-print origin-left" style={{width:prog,background:`linear-gradient(90deg,${GOLD},#FBBF24,${GOLD})`,boxShadow:`0 0 10px ${GOLD}88`}}/>
 
       <nav className="fixed top-[90px] left-0 right-0 z-50 no-print">
-        <div style={{background:"rgba(6,7,26,0.82)",backdropFilter:"blur(24px)",borderBottom:"1px solid rgba(255,255,255,0.05)"}}>
-          <div className="max-w-[1440px] mx-auto px-4 flex items-center h-[50px] gap-2">
-            <div className="w-2 h-2 rounded-full shrink-0" style={{background:GOLD,boxShadow:`0 0 8px 2px ${GOLD}55`,animation:"pg 2s infinite"}}/>
-            <div className="flex items-center gap-0.5 overflow-x-auto flex-1 pb-px" style={{scrollbarWidth:"none"}}>
+        <div style={{background:"rgba(11, 16, 30, 0.85)",backdropFilter:"blur(24px)",borderBottom:`1px solid ${BORDER_COLOR}`}}>
+          <div className="max-w-[1440px] mx-auto px-4 flex items-center h-[55px] gap-3">
+            <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{background:GOLD,boxShadow:`0 0 10px 2px ${GOLD}66`,animation:"pg 2s infinite"}}/>
+            <div className="flex items-center gap-1.5 overflow-x-auto flex-1 pb-px" style={{scrollbarWidth:"none"}}>
               {navItems.map(item => (
                 <button key={item.id} onClick={() => goTo(item.id)}
-                  className="whitespace-nowrap px-3 py-1 rounded-lg text-[11px] font-bold transition-all"
-                  style={activeNav === item.id ? { background: `${GOLD}18`, color: GOLD } : { color: "rgba(255,255,255,0.35)" }}>
+                  className="whitespace-nowrap px-4 py-1.5 rounded-xl text-[12px] font-bold transition-all"
+                  style={activeNav === item.id ? { background: "rgba(212,175,55,0.15)", color: GOLD, border: `1px solid rgba(212,175,55,0.3)` } : { color: TEXT_MUTED, border: `1px solid transparent` }}>
                   {item.label}
                 </button>
               ))}
             </div>
-            <button onClick={toggleLang} className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold shrink-0"
-              style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",color:"rgba(255,255,255,0.45)"}}>
-              <Globe className="w-3.5 h-3.5"/>{isAr?"EN":"AR"}
+            <button onClick={toggleLang} className="flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-[12px] font-bold shrink-0 transition-all hover:bg-white/5"
+              style={{background:"rgba(255,255,255,0.05)",border:`1px solid ${BORDER_COLOR}`,color:TEXT_LIGHT}}>
+              <Globe className="w-4 h-4"/>{isAr?"EN":"AR"}
             </button>
-            <button onClick={() => router.push("/farmdashboard")} className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold shrink-0"
-              style={{background:`${GOLD}18`,border:`1px solid ${GOLD}40`,color:GOLD}}>
+            <button onClick={() => router.push("/farmdashboard")} className="flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-[12px] font-bold shrink-0 transition-all hover:scale-105"
+              style={{background:GOLD,color:"#000"}}>
               BACK
             </button>
           </div>
@@ -541,49 +510,49 @@ export default function GeneticsAnalyticsDashboard(){
 
       <AnimatePresence>
         {showTop && <motion.button onClick={goTop} initial={{ opacity: 0, scale: .7 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: .7 }}
-          className={`fixed bottom-8 ${isAr ? "left-8" : "right-8"} z-50 w-11 h-11 rounded-2xl flex items-center justify-center no-print`}
-          style={{ background: GOLD, color: BG, boxShadow: `0 8px 30px ${GOLD}50` }}>
-          <ChevronUp className="w-5 h-5" />
+          className={`fixed bottom-8 ${isAr ? "left-8" : "right-8"} z-50 w-12 h-12 rounded-2xl flex items-center justify-center no-print hover:scale-110 transition-transform`}
+          style={{ background: GOLD, color: "#000", boxShadow: `0 8px 25px rgba(212,175,55,0.4)` }}>
+          <ChevronUp className="w-6 h-6" />
         </motion.button>}
       </AnimatePresence>
 
-      <div className="relative z-10 max-w-[1440px] mx-auto px-4 md:px-7 pt-[160px]">
+      <div className="relative z-10 max-w-[1440px] mx-auto px-4 md:px-7 pt-[180px]">
 
         {/* ═══ OVERVIEW ═══ */}
         <section id="overview">
           <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .9 }}
-            className="py-12 md:py-16 border-b" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
+            className="py-12 md:py-16 border-b" style={{ borderColor: BORDER_COLOR }}>
             <div className="flex flex-col lg:flex-row justify-between items-start gap-10">
               <div className="flex-1">
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: .2 }}
-                  className="inline-flex items-center gap-2.5 mb-5 px-4 py-1.5 rounded-full"
-                  style={{ background: `${GOLD}12`, border: `1px solid ${GOLD}25` }}>
-                  <div className="w-1.5 h-1.5 rounded-full" style={{ background: GOLD, animation: "pg 2s infinite" }} />
-                  <span className="text-[11px] font-black uppercase tracking-[.22em]" style={{ color: GOLD }}>{farm?.farmName || tr.badge}</span>
+                  className="inline-flex items-center gap-2.5 mb-6 px-5 py-2 rounded-full"
+                  style={{ background: "rgba(212,175,55,0.1)", border: `1px solid rgba(212,175,55,0.3)` }}>
+                  <div className="w-2 h-2 rounded-full" style={{ background: GOLD, animation: "pg 2s infinite" }} />
+                  <span className="text-[12px] font-black uppercase tracking-[.2em]" style={{ color: GOLD }}>{farm?.farmName || tr.badge}</span>
                 </motion.div>
-                <h1 className="text-5xl md:text-[5.5rem] font-black leading-[1.05] mb-5 whitespace-pre-line"
-                  style={{ background: `linear-gradient(135deg,#fff 0%,${GOLD} 55%,rgba(255,255,255,.3) 100%)`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
+                <h1 className="text-5xl md:text-[5.5rem] font-black leading-[1.1] mb-6 whitespace-pre-line"
+                  style={{ background: `linear-gradient(135deg, ${TEXT_LIGHT} 0%, ${GOLD} 65%, ${TEXT_MUTED} 100%)`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", letterSpacing: "-1px" }}>
                   {tr.title}
                 </h1>
-                <p className="max-w-lg font-medium leading-relaxed" style={{ color: "rgba(255,255,255,0.4)" }}>{tr.desc}</p>
+                <p className="max-w-lg font-medium leading-relaxed text-[16px]" style={{ color: TEXT_MUTED }}>{tr.desc}</p>
               </div>
-              <div className="grid grid-cols-2 gap-3 lg:w-[290px] shrink-0">
+              <div className="grid grid-cols-2 gap-4 lg:w-[320px] shrink-0">
                 {[
-                  { icon: Activity, v: S.tot, label: tr.totHorses, hex: "#34d399", pct: 100 },
+                  { icon: Activity, v: S.tot, label: tr.totHorses, hex: "#34D399", pct: 100 },
                   { icon: Dna, v: STRAINS.filter(s => S.str[s] > 0).length, label: tr.strains, hex: GOLD, pct: 50 },
-                  { icon: Baby, v: S.prodMares, label: tr.prod, hex: "#4f8ef7", pct: Math.round(S.prodMares / Math.max(S.tot, 1) * 100) },
-                  { icon: Users, v: S.sibs.length, label: tr.sib, hex: "#a78bfa", pct: Math.round(S.sibs.length / Math.max(S.tot, 1) * 100) },
+                  { icon: Baby, v: S.prodMares, label: tr.prod, hex: "#60A5FA", pct: Math.round(S.prodMares / Math.max(S.tot, 1) * 100) },
+                  { icon: Users, v: S.sibs.length, label: tr.sib, hex: "#A78BFA", pct: Math.round(S.sibs.length / Math.max(S.tot, 1) * 100) },
                 ].map((c, i) => (
                   <motion.div key={i} initial={{ opacity: 0, scale: .9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: .3 + i * .1 }}>
-                    <Cd accent={c.hex} className="p-4 hover:scale-[1.02] transition-transform">
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: `${c.hex}18` }}>
-                          <c.icon className="w-[18px] h-[18px]" style={{ color: c.hex }} />
+                    <Cd accent={c.hex} className="p-5 hover:scale-[1.03] transition-transform">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: `${c.hex}15`, border: `1px solid ${c.hex}30` }}>
+                          <c.icon className="w-5 h-5" style={{ color: c.hex }} />
                         </div>
-                        <Ring pct={c.pct} hex={c.hex} size={46} sw={4} />
+                        <Ring pct={c.pct} hex={c.hex} size={48} sw={5} />
                       </div>
-                      <div className="text-4xl font-black text-white mb-1"><Num v={c.v} /></div>
-                      <div className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "rgba(255,255,255,0.3)" }}>{c.label}</div>
+                      <div className="text-4xl font-black mb-1" style={{color: TEXT_LIGHT}}><Num v={c.v} /></div>
+                      <div className="text-[11px] font-bold uppercase tracking-wider" style={{ color: TEXT_MUTED }}>{c.label}</div>
                     </Cd>
                   </motion.div>
                 ))}
@@ -593,32 +562,32 @@ export default function GeneticsAnalyticsDashboard(){
         </section>
 
         {/* ═══ GENETICS ═══ */}
-        <section id="genetics" className="py-12 border-b" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
+        <section id="genetics" className="py-16 border-b" style={{ borderColor: BORDER_COLOR }}>
           <SecHead n="01" icon={Dna} hex={GOLD} title={tr.secStrains} />
-          <Cd accent={GOLD} className="p-7 mb-6">
-            <div className="flex flex-col xl:flex-row gap-8 items-center">
-              <div className="shrink-0 flex flex-col items-center gap-5">
-                <Donut items={STRAINS.map(s => ({ name: s, pct: S.tot > 0 ? (S.str[s] / S.tot) * 100 : 0, hex: S_CLR[s] }))} size={200} thick={38} />
-                <div className="space-y-1.5">
+          <Cd accent={GOLD} className="p-8 mb-8">
+            <div className="flex flex-col xl:flex-row gap-10 items-center">
+              <div className="shrink-0 flex flex-col items-center gap-6">
+                <Donut items={STRAINS.map(s => ({ name: s, pct: S.tot > 0 ? (S.str[s] / S.tot) * 100 : 0, hex: S_CLR[s] }))} size={220} thick={42} />
+                <div className="space-y-2">
                   {STRAINS.filter(s => S.str[s] > 0).map((s, i) => (
-                    <div key={i} className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full shrink-0" style={{ background: S_CLR[s] }} />
-                      <span className="text-xs font-bold" style={{ color: "rgba(255,255,255,0.45)" }}>{s}</span>
-                      <span className="text-xs font-black text-white ml-auto pl-2">{S.str[s]}</span>
+                    <div key={i} className="flex items-center gap-3">
+                      <div className="w-3 h-3 rounded-full shrink-0" style={{ background: S_CLR[s], boxShadow: `0 0 8px ${S_CLR[s]}88` }} />
+                      <span className="text-[13px] font-bold" style={{ color: TEXT_MUTED }}>{s}</span>
+                      <span className="text-[13px] font-black ml-auto pl-3" style={{color: TEXT_LIGHT}}>{S.str[s]}</span>
                     </div>
                   ))}
-                  {STRAINS.every(s => S.str[s] === 0) && <div className="text-white/20 italic text-xs py-2">No data</div>}
+                  {STRAINS.every(s => S.str[s] === 0) && <div className="text-white/20 italic text-sm py-2">No data</div>}
                 </div>
               </div>
-              <div className="flex-1 space-y-3 w-full">
+              <div className="flex-1 space-y-4 w-full">
                 {STRAINS.filter(s => S.str[s] > 0).map((s, i) => {
                   const pct = S.tot > 0 ? (S.str[s] / S.tot) * 100 : 0; return (
                     <div key={i}>
-                      <div className="flex items-center justify-between mb-1.5">
-                        <span className="font-bold text-sm" style={{ color: "rgba(255,255,255,0.75)" }}>{s}</span>
-                        <div className="flex items-center gap-2">
-                          <span className="text-xl font-black text-white">{pct.toFixed(1)}%</span>
-                          <span className="text-sm font-black px-2.5 py-0.5 rounded-lg" style={{ background: S_CLR[s], color: BG }}>{S.str[s]}</span>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-bold text-[15px]" style={{ color: TEXT_LIGHT }}>{s}</span>
+                        <div className="flex items-center gap-3">
+                          <span className="text-xl font-black" style={{color: TEXT_LIGHT}}>{pct.toFixed(1)}%</span>
+                          <span className="text-sm font-black px-3 py-1 rounded-lg" style={{ background: `${S_CLR[s]}20`, color: S_CLR[s], border: `1px solid ${S_CLR[s]}40` }}>{S.str[s]}</span>
                         </div>
                       </div>
                       <Bar pct={pct} hex={S_CLR[s]} delay={.3 + i * .08} h="h-3" />
@@ -628,47 +597,47 @@ export default function GeneticsAnalyticsDashboard(){
               </div>
             </div>
           </Cd>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-            <Cd accent={GOLD} className="lg:col-span-2 p-7">
-              <div className="flex items-center gap-3 mb-5">
-                <Award className="w-5 h-5" style={{ color: GOLD }} />
-                <h3 className="text-xl font-black">{tr.secFam}</h3>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <Cd accent={GOLD} className="lg:col-span-2 p-8">
+              <div className="flex items-center gap-3 mb-6">
+                <Award className="w-6 h-6" style={{ color: GOLD }} />
+                <h3 className="text-2xl font-black" style={{color: TEXT_LIGHT}}>{tr.secFam}</h3>
               </div>
-              <div className="flex items-start gap-3 p-4 rounded-2xl mb-5" style={{ background: `${GOLD}09`, border: `1px solid ${GOLD}18` }}>
-                <Award className="w-4 h-4 shrink-0 mt-0.5" style={{ color: GOLD }} />
-                <p className="text-sm font-medium leading-relaxed" style={{ color: "rgba(255,255,255,0.6)" }}><strong className="text-white">{tr.ansata}</strong> {tr.ansataDesc}</p>
+              <div className="flex items-start gap-4 p-5 rounded-2xl mb-6" style={{ background: `rgba(212,175,55,0.08)`, border: `1px solid rgba(212,175,55,0.2)` }}>
+                <Award className="w-5 h-5 shrink-0 mt-0.5" style={{ color: GOLD }} />
+                <p className="text-[15px] font-medium leading-relaxed" style={{ color: TEXT_LIGHT }}><strong style={{ color: GOLD }}>{tr.ansata}</strong> {tr.ansataDesc}</p>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {FAMILIES.map((fam, i) => {
                   const cnt = S.fam[fam] || 0; const pct = S.tot > 0 ? (cnt / S.tot * 100) : 0;
-                  return cnt > 0 ? (<div key={i} className="flex items-center justify-between px-3 py-2.5 rounded-xl transition-colors"
-                    style={{ background: "rgba(255,255,255,0.025)", border: "1px solid rgba(255,255,255,0.05)" }}>
-                    <div>
-                      <div className="font-bold text-sm text-white mb-1">{fam}</div>
-                      <Bar pct={pct} hex={GOLD} h="h-1" delay={i * .03} />
+                  return cnt > 0 ? (<div key={i} className="flex items-center justify-between px-4 py-3 rounded-xl transition-colors hover:bg-white/5"
+                    style={{ background: "rgba(255,255,255,0.03)", border: `1px solid ${BORDER_COLOR}` }}>
+                    <div className="flex-1 mr-4">
+                      <div className="font-bold text-[13px] mb-1.5" style={{color: TEXT_LIGHT}}>{fam}</div>
+                      <Bar pct={pct} hex={GOLD} h="h-1.5" delay={i * .03} />
                     </div>
-                    <div className="text-right ml-4 shrink-0">
+                    <div className="text-right shrink-0">
                       <div className="text-lg font-black" style={{ color: GOLD }}>{pct.toFixed(1)}%</div>
-                      <div className="text-[10px] font-bold" style={{ color: "rgba(255,255,255,0.25)" }}>{cnt}</div>
+                      <div className="text-[11px] font-bold" style={{ color: TEXT_MUTED }}>{cnt}</div>
                     </div>
                   </div>) : null;
                 })}
               </div>
             </Cd>
-            <Cd className="p-7 flex flex-col gap-5">
-              <div className="flex items-center gap-3"><Palette className="w-5 h-5" style={{ color: GOLD }} /><h3 className="text-xl font-black">{tr.colorTitle}</h3></div>
+            <Cd className="p-8 flex flex-col gap-6">
+              <div className="flex items-center gap-3"><Palette className="w-6 h-6" style={{ color: GOLD }} /><h3 className="text-2xl font-black" style={{color: TEXT_LIGHT}}>{tr.colorTitle}</h3></div>
               <div className="flex justify-center">
-                <Donut items={(["grey", "chestnut", "bay", "black"] as Color[]).filter(c => S.col[c] > 0).map(c => ({ name: cL(c), pct: S.tot > 0 ? (S.col[c] / S.tot) * 100 : 0, hex: C_MAP[c] }))} size={168} thick={30} />
+                <Donut items={(["grey", "chestnut", "bay", "black"] as Color[]).filter(c => S.col[c] > 0).map(c => ({ name: cL(c), pct: S.tot > 0 ? (S.col[c] / S.tot) * 100 : 0, hex: C_MAP[c] }))} size={180} thick={34} />
               </div>
-              <div className="space-y-3">
+              <div className="space-y-4">
                 {(["grey", "chestnut", "bay", "black"] as Color[]).map((c, i) => {
                   const cnt = S.col[c], pct = S.tot > 0 ? (cnt / S.tot * 100) : 0;
                   return (<div key={i}>
-                    <div className="flex justify-between items-center mb-1">
-                      <div className="flex items-center gap-2"><div className="w-2.5 h-2.5 rounded-full" style={{ background: C_MAP[c] }} /><span className="text-sm font-bold" style={{ color: "rgba(255,255,255,0.75)" }}>{cL(c)}</span></div>
-                      <div className="flex items-center gap-2"><span className="font-black text-base text-white">{pct.toFixed(2)}%</span><span className="text-xs font-black px-2 py-0.5 rounded-lg" style={{ background: `${GOLD}18`, color: GOLD }}>{cnt}</span></div>
+                    <div className="flex justify-between items-center mb-2">
+                      <div className="flex items-center gap-2.5"><div className="w-3 h-3 rounded-full" style={{ background: C_MAP[c], border: '1px solid rgba(255,255,255,0.2)' }} /><span className="text-[14px] font-bold" style={{ color: TEXT_LIGHT }}>{cL(c)}</span></div>
+                      <div className="flex items-center gap-3"><span className="font-black text-[16px]" style={{color: TEXT_LIGHT}}>{pct.toFixed(1)}%</span><span className="text-[12px] font-black px-2.5 py-1 rounded-lg" style={{ background: `rgba(212,175,55,0.15)`, color: GOLD, border: `1px solid rgba(212,175,55,0.3)` }}>{cnt}</span></div>
                     </div>
-                    <Bar pct={pct} hex={C_MAP[c]} delay={i * .1} h="h-2" />
+                    <Bar pct={pct} hex={C_MAP[c]} delay={i * .1} h="h-2.5" />
                   </div>);
                 })}
               </div>
@@ -677,44 +646,44 @@ export default function GeneticsAnalyticsDashboard(){
         </section>
 
         {/* ═══ HEALTH & AGE ═══ */}
-        <section id="health-age" className="py-12 border-b" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
-          <SecHead n="02" icon={TrendingUp} hex="#4f8ef7" title={`${tr.secAge} · ${tr.secHealth}`} />
-          <div className="grid grid-cols-1 xl:grid-cols-5 gap-5">
-            <Cd accent="#4f8ef7" className="xl:col-span-3 p-7">
-              <div className="flex items-center gap-3 mb-6"><TrendingUp className="w-5 h-5 text-blue-400" /><h3 className="text-xl font-black">{tr.secAge}</h3></div>
-              <div className="space-y-4">
+        <section id="health-age" className="py-16 border-b" style={{ borderColor: BORDER_COLOR }}>
+          <SecHead n="02" icon={TrendingUp} hex="#60A5FA" title={`${tr.secAge} · ${tr.secHealth}`} />
+          <div className="grid grid-cols-1 xl:grid-cols-5 gap-6">
+            <Cd accent="#60A5FA" className="xl:col-span-3 p-8">
+              <div className="flex items-center gap-3 mb-8"><TrendingUp className="w-6 h-6 text-blue-400" /><h3 className="text-2xl font-black" style={{color: TEXT_LIGHT}}>{tr.secAge}</h3></div>
+              <div className="space-y-5">
                 {AGE_BUCKETS.map((b, i) => {
                   const cnt = S.ages[i]; const pct = S.tot > 0 ? (cnt / S.tot) * 100 : 0;
                   return (<div key={i}>
-                    <div className="flex items-center justify-between mb-1.5">
-                      <div className="flex items-center gap-2.5"><div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: b.hex }} /><span className="font-bold text-sm" style={{ color: "rgba(255,255,255,0.75)" }}>{tr.ageGroup[i]}</span></div>
-                      <div className="flex items-center gap-3"><span className="text-lg font-black text-white">{pct.toFixed(1)}%</span><span className="text-xs font-black px-2.5 py-0.5 rounded-lg" style={{ background: "rgba(255,255,255,0.1)", color: "white" }}>{cnt}</span></div>
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-3"><div className="w-3 h-3 rounded-full shrink-0" style={{ background: b.hex, boxShadow: `0 0 8px ${b.hex}88` }} /><span className="font-bold text-[14px]" style={{ color: TEXT_LIGHT }}>{tr.ageGroup[i]}</span></div>
+                      <div className="flex items-center gap-4"><span className="text-xl font-black" style={{color: TEXT_LIGHT}}>{pct.toFixed(1)}%</span><span className="text-[12px] font-black px-3 py-1 rounded-lg" style={{ background: "rgba(255,255,255,0.1)", color: "white" }}>{cnt}</span></div>
                     </div>
-                    <Bar pct={pct} hex={b.hex} delay={i * .07} h="h-2.5" />
+                    <Bar pct={pct} hex={b.hex} delay={i * .07} h="h-3" />
                   </div>);
                 })}
               </div>
             </Cd>
-            <Cd accent="#fb7185" className="xl:col-span-2 p-7">
-              <div className="flex items-center gap-3 mb-5"><HeartPulse className="w-5 h-5 text-red-400" /><h3 className="text-xl font-black">{tr.secHealth}</h3></div>
-              <div className="flex items-start gap-3 p-4 rounded-2xl mb-5" style={{ background: "rgba(251,113,133,0.07)", border: "1px solid rgba(251,113,133,0.15)" }}>
-                <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
-                <p className="text-xs font-medium leading-relaxed" style={{ color: "rgba(255,200,200,0.8)" }}>{tr.healthNote}</p>
+            <Cd accent="#F43F5E" className="xl:col-span-2 p-8">
+              <div className="flex items-center gap-3 mb-6"><HeartPulse className="w-6 h-6 text-rose-500" /><h3 className="text-2xl font-black" style={{color: TEXT_LIGHT}}>{tr.secHealth}</h3></div>
+              <div className="flex items-start gap-3 p-5 rounded-2xl mb-6" style={{ background: "rgba(244,63,94,0.1)", border: "1px solid rgba(244,63,94,0.2)" }}>
+                <AlertCircle className="w-5 h-5 text-rose-400 shrink-0 mt-0.5" />
+                <p className="text-[14px] font-medium leading-relaxed" style={{ color: "#FFE4E6" }}>{tr.healthNote}</p>
               </div>
-              <div className="space-y-3">
+              <div className="space-y-4">
                 {HKEYS.map((k, i) => {
                   const cnt = S.dis[k] || 0; const hx = sevClr(k);
                   return cnt > 0 ? (<div key={i}>
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-sm font-bold" style={{ color: "rgba(255,255,255,0.75)" }}>{hL(k)}</span>
-                      <div className="flex items-center gap-2">
-                        <span className="text-[10px] font-black px-2 py-0.5 rounded-full" style={{ background: `${hx}18`, color: hx, border: `1px solid ${hx}25` }}>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="text-[14px] font-bold" style={{ color: TEXT_LIGHT }}>{hL(k)}</span>
+                      <div className="flex items-center gap-3">
+                        <span className="text-[11px] font-black px-2.5 py-1 rounded-full" style={{ background: `${hx}15`, color: hx, border: `1px solid ${hx}30` }}>
                           {sevLbl(DISEASE_TRACE.find(d => d.key === k)?.sev || "medium")}
                         </span>
-                        <span className="text-sm font-black text-white">{cnt}</span>
+                        <span className="text-lg font-black" style={{color: TEXT_LIGHT}}>{cnt}</span>
                       </div>
                     </div>
-                    <Bar pct={(cnt / Math.max(...HKEYS.map(k2 => S.dis[k2] || 0), 1)) * 100} hex={hx} delay={.1 + i * .07} h="h-1.5" />
+                    <Bar pct={(cnt / Math.max(...HKEYS.map(k2 => S.dis[k2] || 0), 1)) * 100} hex={hx} delay={.1 + i * .07} h="h-2" />
                   </div>) : null;
                 })}
               </div>
@@ -723,9 +692,9 @@ export default function GeneticsAnalyticsDashboard(){
         </section>
 
         {/* ═══ DISEASES ═══ */}
-        <section id="diseases" className="py-12 border-b" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
-          <SecHead n="03" icon={ShieldAlert} hex="#fb7185" title={tr.secDisease} sub={tr.diseaseDesc} />
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        <section id="diseases" className="py-16 border-b" style={{ borderColor: BORDER_COLOR }}>
+          <SecHead n="03" icon={ShieldAlert} hex="#F43F5E" title={tr.secDisease} sub={tr.diseaseDesc} />
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
             {DISEASE_TRACE.map((trace, i) => {
               const cnt = S.dis[trace.key] || 0;
               if (cnt === 0) return null;
@@ -733,32 +702,32 @@ export default function GeneticsAnalyticsDashboard(){
               const hx = sevClr(trace.key);
               const disNameAr = ({ melanoma: tr.hMelanoma, laminitis: tr.hLaminitis, epilepsy: tr.hEpilepsy, pigmentation_loss: tr.hPig, fertility: tr.hFertility, guttural_pouch: tr.hGuttural, ovarian_tumor: tr.hOvarian })[trace.key];
               return (<motion.div key={i} initial={{ opacity: 0, y: 14 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * .08 }}>
-                <div className="rounded-[1.5rem] overflow-hidden cursor-pointer transition-all"
-                  style={{ border: `1px solid rgba(251,113,133,${isOpen ? .25 : .1})`, background: isOpen ? "rgba(251,113,133,0.06)" : "rgba(251,113,133,0.025)" }}
+                <div className="rounded-[1.5rem] overflow-hidden cursor-pointer transition-all hover:scale-[1.02]"
+                  style={{ border: `1px solid rgba(244,63,94,${isOpen ? .3 : .15})`, background: isOpen ? "rgba(244,63,94,0.08)" : CARD_BG, boxShadow: "0 10px 30px rgba(0,0,0,0.2)" }}
                   onClick={() => setOpenDis(p => { const n = new Set(p); n.has(i) ? n.delete(i) : n.add(i); return n; })}>
-                  <div className="p-5">
-                    <div className="flex items-start justify-between gap-3 mb-3">
+                  <div className="p-6">
+                    <div className="flex items-start justify-between gap-4 mb-4">
                       <div>
-                        <span className="text-[10px] font-black px-2.5 py-0.5 rounded-full mb-2 inline-block" style={{ background: `${hx}18`, color: hx, border: `1px solid ${hx}25` }}>{sevLbl(trace.sev)}</span>
-                        <h3 className="text-base font-black text-white">{isAr ? disNameAr : hL(trace.key)}</h3>
+                        <span className="text-[11px] font-black px-3 py-1 rounded-full mb-3 inline-block" style={{ background: `${hx}20`, color: hx, border: `1px solid ${hx}40` }}>{sevLbl(trace.sev)}</span>
+                        <h3 className="text-xl font-black" style={{color: TEXT_LIGHT}}>{isAr ? disNameAr : hL(trace.key)}</h3>
                       </div>
-                      <div className="text-center shrink-0"><div className="text-3xl font-black" style={{ color: hx }}>{cnt}</div><div className="text-[10px] font-bold" style={{ color: "rgba(255,255,255,0.25)" }}>{isAr ? "حالة" : "cases"}</div></div>
+                      <div className="text-center shrink-0"><div className="text-4xl font-black" style={{ color: hx }}>{cnt}</div><div className="text-[11px] font-bold" style={{ color: TEXT_MUTED }}>{isAr ? "حالة" : "cases"}</div></div>
                     </div>
-                    <Bar pct={(cnt / Math.max(S.dis.melanoma || 1, 1)) * 100} hex={hx} h="h-1" />
-                    <button className="mt-3 flex items-center gap-1.5 text-xs font-bold transition-colors" style={{ color: `${hx}70` }}>
-                      {isOpen ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+                    <Bar pct={(cnt / Math.max(S.dis.melanoma || 1, 1)) * 100} hex={hx} h="h-1.5" />
+                    <button className="mt-4 flex items-center gap-2 text-[13px] font-bold transition-colors" style={{ color: `${hx}90` }}>
+                      {isOpen ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       {isOpen ? tr.collapse : tr.expand}
-                      <ChevronDown className={`w-3 h-3 transition-transform ${isOpen ? "rotate-180" : ""}`} />
+                      <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? "rotate-180" : ""}`} />
                     </button>
                   </div>
                   <AnimatePresence>
                     {isOpen && <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: .3 }} className="overflow-hidden">
-                      <div className="px-5 pb-5 border-t pt-4" style={{ borderColor: "rgba(251,113,133,0.1)" }}>
-                        <p className="text-sm leading-[1.9] font-medium whitespace-pre-line mb-4" style={{ color: "rgba(255,255,255,0.65)" }}>{isAr ? trace.srcAr : trace.srcEn}</p>
-                        {"analysisAr" in trace && <div className="p-4 rounded-xl relative overflow-hidden" style={{ background: "rgba(251,113,133,0.07)", border: "1px solid rgba(251,113,133,0.12)" }}>
-                          <div className={`absolute top-0 ${isAr ? "right-0" : "left-0"} w-0.5 h-full`} style={{ background: `linear-gradient(${hx},transparent)` }} />
-                          <div className="flex items-center gap-2 mb-2"><Zap className="w-3.5 h-3.5 text-red-400" /><span className="text-xs font-black text-red-300">{tr.causalTitle}</span></div>
-                          <p className="text-xs leading-relaxed font-medium text-justify" style={{ color: "rgba(255,255,255,0.65)" }}>
+                      <div className="px-6 pb-6 border-t pt-5" style={{ borderColor: "rgba(244,63,94,0.15)" }}>
+                        <p className="text-[15px] leading-[1.9] font-medium whitespace-pre-line mb-5" style={{ color: TEXT_LIGHT }}>{isAr ? trace.srcAr : trace.srcEn}</p>
+                        {"analysisAr" in trace && <div className="p-5 rounded-xl relative overflow-hidden" style={{ background: "rgba(244,63,94,0.1)", border: "1px solid rgba(244,63,94,0.2)" }}>
+                          <div className={`absolute top-0 ${isAr ? "right-0" : "left-0"} w-1 h-full`} style={{ background: `linear-gradient(${hx},transparent)` }} />
+                          <div className="flex items-center gap-2 mb-3"><Zap className="w-4 h-4 text-rose-400" /><span className="text-[13px] font-black text-rose-300">{tr.causalTitle}</span></div>
+                          <p className="text-[14px] leading-relaxed font-medium text-justify" style={{ color: TEXT_LIGHT }}>
                             {isAr ? (trace as any).analysisAr : (trace as any).analysisEn}
                           </p>
                         </div>}
@@ -772,35 +741,35 @@ export default function GeneticsAnalyticsDashboard(){
         </section>
 
         {/* ═══ SIBLINGS ═══ */}
-        <section id="siblings" className="py-12 border-b" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6">
-            <SecHead n="04" icon={Users} hex="#a78bfa" title={tr.secSib} sub={tr.sibDesc} />
-            <div className="max-w-xs w-full shrink-0 no-print" style={{ marginTop: "-24px" }}><SrchBox value={sibQ} onChange={setSibQ} placeholder={tr.search} isAr={isAr} /></div>
+        <section id="siblings" className="py-16 border-b" style={{ borderColor: BORDER_COLOR }}>
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-5 mb-8">
+            <SecHead n="04" icon={Users} hex="#A78BFA" title={tr.secSib} sub={tr.sibDesc} />
+            <div className="max-w-md w-full shrink-0 no-print" style={{ marginTop: "-24px" }}><SrchBox value={sibQ} onChange={setSibQ} placeholder={tr.search} isAr={isAr} /></div>
           </div>
-          <p className="text-xs mb-4" style={{ color: "rgba(255,255,255,0.25)" }}>{tr.showing} {filtSibs.length} {tr.of} {S.sibs.length} {tr.groups}</p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+          <p className="text-[14px] mb-5 font-medium" style={{ color: TEXT_MUTED }}>{tr.showing} <span style={{color: TEXT_LIGHT, fontWeight: "bold"}}>{filtSibs.length}</span> {tr.of} <span style={{color: TEXT_LIGHT, fontWeight: "bold"}}>{S.sibs.length}</span> {tr.groups}</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             <AnimatePresence>
-              {filtSibs.length === 0 ? <div className="col-span-4 py-10 text-center font-bold" style={{ color: "rgba(255,255,255,0.2)" }}>{tr.noResults}</div>
+              {filtSibs.length === 0 ? <div className="col-span-4 py-12 text-center text-lg font-bold" style={{ color: TEXT_MUTED }}>{tr.noResults}</div>
                 : filtSibs.map((g, idx) => (
                   <motion.div key={`${g.sire}-${g.dam}`} layout initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ delay: idx * .03 }}>
-                    <div className="rounded-[1.5rem] p-4 h-full flex flex-col transition-all"
-                      style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(167,139,250,0.1)" }}
-                      onMouseEnter={e => (e.currentTarget.style.borderColor = "rgba(167,139,250,0.28)")}
-                      onMouseLeave={e => (e.currentTarget.style.borderColor = "rgba(167,139,250,0.1)")}>
-                      <div className="flex items-center justify-between mb-3">
-                        <span className="text-[9px] font-black px-2 py-0.5 rounded-full" style={{ background: "rgba(167,139,250,0.1)", color: "#a78bfa", border: "1px solid rgba(167,139,250,0.2)" }}>#{S.sibs.indexOf(g) + 1}</span>
-                        <span className="text-[9px] font-black" style={{ color: "rgba(167,139,250,0.5)" }}>{g.kids.length} {tr.thOffspring}</span>
+                    <div className="rounded-[1.5rem] p-5 h-full flex flex-col transition-all hover:scale-[1.02]"
+                      style={{ background: CARD_BG, border: `1px solid ${BORDER_COLOR}`, boxShadow: "0 10px 25px rgba(0,0,0,0.15)" }}
+                      onMouseEnter={e => (e.currentTarget.style.borderColor = "rgba(167,139,250,0.4)")}
+                      onMouseLeave={e => (e.currentTarget.style.borderColor = BORDER_COLOR)}>
+                      <div className="flex items-center justify-between mb-4">
+                        <span className="text-[11px] font-black px-2.5 py-1 rounded-lg" style={{ background: "rgba(167,139,250,0.15)", color: "#C4B5FD", border: "1px solid rgba(167,139,250,0.3)" }}>#{S.sibs.indexOf(g) + 1}</span>
+                        <span className="text-[11px] font-black px-2.5 py-1 rounded-lg" style={{ background: "rgba(255,255,255,0.05)", color: TEXT_LIGHT, border: `1px solid ${BORDER_COLOR}` }}>{g.kids.length} {tr.thOffspring}</span>
                       </div>
-                      <div className="space-y-2 mb-3 flex-1">
-                        <div><div className="text-[9px] font-black uppercase tracking-widest mb-0.5" style={{ color: "rgba(255,255,255,0.2)" }}>{tr.thSire}</div>
-                          <div className="font-black text-sm text-blue-300">{sibQ ? mk(g.sire, sibQ) : g.sire}</div></div>
-                        <div className="h-px" style={{ background: "linear-gradient(90deg,rgba(96,165,250,0.15),rgba(167,139,250,0.15),rgba(249,168,212,0.15))" }} />
-                        <div><div className="text-[9px] font-black uppercase tracking-widest mb-0.5" style={{ color: "rgba(255,255,255,0.2)" }}>{tr.thDam}</div>
-                          <div className="font-black text-sm text-pink-300">{sibQ ? mk(g.dam, sibQ) : g.dam}</div></div>
+                      <div className="space-y-3 mb-4 flex-1">
+                        <div><div className="text-[10px] font-black uppercase tracking-widest mb-1" style={{ color: TEXT_MUTED }}>{tr.thSire}</div>
+                          <div className="font-black text-[15px] text-blue-300">{sibQ ? mk(g.sire, sibQ) : g.sire}</div></div>
+                        <div className="h-px" style={{ background: "linear-gradient(90deg,rgba(96,165,250,0.3),rgba(167,139,250,0.3),rgba(249,168,212,0.3))" }} />
+                        <div><div className="text-[10px] font-black uppercase tracking-widest mb-1" style={{ color: TEXT_MUTED }}>{tr.thDam}</div>
+                          <div className="font-black text-[15px] text-pink-300">{sibQ ? mk(g.dam, sibQ) : g.dam}</div></div>
                       </div>
-                      <div className="flex flex-wrap gap-1">
+                      <div className="flex flex-wrap gap-1.5">
                         {g.kids.map((k, ki) => (
-                          <span key={ki} className="text-[9px] font-bold px-1.5 py-0.5 rounded-lg" style={{ background: "rgba(167,139,250,0.08)", border: "1px solid rgba(167,139,250,0.12)", color: "rgba(167,139,250,0.6)" }}>{k.name}</span>
+                          <span key={ki} className="text-[10px] font-bold px-2 py-1 rounded-md" style={{ background: "rgba(167,139,250,0.1)", border: "1px solid rgba(167,139,250,0.2)", color: "#E9D5FF" }}>{k.name}</span>
                         ))}
                       </div>
                     </div>
@@ -811,24 +780,24 @@ export default function GeneticsAnalyticsDashboard(){
         </section>
 
         {/* ═══ PRODUCTION ═══ */}
-        <section id="production" className="py-12">
-          <SecHead n="05" icon={Layers} hex="#fbbf24" title={tr.secProd} />
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-            <ProdCard rows={S.siresRanked} title={tr.siresTitle} icon={Award} hex="#4f8ef7" lang={lang} open={openProd} setOpen={setOpenProd} prefix="s" />
-            <ProdCard rows={S.damsRanked} title={tr.damsTitle} icon={Baby} hex="#ec4899" lang={lang} open={openProd} setOpen={setOpenProd} prefix="d" />
+        <section id="production" className="py-16">
+          <SecHead n="05" icon={Layers} hex={GOLD} title={tr.secProd} />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <ProdCard rows={S.siresRanked} title={tr.siresTitle} icon={Award} hex="#60A5FA" lang={lang} open={openProd} setOpen={setOpenProd} prefix="s" />
+            <ProdCard rows={S.damsRanked} title={tr.damsTitle} icon={Baby} hex="#F472B6" lang={lang} open={openProd} setOpen={setOpenProd} prefix="d" />
           </div>
         </section>
 
         {/* Footer */}
-        <footer className="py-12 flex flex-col sm:flex-row justify-between items-center gap-5 border-t" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
-          {[{ label: tr.footerIdea, name: "ناصر", hex: GOLD }, { label: tr.footerDev, name: "أحمد الصالح", hex: "#4f8ef7" }].map((f, i) => (
-            <Cd key={i} accent={f.hex} className="px-7 py-5 flex items-center gap-4 w-full sm:w-auto">
-              <div className="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0" style={{ background: `${f.hex}15`, border: `1px solid ${f.hex}20` }}>
-                {i === 0 ? <Star className="w-5 h-5" style={{ color: f.hex }} /> : <Globe className="w-5 h-5" style={{ color: f.hex }} />}
+        <footer className="py-12 flex flex-col sm:flex-row justify-between items-center gap-6 border-t mt-8" style={{ borderColor: BORDER_COLOR }}>
+          {[{ label: tr.footerIdea, name: "ناصر", hex: GOLD }, { label: tr.footerDev, name: "أحمد الصالح", hex: "#60A5FA" }].map((f, i) => (
+            <Cd key={i} accent={f.hex} className="px-8 py-6 flex items-center gap-5 w-full sm:w-auto hover:scale-105 transition-transform">
+              <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0" style={{ background: `${f.hex}15`, border: `1px solid ${f.hex}30` }}>
+                {i === 0 ? <Star className="w-6 h-6" style={{ color: f.hex }} /> : <Globe className="w-6 h-6" style={{ color: f.hex }} />}
               </div>
               <div>
-                <div className="text-[10px] font-black uppercase tracking-wider mb-0.5" style={{ color: "rgba(255,255,255,0.22)" }}>{f.label}</div>
-                <div className="text-xl font-black text-white">{f.name}</div>
+                <div className="text-[11px] font-black uppercase tracking-widest mb-1" style={{ color: TEXT_MUTED }}>{f.label}</div>
+                <div className="text-2xl font-black" style={{color: TEXT_LIGHT}}>{f.name}</div>
               </div>
             </Cd>
           ))}
@@ -856,57 +825,58 @@ function ProdCard({ rows, title, icon: Icon, hex, lang, open, setOpen, prefix }:
     if (sort === "desc") r = [...r].sort((a, b) => b.n - a.n);
     return r;
   }, [rows, q, sort]);
-  return (<div className="rounded-[2rem] p-6" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
-    <div className="relative top-0 left-0 right-0 h-px mb-1" style={{ background: `linear-gradient(90deg,transparent,${hex}40,transparent)` }} />
-    <div className="flex items-center gap-3 mb-4">
-      <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: `${hex}15` }}>
-        <Icon className="w-[18px] h-[18px]" style={{ color: hex }} />
+  return (<div className="rounded-[2rem] p-8" style={{ background: CARD_BG, border: `1px solid ${BORDER_COLOR}`, boxShadow: "0 10px 30px rgba(0,0,0,0.2)" }}>
+    <div className="relative top-0 left-0 right-0 h-1 mb-2" style={{ background: `linear-gradient(90deg,transparent,${hex}60,transparent)` }} />
+    <div className="flex items-center gap-4 mb-6">
+      <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: `${hex}15`, border: `1px solid ${hex}30` }}>
+        <Icon className="w-6 h-6" style={{ color: hex }} />
       </div>
-      <h3 className="text-lg font-black">{title}</h3>
+      <h3 className="text-2xl font-black" style={{color: TEXT_LIGHT}}>{title}</h3>
     </div>
-    <div className="flex gap-2 mb-3">
+    <div className="flex gap-3 mb-5">
       <div className="flex-1">
         <div className="relative">
-          <Search className={`absolute top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none ${isAr ? "right-3.5" : "left-3.5"}`} style={{ color: "rgba(255,255,255,0.25)" }} />
+          <Search className={`absolute top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none ${isAr ? "right-4" : "left-4"}`} style={{ color: TEXT_MUTED }} />
           <input value={q} onChange={e => setQ(e.target.value)} placeholder={tr.search}
-            className={`w-full text-sm text-white placeholder-gray-600 focus:outline-none py-2.5 rounded-xl transition-colors ${isAr ? "pr-10 pl-9" : "pl-10 pr-9"}`}
-            style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.09)" }} />
-          {q && <button onClick={() => setQ("")} className={`absolute top-1/2 -translate-y-1/2 ${isAr ? "left-3" : "right-3"}`} style={{ color: "rgba(255,255,255,0.3)" }}><X className="w-3.5 h-3.5" /></button>}
+            className={`w-full text-[15px] placeholder-slate-500 focus:outline-none py-3 rounded-xl transition-all ${isAr ? "pr-11 pl-4" : "pl-11 pr-4"}`}
+            style={{ background: "rgba(255,255,255,0.03)", border: `1px solid ${BORDER_COLOR}`, color: TEXT_LIGHT }} 
+            onFocus={(e) => e.target.style.borderColor = hex} onBlur={(e) => e.target.style.borderColor = BORDER_COLOR} />
+          {q && <button onClick={() => setQ("")} className={`absolute top-1/2 -translate-y-1/2 ${isAr ? "left-4" : "right-4"}`} style={{ color: TEXT_MUTED }}><X className="w-4 h-4" /></button>}
         </div>
       </div>
       <button onClick={() => setSort(s => s === null ? "desc" : s === "desc" ? "asc" : null)}
-        className="px-3 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all"
-        style={sort ? { background: `${hex}15`, color: hex, border: `1px solid ${hex}25` } : { background: "rgba(255,255,255,0.04)", color: "rgba(255,255,255,0.4)", border: "1px solid rgba(255,255,255,0.07)" }}>
-        {sort === "asc" ? <SortAsc className="w-4 h-4" /> : sort === "desc" ? <SortDesc className="w-4 h-4" /> : <ArrowUpDown className="w-4 h-4" />}
+        className="px-4 rounded-xl text-[13px] font-bold flex items-center gap-2 transition-all"
+        style={sort ? { background: `${hex}15`, color: hex, border: `1px solid ${hex}30` } : { background: "rgba(255,255,255,0.03)", color: TEXT_MUTED, border: `1px solid ${BORDER_COLOR}` }}>
+        {sort === "asc" ? <SortAsc className="w-5 h-5" /> : sort === "desc" ? <SortDesc className="w-5 h-5" /> : <ArrowUpDown className="w-5 h-5" />}
       </button>
     </div>
-    <p className="text-xs mb-3" style={{ color: "rgba(255,255,255,0.2)" }}>{tr.showing} {filtered.length} {tr.of} {rows.length}</p>
-    <div className="space-y-2 max-h-[500px] overflow-y-auto pr-1">
+    <p className="text-[13px] mb-4 font-medium" style={{ color: TEXT_MUTED }}>{tr.showing} <span style={{color: TEXT_LIGHT, fontWeight: "bold"}}>{filtered.length}</span> {tr.of} <span style={{color: TEXT_LIGHT, fontWeight: "bold"}}>{rows.length}</span></p>
+    <div className="space-y-3 max-h-[550px] overflow-y-auto pr-2" style={{scrollbarWidth:"thin"}}>
       <AnimatePresence>
-        {filtered.length === 0 ? <div className="py-8 text-center text-sm font-bold" style={{ color: "rgba(255,255,255,0.2)" }}>{tr.noResults}</div>
+        {filtered.length === 0 ? <div className="py-10 text-center text-[15px] font-bold" style={{ color: TEXT_MUTED }}>{tr.noResults}</div>
           : filtered.map((row, i) => {
             const k = `${prefix}-${row.name}`; const isOpen = open.has(k); const origIdx = rows.indexOf(row);
             return (<motion.div key={row.name} layout initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ delay: i * .02 }}>
-              <div className="rounded-2xl overflow-hidden cursor-pointer transition-all" onClick={() => toggle(k)}
-                style={{ border: `1px solid ${isOpen ? `${hex}25` : "rgba(255,255,255,0.06)"}`, background: isOpen ? `${hex}08` : "rgba(255,255,255,0.02)" }}>
-                <div className="px-4 py-3 flex items-center gap-3">
-                  <span className="text-base font-black w-8 text-center shrink-0">{medal(origIdx)}</span>
+              <div className="rounded-2xl overflow-hidden cursor-pointer transition-all hover:border-opacity-50" onClick={() => toggle(k)}
+                style={{ border: `1px solid ${isOpen ? `${hex}50` : BORDER_COLOR}`, background: isOpen ? `${hex}10` : "rgba(255,255,255,0.02)" }}>
+                <div className="px-5 py-4 flex items-center gap-4">
+                  <span className="text-xl font-black w-8 text-center shrink-0" style={{color: TEXT_LIGHT}}>{medal(origIdx)}</span>
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between mb-1.5">
-                      <span className="font-bold text-sm text-white truncate">{row.name}</span>
-                      <span className="text-sm font-black shrink-0 ml-2" style={{ color: hex }}>{row.n}</span>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-bold text-[15px] truncate" style={{color: TEXT_LIGHT}}>{row.name}</span>
+                      <span className="text-[16px] font-black shrink-0 ml-3" style={{ color: hex }}>{row.n}</span>
                     </div>
-                    <div className="w-full h-1 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.04)" }}>
+                    <div className="w-full h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
                       <motion.div className="h-full rounded-full" style={{ background: hex }}
                         initial={{ width: 0 }} whileInView={{ width: `${(row.n / max) * 100}%` }} viewport={{ once: true }} transition={{ duration: 1, ease: "easeOut", delay: .1 + i * .04 }} />
                     </div>
                   </div>
-                  <ChevronDown className={`w-4 h-4 shrink-0 transition-transform ${isOpen ? "rotate-180" : ""}`} style={{ color: "rgba(255,255,255,0.3)" }} />
+                  <ChevronDown className={`w-5 h-5 shrink-0 transition-transform ${isOpen ? "rotate-180" : ""}`} style={{ color: TEXT_MUTED }} />
                 </div>
                 <AnimatePresence>
                   {isOpen && <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: .25 }} className="overflow-hidden">
-                    <div className="px-4 pb-3 border-t pt-3 flex flex-wrap gap-1.5" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
-                      {row.kids.map((h, ki) => <span key={ki} className="text-[10px] font-bold px-2 py-0.5 rounded-lg" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.45)" }}>{h.name}</span>)}
+                    <div className="px-5 pb-4 border-t pt-4 flex flex-wrap gap-2" style={{ borderColor: BORDER_COLOR }}>
+                      {row.kids.map((h, ki) => <span key={ki} className="text-[11px] font-bold px-3 py-1 rounded-lg" style={{ background: "rgba(255,255,255,0.05)", border: `1px solid ${BORDER_COLOR}`, color: TEXT_LIGHT }}>{h.name}</span>)}
                     </div>
                   </motion.div>}
                 </AnimatePresence>
