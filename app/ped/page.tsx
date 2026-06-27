@@ -202,7 +202,12 @@ export default function PedigreeSearch() {
 
     try {
       const data = await searchLocalPedigree(trimmed);
-      setResult(data);
+
+if (data.success) {
+  setResult(data as PedigreeResult);
+} else {
+  setResult(data as ErrorResult);
+}
     } catch {
       setResult({
         success: false,
