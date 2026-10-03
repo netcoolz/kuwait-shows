@@ -104,6 +104,7 @@ export default function RegistrationPage() {
     useState<Record<string, number>>({});
 
   const [loading, setLoading] = useState(true);
+  const [classesLoading, setClassesLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [successNumber, setSuccessNumber] = useState("");
@@ -170,29 +171,6 @@ export default function RegistrationPage() {
       .eq("slug", routeSlug)
       .maybeSingle();
 
-    // محاولة احتياطية: في حال كان الـ slug مخزناً بترميز مختلف،
-    // نقرأ السجلات المتاحة ونطابق القيمة بعد فك الترميز.
-    if (!showData && !showError) {
-      const { data: allShows, error: allShowsError } = await supabase
-        .from("shows")
-        .select(showColumns);
-
-      if (!allShowsError && allShows) {
-        showData =
-          allShows.find((item) => {
-            let itemSlug = item.slug || "";
-
-            try {
-              itemSlug = decodeURIComponent(itemSlug);
-            } catch {
-              // نستخدم القيمة الأصلية إذا لم تكن بحاجة إلى فك ترميز.
-            }
-
-            return itemSlug.trim() === routeSlug;
-          }) || null;
-      }
-    }
-
     if (showError || !showData) {
       console.error("Registration show lookup failed:", showError);
 
@@ -215,43 +193,47 @@ export default function RegistrationPage() {
       class_id: "",
     }));
 
-    // نجلب البيانات الأساسية بالتوازي حتى لا ينتظر الهاتف طلبًا بعد الآخر.
-    // عدّاد التسجيلات ليس مطلوبًا لعرض الصفحة، لذلك نجلبه في الخلفية
-    // بعد إظهار النموذج حتى يظهر المحتوى بسرعة على الآيفون.
-    const [championshipResult, classesResult] = await Promise.all([
-      supabase
-        .from("championships")
-        .select("id,title_ar,year,location_ar")
-        .eq("id", showData.championship_id)
-        .single(),
-
-      supabase
-        .from("classes")
-        .select(
-          "id,show_id,name_ar,name_en,class_code,horse_type,gender,birth_date_from,birth_date_to,status,sort_order"
-        )
-        .eq("show_id", showData.id)
-        .eq("status", "open")
-        .order("sort_order", { ascending: true }),
-    ]);
-
-    if (championshipResult.error) {
-      console.error("Championship lookup failed:", championshipResult.error);
-    }
-
-    if (classesResult.error) {
-      console.error("Classes lookup failed:", classesResult.error);
-      setErrorMessage(
-        "تعذر تحميل فئات البطولة. يرجى المحاولة مرة أخرى."
-      );
-    }
-
-    setChampionship(championshipResult.data || null);
-    setClasses(classesResult.data || []);
+    // مهم للأجهزة المحمولة:
+    // بمجرد العثور على البطولة نعرض الصفحة فورًا.
+    // لا ننتظر تحميل الفئات أو عدادات التسجيل.
     setLoading(false);
 
-    // نحمّل عدد المسجلين في الخلفية بعد ظهور الصفحة مباشرة،
-    // حتى لا يتأخر فتح نموذج التسجيل على الآيفون بسبب طلب إضافي.
+    // تحميل التفاصيل في الخلفية.
+    void (async () => {
+      setClassesLoading(true);
+
+      const [championshipResult, classesResult] = await Promise.all([
+        supabase
+          .from("championships")
+          .select("id,title_ar,year,location_ar")
+          .eq("id", showData.championship_id)
+          .maybeSingle(),
+
+        supabase
+          .from("classes")
+          .select(
+            "id,show_id,name_ar,name_en,class_code,horse_type,gender,birth_date_from,birth_date_to,status,sort_order"
+          )
+          .eq("show_id", showData.id)
+          .eq("status", "open")
+          .order("sort_order", { ascending: true }),
+      ]);
+
+      if (championshipResult.error) {
+        console.error("Championship lookup failed:", championshipResult.error);
+      }
+
+      if (classesResult.error) {
+        console.error("Classes lookup failed:", classesResult.error);
+        setErrorMessage("تعذر تحميل فئات البطولة. يرجى المحاولة مرة أخرى.");
+      }
+
+      setChampionship(championshipResult.data || null);
+      setClasses(classesResult.data || []);
+      setClassesLoading(false);
+    })();
+
+    // تحميل العدادات بشكل مستقل ولا يمنع ظهور الصفحة.
     void (async () => {
       const { data: registrationRows, error: registrationCountsError } =
         await supabase
@@ -304,6 +286,7 @@ export default function RegistrationPage() {
     });
   }, [
     classes,
+    classRegistrationCounts,
     form.horse_type,
     form.gender,
     form.horse_birth_date,
@@ -502,7 +485,7 @@ export default function RegistrationPage() {
           <motion.div
             initial={{ opacity: 0, y: 25 }}
             animate={{ opacity: 1, y: 0 }}
-            className="rounded-2xl sm:rounded-[2.5rem] border border-white/10 bg-white/[0.04] backdrop-blur-none sm:backdrop-blur-xl p-5 sm:p-8 md:p-14 text-center shadow-2xl"
+            className="rounded-2xl sm:rounded-[2.5rem] border border-white/10 bg-white/[0.04] backdrop-blur-xl p-5 sm:p-8 md:p-14 text-center shadow-2xl"
           >
             <div
               className="mx-auto mb-7 w-20 h-20 rounded-full flex items-center justify-center border"
@@ -600,7 +583,7 @@ export default function RegistrationPage() {
       </div>
 
       <div className="relative z-10">
-        <header className="border-b border-white/10 bg-white/[0.02] backdrop-blur-none sm:backdrop-blur-xl">
+        <header className="border-b border-white/10 bg-white/[0.02] backdrop-blur-xl">
           <div className="max-w-6xl mx-auto px-3 sm:px-6 py-4 sm:py-5">
             <button
               onClick={() => router.back()}
@@ -614,7 +597,7 @@ export default function RegistrationPage() {
 
         <div className="max-w-6xl mx-auto px-3 sm:px-6 py-7 sm:py-10 md:py-14">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={false}
             animate={{ opacity: 1, y: 0 }}
             className="mb-8 sm:mb-10"
           >
@@ -672,10 +655,10 @@ export default function RegistrationPage() {
             </div>
           ) : (
             <motion.form
-              initial={{ opacity: 0, y: 20 }}
+              initial={false}
               animate={{ opacity: 1, y: 0 }}
               onSubmit={submitRegistration}
-              className="rounded-2xl sm:rounded-[2.5rem] border border-white/10 bg-white/[0.035] backdrop-blur-none sm:backdrop-blur-xl p-4 sm:p-6 md:p-10"
+              className="rounded-2xl sm:rounded-[2.5rem] border border-white/10 bg-white/[0.035] backdrop-blur-xl p-4 sm:p-6 md:p-10"
             >
               <div className="grid lg:grid-cols-2 gap-6 sm:gap-8">
                 <section>
@@ -811,7 +794,11 @@ export default function RegistrationPage() {
                   title="اختيار الفئة"
                 />
 
-                {!form.horse_birth_date || !form.gender ? (
+                {classesLoading ? (
+                  <div className="rounded-2xl border border-white/10 bg-black/10 p-5 text-gray-400 text-sm leading-7">
+                    جاري تحميل الفئات المتاحة...
+                  </div>
+                ) : !form.horse_birth_date || !form.gender ? (
                   <div className="rounded-2xl border border-white/10 bg-black/10 p-5 text-gray-400 text-sm leading-7">
                     أدخل <span className="text-white">تاريخ ميلاد الخيل</span>{" "}
                     واختر <span className="text-white">جنس الخيل</span>{" "}
@@ -831,10 +818,10 @@ export default function RegistrationPage() {
                       return (
                         <label
                           key={item.id}
-                          className={`relative rounded-2xl border p-4 sm:p-5 transition cursor-pointer ${
+                          className={`relative rounded-2xl border p-4 sm:p-5 transition ${
                             form.class_id === item.id
-                              ? "border-[#bc9b6a]/70 bg-[#bc9b6a]/10"
-                              : "border-white/10 bg-white/[0.025] hover:border-white/20"
+                              ? "border-[#bc9b6a]/70 bg-[#bc9b6a]/10 cursor-pointer"
+                              : "border-white/10 bg-white/[0.025] hover:border-white/20 cursor-pointer"
                           }`}
                         >
                           <input
@@ -873,21 +860,21 @@ export default function RegistrationPage() {
                               </p>
                             </div>
 
-                            <div
-                              className={`w-5 h-5 rounded-full border flex-shrink-0 mt-1 ${
-                                form.class_id === item.id
-                                  ? "border-[#bc9b6a] bg-[#bc9b6a]"
-                                  : "border-white/20"
-                              }`}
-                            >
-                              {form.class_id === item.id && (
-                                <div className="w-full h-full rounded-full scale-50 bg-[#050B18]" />
-                              )}
-                            </div>
+                          <div
+                            className={`w-5 h-5 rounded-full border flex-shrink-0 mt-1 ${
+                              form.class_id === item.id
+                                ? "border-[#bc9b6a] bg-[#bc9b6a]"
+                                : "border-white/20"
+                            }`}
+                          >
+                            {form.class_id === item.id && (
+                              <div className="w-full h-full rounded-full scale-50 bg-[#050B18]" />
+                            )}
                           </div>
-                        </label>
-                      );
-                    })}
+                        </div>
+                          </label>
+                        );
+                      })}
                     </div>
                 )}
               </section>
