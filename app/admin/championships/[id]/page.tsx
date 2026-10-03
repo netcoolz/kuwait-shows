@@ -65,6 +65,7 @@ type ClassItem = {
   birth_date_to: string | null;
   status: string;
   sort_order: number;
+  max_participants: number | null;
 };
 
 export default function ChampionshipDetails() {
@@ -115,6 +116,7 @@ export default function ChampionshipDetails() {
   const [birthDateTo, setBirthDateTo] = useState("");
   const [classStatus, setClassStatus] = useState("open");
   const [classSortOrder, setClassSortOrder] = useState("0");
+  const [classMaxParticipants, setClassMaxParticipants] = useState("");
 
   useEffect(() => {
     if (id) {
@@ -447,6 +449,7 @@ export default function ChampionshipDetails() {
     setBirthDateTo("");
     setClassStatus("open");
     setClassSortOrder("0");
+    setClassMaxParticipants("");
   }
 
   function startAddClass(showId: string) {
@@ -469,6 +472,11 @@ export default function ChampionshipDetails() {
     setBirthDateTo(classItem.birth_date_to || "");
     setClassStatus(classItem.status || "open");
     setClassSortOrder(String(classItem.sort_order ?? 0));
+    setClassMaxParticipants(
+      classItem.max_participants != null
+        ? String(classItem.max_participants)
+        : ""
+    );
 
     setClassForm(true);
   }
@@ -508,6 +516,10 @@ export default function ChampionshipDetails() {
       birth_date_to: birthDateTo || null,
       status: classStatus,
       sort_order: Number(classSortOrder) || 0,
+      max_participants:
+        classMaxParticipants.trim() === ""
+          ? null
+          : Math.max(1, Number(classMaxParticipants)),
     };
 
     if (classEditingId) {
@@ -523,6 +535,7 @@ export default function ChampionshipDetails() {
           birth_date_to: payload.birth_date_to,
           status: payload.status,
           sort_order: payload.sort_order,
+          max_participants: payload.max_participants,
         })
         .eq("id", classEditingId);
 
@@ -1320,6 +1333,13 @@ export default function ChampionshipDetails() {
                                         {classItem.sort_order}
                                       </span>
 
+                                      <span className="px-3 py-1.5 rounded-lg bg-white/[0.035] border border-white/10 text-xs text-gray-400">
+                                        الحد الأقصى:{" "}
+                                        {classItem.max_participants != null
+                                          ? `${classItem.max_participants} خيل`
+                                          : "غير محدد"}
+                                      </span>
+
                                     </div>
 
                                   </div>
@@ -1764,6 +1784,29 @@ export default function ChampionshipDetails() {
                   />
                 </div>
 
+              </div>
+
+              {/* Maximum participants */}
+              <div>
+                <label className="block text-sm text-gray-300 mb-2">
+                  الحد الأقصى لعدد الخيل في الفئة
+                </label>
+
+                <input
+                  type="number"
+                  min="1"
+                  step="1"
+                  value={classMaxParticipants}
+                  onChange={(e) =>
+                    setClassMaxParticipants(e.target.value)
+                  }
+                  placeholder="مثال: 20"
+                  className="w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3.5 text-white outline-none focus:border-[#bc9b6a]"
+                />
+
+                <p className="text-gray-500 text-xs mt-2">
+                  اتركي الحقل فارغًا إذا كانت الفئة بدون حد أقصى.
+                </p>
               </div>
 
               {/* Horse type + Gender */}
