@@ -250,10 +250,12 @@ export default function RegistrationPage() {
 
       const counts: Record<string, number> = {};
 
-      (registrationCountRows || []).forEach((row) => {
-        if (!row.class_id) return;
-        counts[row.class_id] = Number(row.registration_count || 0);
-      });
+    (registrationCountRows || []).forEach(
+  (row: { class_id: string | null; registration_count: number | string | null }) => {
+    if (!row.class_id) return;
+    counts[row.class_id] = Number(row.registration_count || 0);
+  }
+);
 
       setClassRegistrationCounts(counts);
     })();
