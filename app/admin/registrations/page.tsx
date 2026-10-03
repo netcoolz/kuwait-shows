@@ -13,6 +13,9 @@ import {
   Clock3,
   Eye,
   X,
+RefreshCw,
+ Printer,
+  Download,
   
 } from "lucide-react";
 
