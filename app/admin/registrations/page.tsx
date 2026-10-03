@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { ReactNode, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { motion } from "framer-motion";
 import {
@@ -998,7 +998,7 @@ function Info({
   ltr = false,
 }: {
   label: string;
-  value: string;
+  value: ReactNode;
   ltr?: boolean;
 }) {
   return (
