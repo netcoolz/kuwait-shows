@@ -235,12 +235,10 @@ export default function RegistrationPage() {
 
     // تحميل العدادات بشكل مستقل ولا يمنع ظهور الصفحة.
     void (async () => {
-      const { data: registrationRows, error: registrationCountsError } =
-        await supabase
-          .from("registrations")
-          .select("class_id")
-          .eq("show_id", showData.id)
-          .not("class_id", "is", null);
+      const { data: registrationCountRows, error: registrationCountsError } =
+        await supabase.rpc("get_class_registration_counts", {
+          p_show_id: showData.id,
+        });
 
       if (registrationCountsError) {
         console.error(
@@ -252,9 +250,9 @@ export default function RegistrationPage() {
 
       const counts: Record<string, number> = {};
 
-      (registrationRows || []).forEach((row) => {
+      (registrationCountRows || []).forEach((row) => {
         if (!row.class_id) return;
-        counts[row.class_id] = (counts[row.class_id] || 0) + 1;
+        counts[row.class_id] = Number(row.registration_count || 0);
       });
 
       setClassRegistrationCounts(counts);
