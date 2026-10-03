@@ -52,7 +52,6 @@ type ClassItem = {
   birth_date_to: string | null;
   status: string;
   sort_order: number;
-  max_participants: number | null;
 };
 
 type FormData = {
@@ -216,6 +215,9 @@ export default function RegistrationPage() {
       class_id: "",
     }));
 
+    // نجلب البيانات الأساسية بالتوازي حتى لا ينتظر الهاتف طلبًا بعد الآخر.
+    // عدّاد التسجيلات ليس مطلوبًا لعرض الصفحة، لذلك نجلبه في الخلفية
+    // بعد إظهار النموذج حتى يظهر المحتوى بسرعة على الآيفون.
     const [championshipResult, classesResult] = await Promise.all([
       supabase
         .from("championships")
@@ -226,35 +228,12 @@ export default function RegistrationPage() {
       supabase
         .from("classes")
         .select(
-          "id,show_id,name_ar,name_en,class_code,horse_type,gender,birth_date_from,birth_date_to,status,sort_order,max_participants"
+          "id,show_id,name_ar,name_en,class_code,horse_type,gender,birth_date_from,birth_date_to,status,sort_order"
         )
         .eq("show_id", showData.id)
         .eq("status", "open")
         .order("sort_order", { ascending: true }),
     ]);
-
-    const { data: registrationRows, error: registrationCountsError } =
-      await supabase
-        .from("registrations")
-        .select("class_id")
-        .eq("show_id", showData.id)
-        .not("class_id", "is", null);
-
-    if (registrationCountsError) {
-      console.error(
-        "Class registration counts lookup failed:",
-        registrationCountsError
-      );
-    }
-
-    const counts: Record<string, number> = {};
-
-    (registrationRows || []).forEach((row) => {
-      if (!row.class_id) return;
-      counts[row.class_id] = (counts[row.class_id] || 0) + 1;
-    });
-
-    setClassRegistrationCounts(counts);
 
     if (championshipResult.error) {
       console.error("Championship lookup failed:", championshipResult.error);
@@ -270,6 +249,34 @@ export default function RegistrationPage() {
     setChampionship(championshipResult.data || null);
     setClasses(classesResult.data || []);
     setLoading(false);
+
+    // نحمّل عدد المسجلين في الخلفية بعد ظهور الصفحة مباشرة،
+    // حتى لا يتأخر فتح نموذج التسجيل على الآيفون بسبب طلب إضافي.
+    void (async () => {
+      const { data: registrationRows, error: registrationCountsError } =
+        await supabase
+          .from("registrations")
+          .select("class_id")
+          .eq("show_id", showData.id)
+          .not("class_id", "is", null);
+
+      if (registrationCountsError) {
+        console.error(
+          "Class registration counts lookup failed:",
+          registrationCountsError
+        );
+        return;
+      }
+
+      const counts: Record<string, number> = {};
+
+      (registrationRows || []).forEach((row) => {
+        if (!row.class_id) return;
+        counts[row.class_id] = (counts[row.class_id] || 0) + 1;
+      });
+
+      setClassRegistrationCounts(counts);
+    })();
   }
 
   const availableClasses = useMemo(() => {
@@ -297,7 +304,6 @@ export default function RegistrationPage() {
     });
   }, [
     classes,
-    classRegistrationCounts,
     form.horse_type,
     form.gender,
     form.horse_birth_date,
@@ -386,35 +392,6 @@ export default function RegistrationPage() {
         "الفئة المختارة غير متوافقة مع بيانات الخيل. يرجى إعادة اختيار الفئة."
       );
       return;
-    }
-
-    // إعادة التحقق من السعة مباشرة قبل التسجيل، حتى لا نعتمد فقط
-    // على العدد الذي تم تحميله عند فتح الصفحة.
-    if (selectedClass.max_participants !== null) {
-      const { count: currentCount, error: capacityError } = await supabase
-        .from("registrations")
-        .select("id", { count: "exact", head: true })
-        .eq("show_id", show.id)
-        .eq("class_id", selectedClass.id);
-
-      if (capacityError) {
-        console.error("Class capacity check failed:", capacityError);
-        setErrorMessage(
-          "تعذر التحقق من المقاعد المتاحة للفئة. يرجى المحاولة مرة أخرى."
-        );
-        return;
-      }
-
-      if ((currentCount || 0) >= selectedClass.max_participants) {
-        setClassRegistrationCounts((prev) => ({
-          ...prev,
-          [selectedClass.id]: currentCount || 0,
-        }));
-        setErrorMessage(
-          "عذراً، هذه الفئة مكتملة حالياً. يرجى اختيار فئة أخرى."
-        );
-        return;
-      }
     }
 
     setSubmitting(true);
@@ -525,7 +502,7 @@ export default function RegistrationPage() {
           <motion.div
             initial={{ opacity: 0, y: 25 }}
             animate={{ opacity: 1, y: 0 }}
-            className="rounded-2xl sm:rounded-[2.5rem] border border-white/10 bg-white/[0.04] backdrop-blur-xl p-5 sm:p-8 md:p-14 text-center shadow-2xl"
+            className="rounded-2xl sm:rounded-[2.5rem] border border-white/10 bg-white/[0.04] backdrop-blur-none sm:backdrop-blur-xl p-5 sm:p-8 md:p-14 text-center shadow-2xl"
           >
             <div
               className="mx-auto mb-7 w-20 h-20 rounded-full flex items-center justify-center border"
@@ -623,7 +600,7 @@ export default function RegistrationPage() {
       </div>
 
       <div className="relative z-10">
-        <header className="border-b border-white/10 bg-white/[0.02] backdrop-blur-xl">
+        <header className="border-b border-white/10 bg-white/[0.02] backdrop-blur-none sm:backdrop-blur-xl">
           <div className="max-w-6xl mx-auto px-3 sm:px-6 py-4 sm:py-5">
             <button
               onClick={() => router.back()}
@@ -698,7 +675,7 @@ export default function RegistrationPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               onSubmit={submitRegistration}
-              className="rounded-2xl sm:rounded-[2.5rem] border border-white/10 bg-white/[0.035] backdrop-blur-xl p-4 sm:p-6 md:p-10"
+              className="rounded-2xl sm:rounded-[2.5rem] border border-white/10 bg-white/[0.035] backdrop-blur-none sm:backdrop-blur-xl p-4 sm:p-6 md:p-10"
             >
               <div className="grid lg:grid-cols-2 gap-6 sm:gap-8">
                 <section>
@@ -849,93 +826,68 @@ export default function RegistrationPage() {
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                     {availableClasses.map((item) => {
-                        const currentCount =
-                          classRegistrationCounts[item.id] || 0;
-                        const isFull =
-                          item.max_participants !== null &&
-                          currentCount >= item.max_participants;
+                      const currentCount = classRegistrationCounts[item.id] || 0;
 
-                        return (
-                          <label
-                            key={item.id}
-                            className={`relative rounded-2xl border p-4 sm:p-5 transition ${
-                              isFull
-                                ? "border-red-400/20 bg-red-400/[0.04] opacity-75 cursor-not-allowed"
-                                : form.class_id === item.id
-                                ? "border-[#bc9b6a]/70 bg-[#bc9b6a]/10 cursor-pointer"
-                                : "border-white/10 bg-white/[0.025] hover:border-white/20 cursor-pointer"
-                            }`}
-                          >
-                            <input
-                              type="radio"
-                              name="class_id"
-                              value={item.id}
-                              checked={form.class_id === item.id}
-                              disabled={isFull}
-                              onChange={() =>
-                                updateField("class_id", item.id)
-                              }
-                              className="sr-only"
-                            />
+                      return (
+                        <label
+                          key={item.id}
+                          className={`relative rounded-2xl border p-4 sm:p-5 transition cursor-pointer ${
+                            form.class_id === item.id
+                              ? "border-[#bc9b6a]/70 bg-[#bc9b6a]/10"
+                              : "border-white/10 bg-white/[0.025] hover:border-white/20"
+                          }`}
+                        >
+                          <input
+                            type="radio"
+                            name="class_id"
+                            value={item.id}
+                            checked={form.class_id === item.id}
+                            onChange={() => updateField("class_id", item.id)}
+                            className="sr-only"
+                          />
 
-                        <div className="flex items-start justify-between gap-4">
-                          <div>
-                            {item.class_code && (
-                              <p
-                                className="text-xs mb-2"
-                                style={{ color: gold }}
-                              >
-                                {item.class_code}
+                          <div className="flex items-start justify-between gap-4">
+                            <div>
+                              {item.class_code && (
+                                <p
+                                  className="text-xs mb-2"
+                                  style={{ color: gold }}
+                                >
+                                  {item.class_code}
+                                </p>
+                              )}
+
+                              <p className="font-semibold text-base sm:text-lg break-words">
+                                {item.name_ar}
                               </p>
-                            )}
 
-                            <p className="font-semibold text-base sm:text-lg break-words">
-                              {item.name_ar}
-                            </p>
+                              <p className="text-sm text-gray-500 mt-2">
+                                {getHorseTypeLabel(item.horse_type)}
+                                {" · "}
+                                {getGenderLabel(item.gender)}
+                              </p>
 
-                            <p className="text-sm text-gray-500 mt-2">
-                              {getHorseTypeLabel(item.horse_type)}
-                              {" · "}
-                              {getGenderLabel(item.gender)}
-                            </p>
+                              <p className="text-xs text-gray-500 mt-3">
+                                المسجلون حاليًا:{" "}
+                                <span style={{ color: gold }}>{currentCount}</span>
+                              </p>
+                            </div>
 
-                            {item.max_participants !== null && (
-                              <div className="mt-3">
-                                {isFull ? (
-                                  <span className="inline-flex items-center rounded-xl border border-red-400/25 bg-red-400/10 px-3 py-1.5 text-xs font-semibold text-red-200">
-                                    مكتملة — {currentCount} / {item.max_participants}
-                                  </span>
-                                ) : (
-                                  <p className="text-xs text-gray-500">
-                                    المقاعد المتاحة:{" "}
-                                    <span style={{ color: gold }}>
-                                      {Math.max(
-                                        item.max_participants - currentCount,
-                                        0
-                                      )}
-                                    </span>{" "}
-                                    من {item.max_participants}
-                                  </p>
-                                )}
-                              </div>
-                            )}
+                            <div
+                              className={`w-5 h-5 rounded-full border flex-shrink-0 mt-1 ${
+                                form.class_id === item.id
+                                  ? "border-[#bc9b6a] bg-[#bc9b6a]"
+                                  : "border-white/20"
+                              }`}
+                            >
+                              {form.class_id === item.id && (
+                                <div className="w-full h-full rounded-full scale-50 bg-[#050B18]" />
+                              )}
+                            </div>
                           </div>
-
-                          <div
-                            className={`w-5 h-5 rounded-full border flex-shrink-0 mt-1 ${
-                              form.class_id === item.id
-                                ? "border-[#bc9b6a] bg-[#bc9b6a]"
-                                : "border-white/20"
-                            }`}
-                          >
-                            {form.class_id === item.id && (
-                              <div className="w-full h-full rounded-full scale-50 bg-[#050B18]" />
-                            )}
-                          </div>
-                        </div>
-                          </label>
-                        );
-                      })}
+                        </label>
+                      );
+                    })}
                     </div>
                 )}
               </section>
