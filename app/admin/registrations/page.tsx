@@ -2,6 +2,7 @@
 
 import { ReactNode, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import * as XLSX from "xlsx";
 import { motion } from "framer-motion";
 import {
   ArrowRight,
@@ -33,6 +34,17 @@ type Show = {
   color: string;
 };
 
+type ClassItem = {
+  id: string;
+  show_id: string;
+  name_ar: string;
+  name_en: string | null;
+  class_code: string | null;
+  horse_type: string;
+  gender: string | null;
+  max_participants: number | null;
+};
+
 type Registration = {
   id: string;
   show_id: string;
@@ -48,6 +60,7 @@ type Registration = {
   payment_status: string;
   payment_confirmed_at: string | null;
   created_at: string;
+  class_id?: string | null;
 };
 
 export default function RegistrationsPage() {
@@ -59,12 +72,309 @@ export default function RegistrationsPage() {
     useState("");
 
   const [selectedShow, setSelectedShow] = useState("");
+  const [selectedPayment, setSelectedPayment] = useState("");
+  const [selectedClass, setSelectedClass] = useState("");
+
+  const [classes, setClasses] = useState<ClassItem[]>([]);
 
   const [search, setSearch] = useState("");
 
   const [loading, setLoading] = useState(true);
   const [details, setDetails] =
     useState<Registration | null>(null);
+
+  function getReportTitle() {
+    const championship = championships.find(
+      (item) => item.id === selectedChampionship
+    );
+
+    const show = shows.find((item) => item.id === selectedShow);
+
+    if (show) return show.title_ar;
+    if (championship) return championship.title_ar;
+    return "جميع البطولات";
+  }
+
+  function getSafeFileName(value: string) {
+    return value
+      .replace(/[\\/:*?"<>|]/g, "")
+      .replace(/\\s+/g, "_")
+      .trim() || "kuwait-shows-report";
+  }
+
+  function exportExcel() {
+    if (filteredRegistrations.length === 0) {
+      alert("لا توجد بيانات لتصديرها.");
+      return;
+    }
+
+    const rows = filteredRegistrations.map((registration) => {
+      const show = getShow(registration.show_id);
+
+      return {
+        "رقم التسجيل": registration.registration_number,
+        "اسم المشارك": registration.participant_name,
+        "رقم الهاتف": registration.phone,
+        "البريد الإلكتروني": registration.email || "",
+        "البطولة": show?.title_ar || "",
+        "تاريخ البطولة": show
+          ? `${show.start_date} - ${show.end_date}`
+          : "",
+        "الفئة": (() => {
+          const classId = registration.class_id;
+          return (
+            classes.find((item) => item.id === classId)?.name_ar || ""
+          );
+        })(),
+        "اسم الخيل": registration.horse_name,
+        "رقم تسجيل الخيل": registration.horse_registration_number,
+        "نوع الخيل":
+          registration.horse_type === "egyptian"
+            ? "الخيل العربية المصرية"
+            : "الخيل العربية",
+        "تعارض مصالح":
+          registration.has_conflict_of_interest ? "نعم" : "لا",
+        "الحكم المتعارض":
+          registration.conflict_judge_name || "",
+        "حالة الدفع":
+          registration.payment_status === "paid"
+            ? "مدفوع"
+            : "غير مدفوع",
+        "وقت تأكيد الدفع":
+          registration.payment_confirmed_at || "",
+        "تاريخ التسجيل": registration.created_at,
+      };
+    });
+
+    const worksheet = XLSX.utils.json_to_sheet(rows);
+    worksheet["!cols"] = [
+      { wch: 18 },
+      { wch: 24 },
+      { wch: 16 },
+      { wch: 28 },
+      { wch: 30 },
+      { wch: 24 },
+      { wch: 24 },
+      { wch: 22 },
+      { wch: 22 },
+      { wch: 16 },
+      { wch: 24 },
+      { wch: 14 },
+      { wch: 24 },
+      { wch: 24 },
+    ];
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "التسجيلات");
+
+    XLSX.writeFile(
+      workbook,
+      `${getSafeFileName(getReportTitle())}_registrations.xlsx`
+    );
+  }
+
+  function printReport() {
+    if (filteredRegistrations.length === 0) {
+      alert("لا توجد بيانات للطباعة.");
+      return;
+    }
+
+    const reportTitle = getReportTitle();
+    const generatedAt = new Date().toLocaleString("ar-KW", {
+      dateStyle: "medium",
+      timeStyle: "short",
+    });
+
+    const rows = filteredRegistrations
+      .map((registration) => {
+        const show = getShow(registration.show_id);
+
+        return `
+          <tr>
+            <td>${registration.registration_number}</td>
+            <td>${registration.participant_name}</td>
+            <td dir="ltr">${registration.phone}</td>
+            <td>${show?.title_ar || "—"}</td>
+            <td>${
+              classes.find(
+                (item) => item.id === registration.class_id
+              )?.name_ar || "—"
+            }</td>
+            <td>${registration.horse_name}</td>
+            <td>${registration.horse_registration_number}</td>
+            <td>${
+              registration.horse_type === "egyptian"
+                ? "الخيل العربية المصرية"
+                : "الخيل العربية"
+            }</td>
+            <td>${
+              registration.payment_status === "paid"
+                ? "مدفوع"
+                : "غير مدفوع"
+            }</td>
+            <td>${
+              registration.has_conflict_of_interest
+                ? registration.conflict_judge_name || "نعم"
+                : "لا"
+            }</td>
+          </tr>
+        `;
+      })
+      .join("");
+
+    const printWindow = window.open("", "_blank", "width=1400,height=900");
+
+    if (!printWindow) {
+      alert("يرجى السماح بفتح نافذة الطباعة من المتصفح.");
+      return;
+    }
+
+    printWindow.document.write(`
+      <!doctype html>
+      <html lang="ar" dir="rtl">
+        <head>
+          <meta charset="UTF-8" />
+          <title>${reportTitle}</title>
+          <style>
+            * { box-sizing: border-box; }
+            body {
+              margin: 0;
+              padding: 35px;
+              font-family: Arial, Tahoma, sans-serif;
+              color: #172033;
+              background: white;
+            }
+            .header {
+              border-bottom: 3px solid #bc9b6a;
+              padding-bottom: 18px;
+              margin-bottom: 24px;
+            }
+            .brand {
+              color: #bc9b6a;
+              font-size: 12px;
+              letter-spacing: 2px;
+              font-weight: bold;
+            }
+            h1 {
+              margin: 8px 0;
+              font-size: 26px;
+            }
+            .meta {
+              color: #667085;
+              font-size: 13px;
+            }
+            .stats {
+              display: grid;
+              grid-template-columns: repeat(4, 1fr);
+              gap: 10px;
+              margin-bottom: 24px;
+            }
+            .stat {
+              border: 1px solid #e5e7eb;
+              border-radius: 10px;
+              padding: 13px;
+              background: #fafafa;
+            }
+            .stat-label {
+              color: #667085;
+              font-size: 11px;
+              margin-bottom: 5px;
+            }
+            .stat-value {
+              font-size: 20px;
+              font-weight: 800;
+            }
+            table {
+              width: 100%;
+              border-collapse: collapse;
+              font-size: 10px;
+            }
+            th {
+              background: #172033;
+              color: white;
+              padding: 9px 6px;
+              border: 1px solid #172033;
+            }
+            td {
+              padding: 8px 6px;
+              border: 1px solid #e5e7eb;
+              vertical-align: middle;
+            }
+            tr:nth-child(even) td {
+              background: #f8fafc;
+            }
+            .footer {
+              margin-top: 22px;
+              padding-top: 12px;
+              border-top: 1px solid #e5e7eb;
+              color: #667085;
+              font-size: 10px;
+              text-align: center;
+            }
+            @media print {
+              body { padding: 15px; }
+              @page { size: A4 landscape; margin: 10mm; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <div class="brand">KUWAIT SHOWS</div>
+            <h1>تقرير التسجيلات — ${reportTitle}</h1>
+            <div class="meta">تاريخ إنشاء التقرير: ${generatedAt}</div>
+          </div>
+
+          <div class="stats">
+            <div class="stat">
+              <div class="stat-label">إجمالي التسجيلات</div>
+              <div class="stat-value">${filteredRegistrations.length}</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">المدفوع</div>
+              <div class="stat-value">${paidCount}</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">غير المدفوع</div>
+              <div class="stat-value">${unpaidCount}</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">تعارض المصالح</div>
+              <div class="stat-value">${conflictCount}</div>
+            </div>
+          </div>
+
+          <table>
+            <thead>
+              <tr>
+                <th>رقم التسجيل</th>
+                <th>المشارك</th>
+                <th>الهاتف</th>
+                <th>البطولة</th>
+                <th>الفئة</th>
+                <th>اسم الخيل</th>
+                <th>رقم تسجيل الخيل</th>
+                <th>نوع الخيل</th>
+                <th>الدفع</th>
+                <th>تعارض المصالح</th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+
+          <div class="footer">
+            Kuwait Shows — تقرير التسجيلات الرسمي
+          </div>
+        </body>
+      </html>
+    `);
+
+    printWindow.document.close();
+    printWindow.focus();
+
+    setTimeout(() => {
+      printWindow.print();
+    }, 350);
+  }
 
   useEffect(() => {
     loadData();
@@ -76,6 +386,7 @@ export default function RegistrationsPage() {
     const [
       championshipsResult,
       showsResult,
+      classesResult,
       registrationsResult,
     ] = await Promise.all([
       supabase
@@ -91,6 +402,13 @@ export default function RegistrationsPage() {
         .order("start_date", { ascending: true }),
 
       supabase
+        .from("classes")
+        .select(
+          "id,show_id,name_ar,name_en,class_code,horse_type,gender,max_participants"
+        )
+        .order("sort_order", { ascending: true }),
+
+      supabase
         .from("registrations")
         .select("*")
         .order("created_at", { ascending: false }),
@@ -104,6 +422,10 @@ export default function RegistrationsPage() {
       console.error(showsResult.error);
     }
 
+    if (classesResult.error) {
+      console.error(classesResult.error);
+    }
+
     if (registrationsResult.error) {
       console.error(registrationsResult.error);
       alert(
@@ -113,6 +435,7 @@ export default function RegistrationsPage() {
 
     setChampionships(championshipsResult.data || []);
     setShows(showsResult.data || []);
+    setClasses(classesResult.data || []);
     setRegistrations(registrationsResult.data || []);
 
     setLoading(false);
@@ -126,6 +449,30 @@ export default function RegistrationsPage() {
         show.championship_id === selectedChampionship
     );
   }, [shows, selectedChampionship]);
+
+  const filteredClasses = useMemo(() => {
+    if (!selectedShow) return [];
+
+    return classes.filter(
+      (item) => item.show_id === selectedShow
+    );
+  }, [classes, selectedShow]);
+
+  const classCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+
+    registrations.forEach((registration) => {
+      const classId = (registration as Registration & {
+        class_id?: string | null;
+      }).class_id;
+
+      if (classId) {
+        counts[classId] = (counts[classId] || 0) + 1;
+      }
+    });
+
+    return counts;
+  }, [registrations]);
 
   const filteredRegistrations = useMemo(() => {
     let result = registrations;
@@ -147,6 +494,22 @@ export default function RegistrationsPage() {
       result = result.filter(
         (registration) =>
           registration.show_id === selectedShow
+      );
+    }
+
+    if (selectedPayment) {
+      result = result.filter(
+        (registration) =>
+          registration.payment_status === selectedPayment
+      );
+    }
+
+    if (selectedClass) {
+      result = result.filter(
+        (registration) =>
+          (registration as Registration & {
+            class_id?: string | null;
+          }).class_id === selectedClass
       );
     }
 
@@ -185,6 +548,8 @@ export default function RegistrationsPage() {
     shows,
     selectedChampionship,
     selectedShow,
+    selectedPayment,
+    selectedClass,
     search,
   ]);
 
@@ -420,7 +785,7 @@ export default function RegistrationsPage() {
           {/* Filters */}
           <div className="rounded-[2rem] border border-white/10 bg-white/[0.035] backdrop-blur-xl p-5 mb-6">
 
-            <div className="grid lg:grid-cols-3 gap-4">
+            <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-4">
 
               <div>
                 <label className="block text-sm text-gray-400 mb-2">
@@ -434,6 +799,7 @@ export default function RegistrationsPage() {
                       e.target.value
                     );
                     setSelectedShow("");
+                    setSelectedClass("");
                   }}
                   className="w-full rounded-xl border border-white/10 bg-[#08101f] px-4 py-3.5 text-white outline-none focus:border-[#bc9b6a]"
                 >
@@ -462,9 +828,10 @@ export default function RegistrationsPage() {
 
                 <select
                   value={selectedShow}
-                  onChange={(e) =>
-                    setSelectedShow(e.target.value)
-                  }
+                  onChange={(e) => {
+                    setSelectedShow(e.target.value);
+                    setSelectedClass("");
+                  }}
                   className="w-full rounded-xl border border-white/10 bg-[#08101f] px-4 py-3.5 text-white outline-none focus:border-[#bc9b6a]"
                 >
                   <option value="">
@@ -479,6 +846,57 @@ export default function RegistrationsPage() {
                       {show.title_ar}
                     </option>
                   ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm text-gray-400 mb-2">
+                  حالة الدفع
+                </label>
+
+                <select
+                  value={selectedPayment}
+                  onChange={(e) =>
+                    setSelectedPayment(e.target.value)
+                  }
+                  className="w-full rounded-xl border border-white/10 bg-[#08101f] px-4 py-3.5 text-white outline-none focus:border-[#bc9b6a]"
+                >
+                  <option value="">كل حالات الدفع</option>
+                  <option value="paid">مدفوع</option>
+                  <option value="unpaid">غير مدفوع</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm text-gray-400 mb-2">
+                  الفئة
+                </label>
+
+                <select
+                  value={selectedClass}
+                  onChange={(e) =>
+                    setSelectedClass(e.target.value)
+                  }
+                  disabled={!selectedShow}
+                  className="w-full rounded-xl border border-white/10 bg-[#08101f] px-4 py-3.5 text-white outline-none focus:border-[#bc9b6a] disabled:opacity-50"
+                >
+                  <option value="">
+                    {!selectedShow
+                      ? "اختر البطولة الفرعية أولاً"
+                      : "جميع الفئات"}
+                  </option>
+
+                  {filteredClasses.map((classItem) => {
+                    const count = classCounts[classItem.id] || 0;
+                    const limit = classItem.max_participants;
+
+                    return (
+                      <option key={classItem.id} value={classItem.id}>
+                        {classItem.name_ar} — {count}
+                        {limit != null ? ` / ${limit}` : ""}
+                      </option>
+                    );
+                  })}
                 </select>
               </div>
 
@@ -506,6 +924,123 @@ export default function RegistrationsPage() {
                 </div>
               </div>
 
+            </div>
+          </div>
+
+          {/* Class Capacity Summary */}
+          {selectedShow && filteredClasses.length > 0 && (
+            <div className="rounded-[2rem] border border-white/10 bg-white/[0.035] backdrop-blur-xl p-5 mb-6">
+              <div className="flex items-center justify-between gap-4 mb-4">
+                <div>
+                  <p className="font-black text-gray-200">
+                    حالة الفئات
+                  </p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    عدد المسجلين مقارنة بالحد الأقصى لكل فئة.
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {filteredClasses.map((classItem) => {
+                  const count = classCounts[classItem.id] || 0;
+                  const limit = classItem.max_participants;
+                  const full =
+                    limit != null && count >= limit;
+
+                  return (
+                    <div
+                      key={classItem.id}
+                      className="rounded-2xl border border-white/10 bg-black/20 p-4"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <p className="font-bold text-sm">
+                          {classItem.name_ar}
+                        </p>
+
+                        <span
+                          className={`px-2.5 py-1 rounded-full text-xs border ${
+                            full
+                              ? "border-red-400/20 bg-red-400/10 text-red-300"
+                              : "border-emerald-400/20 bg-emerald-400/10 text-emerald-300"
+                          }`}
+                        >
+                          {full ? "مكتملة" : "متاحة"}
+                        </span>
+                      </div>
+
+                      <div className="mt-3 flex items-end justify-between">
+                        <span className="text-gray-500 text-xs">
+                          المسجلون
+                        </span>
+                        <span className="font-black text-lg">
+                          {count}
+                          {limit != null ? (
+                            <span className="text-gray-500 text-sm font-normal">
+                              {" "} / {limit}
+                            </span>
+                          ) : (
+                            <span className="text-gray-500 text-sm font-normal">
+                              {" "} / غير محدد
+                            </span>
+                          )}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Report Actions */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+            <div>
+              <p className="text-sm font-bold text-gray-200">
+                تقرير التسجيلات
+              </p>
+              <p className="text-xs text-gray-500 mt-1">
+                التقرير يعتمد على البطولة والفلاتر المحددة حاليًا.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap gap-3">
+              <button
+                type="button"
+                onClick={() => loadData()}
+                disabled={loading}
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-bold text-gray-300 transition hover:border-white/20 hover:text-white disabled:opacity-50"
+              >
+                <RefreshCw
+                  size={16}
+                  className={loading ? "animate-spin" : ""}
+                />
+                تحديث
+              </button>
+
+              <button
+                type="button"
+                onClick={printReport}
+                disabled={filteredRegistrations.length === 0}
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#bc9b6a]/30 bg-[#bc9b6a]/10 px-4 py-3 text-sm font-bold text-[#bc9b6a] transition hover:bg-[#bc9b6a]/15 disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                <Printer size={16} />
+                طباعة التقرير
+              </button>
+
+              <button
+                type="button"
+                onClick={exportExcel}
+                disabled={filteredRegistrations.length === 0}
+                className="inline-flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-bold transition hover:scale-[1.01] disabled:opacity-40 disabled:cursor-not-allowed"
+                style={{
+                  background: gold,
+                  color: "#050B18",
+                }}
+              >
+                <Download size={16} />
+                تصدير Excel
+              </button>
             </div>
           </div>
 
