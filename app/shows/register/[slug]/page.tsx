@@ -567,7 +567,7 @@ export default function RegistrationPage() {
       dir="rtl"
       className="min-h-screen"
       style={{
-        background: "#050B18",
+        background: "#050B22",
         color: "#f4f4f4",
       }}
     >

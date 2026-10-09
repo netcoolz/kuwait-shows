@@ -4,47 +4,70 @@
 @tailwind utilities;
 
 /* RESET */
-html, body {
+html,
+body {
   margin: 0;
   padding: 0;
-  background: #000;
-  color: #fff;
+  background: #f4f5f7;
+  color: #172033;
   overflow-x: hidden;
   font-family: inherit;
+}
+
+/* SELECTION */
+::selection {
+  background: #bc9b6a;
+  color: #ffffff;
 }
 
 /* MENU */
 .menu-item {
   display: block;
   padding: 14px;
-  border-bottom: 1px solid #bc9b6a;
+  border-bottom: 1px solid #e4e7ec;
   text-align: center;
+  color: #172033;
   transition: 0.3s;
 }
 
 .menu-item:hover {
   background: #bc9b6a;
-  color: black;
+  color: #ffffff;
 }
 
 /* DROPDOWN */
 .dropdown-item {
   display: block;
   padding: 10px;
-  border-bottom: 1px solid #bc9b6a;
+  border-bottom: 1px solid #e4e7ec;
+  color: #172033;
   transition: 0.3s;
 }
 
 .dropdown-item:hover {
   background: #bc9b6a;
-  color: black;
+  color: #ffffff;
 }
 
+/* FORM ELEMENTS */
+input,
+select,
+textarea {
+  color: #172033;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #98a1b2;
+}
+
+/* ANIMATION */
 @keyframes fadeUp {
   from {
     opacity: 0;
     transform: translateY(40px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -54,6 +77,3 @@ html, body {
 .animate-fadeUp {
   animation: fadeUp 1s ease forwards;
 }
-
-
-

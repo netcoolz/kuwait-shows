@@ -86,16 +86,17 @@ export default function Sidebar() {
             animate={{ x: 0 }}
             exit={{ x: "-100%" }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            style={{ 
-              backgroundImage: "url('/bg.png')", 
-              backgroundSize: "cover", 
-              backgroundPosition: "center" 
-            }}
+          style={{
+  backgroundImage: "url('/bg.png')",
+  backgroundSize: "100vw auto",
+  backgroundPosition: "left top",
+  backgroundRepeat: "repeat",
+}}
             className="fixed left-0 top-0 h-screen w-[300px] md:w-[380px] z-[70] shadow-[20px_0_50px_rgba(0,0,0,0.8)] overflow-hidden"
             dir={lang === "ar" ? "rtl" : "ltr"}
           >
             {/* 🔴 طبقة تظليل */}
-            <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] z-0 pointer-events-none"></div>
+            <div className="absolute inset-0 bg-black/60 backdrop-blur-[0px] z-0 pointer-events-none"></div>
 
             {/* محتوى السايد بار */}
             <div className="relative z-10 flex flex-col h-full justify-between">

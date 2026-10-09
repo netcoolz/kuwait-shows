@@ -36,6 +36,7 @@ type Show = {
   start_date: string;
   end_date: string;
   registration_status: string;
+  registration_fee: number;
   color: string;
 };
 
@@ -94,6 +95,7 @@ export default function ChampionshipDetails() {
   const [registrationStatus, setRegistrationStatus] =
     useState("coming_soon");
   const [showColor, setShowColor] = useState("#BC9B6A");
+  const [registrationFee, setRegistrationFee] = useState("");
 
   const [selectedJudgeId, setSelectedJudgeId] = useState<
     Record<string, string>
@@ -225,6 +227,7 @@ export default function ChampionshipDetails() {
     setEndDate("");
     setRegistrationStatus("coming_soon");
     setShowColor("#BC9B6A");
+    setRegistrationFee("");
     setEditingId(null);
     setShowForm(false);
   }
@@ -237,6 +240,11 @@ export default function ChampionshipDetails() {
     setEndDate(show.end_date);
     setRegistrationStatus(show.registration_status);
     setShowColor(show.color || "#BC9B6A");
+    setRegistrationFee(
+      show.registration_fee != null
+        ? String(show.registration_fee)
+        : "0"
+    );
     setShowForm(true);
   }
 
@@ -267,6 +275,19 @@ export default function ChampionshipDetails() {
       "-" +
       Date.now();
 
+    const registrationFeeValue =
+      registrationFee.trim() === ""
+        ? 0
+        : Number(registrationFee);
+
+    if (
+      !Number.isFinite(registrationFeeValue) ||
+      registrationFeeValue < 0
+    ) {
+      alert("يرجى إدخال رسوم تسجيل صحيحة.");
+      return;
+    }
+
     const payload = {
       championship_id: id,
       title_ar: titleAr.trim(),
@@ -275,6 +296,7 @@ export default function ChampionshipDetails() {
       start_date: startDate,
       end_date: endDate,
       registration_status: registrationStatus,
+      registration_fee: registrationFeeValue,
       color: showColor,
     };
 
@@ -287,6 +309,7 @@ export default function ChampionshipDetails() {
           start_date: payload.start_date,
           end_date: payload.end_date,
           registration_status: payload.registration_status,
+          registration_fee: payload.registration_fee,
           color: payload.color,
         })
         .eq("id", editingId);
@@ -1536,6 +1559,29 @@ export default function ChampionshipDetails() {
                   />
                 </div>
 
+              </div>
+
+              {/* Registration Fee */}
+              <div>
+                <label className="block text-sm text-gray-300 mb-2">
+                  رسوم التسجيل (د.ك)
+                </label>
+
+                <input
+                  type="number"
+                  min="0"
+                  step="0.001"
+                  value={registrationFee}
+                  onChange={(e) =>
+                    setRegistrationFee(e.target.value)
+                  }
+                  placeholder="مثال: 100.000"
+                  className="w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3.5 text-white outline-none focus:border-[#bc9b6a]"
+                />
+
+                <p className="text-gray-500 text-xs mt-2">
+                  أدخلي 0 إذا كانت البطولة مجانية.
+                </p>
               </div>
 
               {/* Show Color */}

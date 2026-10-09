@@ -448,7 +448,7 @@ export default function ShowsPage() {
       }}
     >
       {/* Background overlay */}
-      <div className="absolute inset-0 bg-[#050B18]/80 pointer-events-none" />
+      <div className="absolute inset-0 bg-[#050B18]/50 pointer-events-none" />
 
       <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-[#050B18]/60 to-[#050B18] pointer-events-none" />
 
